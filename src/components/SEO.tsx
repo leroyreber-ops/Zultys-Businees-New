@@ -19,7 +19,12 @@ export function SEO({
 }: SEOProps) {
   const siteName = 'Dallas Fort Worth Zultys';
   const fullTitle = `${title} | ${siteName}`;
-  const url = canonical || window.location.href;
+  
+  // Dynamically build canonical URL pointing to the production domain with the current path
+  const currentPath = window.location.pathname;
+  const url = canonical 
+    ? (canonical.startsWith('http') ? canonical : `https://dallasfortworthzultys.com${canonical}`)
+    : `https://dallasfortworthzultys.com${currentPath}`;
 
   return (
     <>
@@ -27,6 +32,8 @@ export function SEO({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={url} />
+      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta name="googlebot" content="index, follow" />
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={ogType} />

@@ -246,61 +246,171 @@ export function Home() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
       
       <main className="flex-1">
         {/* Hero Section - Inspired by Reference */}
         <section className="relative min-h-[95vh] flex flex-col justify-center bg-slate-950 overflow-hidden">
-          {/* Background Image - Clear and sharp */}
+          {/* Background Image with vivid, colorful professional gradients & grid */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <ImageWithFallback
               src={ZULTYS_FORT_WORTH_BG}
               alt="Dallas Fort Worth Skyline"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover opacity-65"
             />
-            {/* Subtle dark tint for text legibility */}
-            <div className="absolute inset-0 bg-black/40"></div>
+            {/* Soft, professional gradient overlay using Zultys Green & Gold brand tones */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900/90 to-emerald-950/40"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(0,168,45,0.15),transparent_50%)]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,160,23,0.12),transparent_50%)]"></div>
+            {/* Tech dot grid pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]"></div>
           </div>
 
-            {/* Blended Phone Image - Removed as requested */}
-            <div className="absolute right-0 bottom-0 top-0 w-1/2 hidden lg:block">
+          {/* Connected Cloud Telecommunications Interactive Artwork Column */}
+          <div className="absolute right-12 top-1/2 -translate-y-[45%] w-[45%] hidden lg:flex items-center justify-center z-10">
+            {/* Premium Glassmorphic Telecom Network Card */}
+            <div className="relative w-full max-w-lg p-8 rounded-[2.5rem] bg-slate-900/85 backdrop-blur-xl border border-white/15 shadow-[0_50px_100px_-20px_rgba(0,168,45,0.3)] overflow-hidden">
+              {/* Neon Glow Effects */}
+              <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-zultys-green/20 blur-[80px]"></div>
+              <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-zultys-gold/20 blur-[80px]"></div>
+              
+              {/* Tech grid overlay */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
+
+              <div className="relative space-y-8">
+                {/* Title & Pulse Indicator */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zultys-green opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-zultys-green"></span>
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-300">Zultys Cloud Core Active</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-zultys-gold bg-zultys-gold/10 px-2.5 py-1 rounded-full border border-zultys-gold/20">DFW Cluster</span>
+                </div>
+
+                {/* SVG Network Cloud Telephony Diagram */}
+                <div className="relative h-56 flex items-center justify-center">
+                  {/* SVG Connections & Nodes */}
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 220">
+                    <defs>
+                      <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#00A82D" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#D4A017" stopOpacity="0.8" />
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Connection Lines with Pulsing Dash Array */}
+                    <path d="M 60 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_20s_linear_infinite]" />
+                    <path d="M 60 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_25s_linear_infinite]" />
+                    <path d="M 340 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_18s_linear_infinite]" />
+                    <path d="M 340 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_22s_linear_infinite]" />
+                    
+                    {/* Central Cloud Orbit */}
+                    <circle cx="200" cy="110" r="44" fill="#000000" fillOpacity="0.3" stroke="#00A82D" strokeWidth="2" strokeDasharray="4 4" className="animate-[spin_40s_linear_infinite]" />
+
+                    {/* Endpoint Nodes */}
+                    {/* Node 1: Small Business Phone */}
+                    <g className="translate-x-[40px] translate-y-[40px] cursor-pointer">
+                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                      <path d="M 14 17 L 14 23 M 17 20 L 23 20" stroke="#00A82D" strokeWidth="2" />
+                    </g>
+                    {/* Node 2: Mobile Softphone */}
+                    <g className="translate-x-[40px] translate-y-[140px] cursor-pointer">
+                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                      <rect x="15" y="14" width="10" height="12" rx="1.5" stroke="#D4A017" strokeWidth="1.5" fill="none" />
+                    </g>
+                    {/* Node 3: Satellite Office */}
+                    <g className="translate-x-[320px] translate-y-[40px] cursor-pointer">
+                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                      <path d="M 15 25 L 15 17 L 20 13 L 25 17 L 25 25 Z" stroke="#00A82D" strokeWidth="1.5" fill="none" />
+                    </g>
+                    {/* Node 4: Call Center Headset */}
+                    <g className="translate-x-[320px] translate-y-[140px] cursor-pointer">
+                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                      <path d="M 14 20 A 6 6 0 0 1 26 20 M 26 20 L 26 24" stroke="#D4A017" strokeWidth="1.5" fill="none" />
+                    </g>
+                  </svg>
+                  
+                  {/* Pulsing Central Cloud Device */}
+                  <div className="relative z-10 p-5 bg-slate-950/90 rounded-full border border-zultys-green shadow-[0_0_40px_rgba(0,168,45,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
+                    <Cloud className="h-12 w-12 text-zultys-green" />
+                  </div>
+                </div>
+
+                {/* Equalizer Wave / Realtime Telephony Feed */}
+                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SIP Jitter & Latency Feed</span>
+                    <span className="text-[10px] font-mono text-zultys-green font-bold">12ms (Excellent)</span>
+                  </div>
+                  {/* Equalizer Bars */}
+                  <div className="flex items-end justify-center gap-1.5 h-10 px-2 pt-2">
+                    {[30, 60, 45, 90, 75, 40, 80, 55, 95, 65, 35, 70, 50, 85, 40, 60].map((h, i) => (
+                      <div 
+                        key={i} 
+                        className="w-1 bg-zultys-green rounded-full transition-all duration-300"
+                        style={{ 
+                          height: `${h}%`,
+                          animation: `bounceEqualizer ${1 + (i % 3) * 0.3}s ease-in-out infinite alternate`,
+                          animationDelay: `${i * 0.05}s`
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Active Features Badges */}
+                <div className="grid grid-cols-3 gap-2.5 pt-2">
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-sm font-black text-white">99.999%</span>
+                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1">Uptime SLA</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-sm font-black text-zultys-green">AES-256</span>
+                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1">Encrypted</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
+                    <span className="text-sm font-black text-zultys-gold">QoS VoIP</span>
+                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1">Priority</span>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
 
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-10 w-full pt-20 pb-40">
-            <div className="max-w-3xl">
+            <div className="max-w-3xl lg:max-w-2xl">
               <Link to="/about" className="inline-flex items-center gap-2 bg-zultys-green/20 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-zultys-green/30 hover:bg-zultys-green/30 transition-all group">
                 <Award className="h-5 w-5 text-zultys-green group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-bold text-white uppercase tracking-widest">Authorized Zultys Partner DFW</span>
               </Link>
               
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 leading-[1.1] text-white tracking-tight drop-shadow-2xl">
-                Zultys Business Phone Communications in Dallas-Fort Worth
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.15] text-white tracking-tight drop-shadow-2xl">
+                Zultys Business Phone Systems in Dallas–Fort Worth
               </h1>
               
-              <p className="text-lg md:text-xl lg:text-2xl mb-12 text-slate-200 leading-relaxed max-w-2xl font-medium">
-                Unified communications, VoIP phone systems, cloud calling, and business connectivity solutions built for DFW businesses.
+              <p className="text-lg md:text-xl lg:text-2xl mb-10 text-slate-200/95 leading-relaxed max-w-xl font-medium">
+                Enterprise‑grade VoIP, cloud calling, and unified communications built for North Texas organizations.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex flex-col sm:flex-row gap-5 items-stretch sm:items-center">
                 <Button
                   size="lg"
                   onClick={openQuote}
-                  className="bg-zultys-green hover:bg-zultys-green/90 text-white text-xl px-10 py-8 shadow-2xl transition-all font-black uppercase tracking-wider rounded-xl"
+                  className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 text-xl px-12 py-8 shadow-[0_20px_50px_rgba(212,160,23,0.3)] transition-all font-black uppercase tracking-wider rounded-xl border-none hover:scale-[1.03] active:scale-95"
                 >
-                  Get a Free Quote
+                  Request a Free Quote
                 </Button>
-                <Button
-                  size="lg"
-                  asChild
-                  variant="outline"
-                  className="border-2 border-white/30 bg-white/5 text-white hover:bg-white/10 text-xl px-10 py-8 font-black transition-all rounded-xl backdrop-blur-md"
+                <a 
+                  href="tel:817-231-2962" 
+                  className="text-center inline-flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 text-lg px-8 py-4.5 font-bold transition-all rounded-xl hover:scale-[1.02] active:scale-95"
                 >
-                  <a href="tel:817-231-2962" className="flex items-center gap-3">
-                    <Phone className="h-6 w-6 text-zultys-gold" />
-                    Call 817-231-2962
-                  </a>
-                </Button>
+                  <Phone className="h-5 w-5 text-zultys-green animate-pulse" />
+                  Call 817-231-2962
+                </a>
               </div>
             </div>
           </div>
@@ -383,6 +493,17 @@ export function Home() {
             </div>
           </div>
         </section>
+
+        {/* ROI Calculator Section */}
+        <ROICalculator
+          productName="Zultys Cloud Business Phones"
+          zultysPrice={250}
+          competitorPrice={380}
+          zultysMonthly={35}
+          competitorMonthly={55}
+          productType="phone"
+          onOpenContactForm={openQuote}
+        />
 
         {/* Features Section */}
         <section className="py-24 bg-gray-50">
@@ -628,16 +749,18 @@ export function Home() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button
                 onClick={openQuote}
-                className="bg-white text-zultys-green hover:bg-gray-100 font-black px-12 py-8 text-xl shadow-2xl"
+                className="bg-white text-slate-950 hover:bg-gray-100 font-black px-12 py-8 text-xl shadow-2xl border-none hover:scale-[1.02] active:scale-95"
               >
                 Request a Quote
               </Button>
               <Button
                 asChild
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white/10 font-black px-12 py-8 text-xl"
+                className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 font-black px-12 py-8 text-xl border-none shadow-2xl hover:scale-[1.02] active:scale-95"
               >
-                <a href="tel:817-231-2962">Call 817-231-2962</a>
+                <a href="tel:817-231-2962" className="flex items-center gap-3">
+                  <Phone className="h-6 w-6 text-slate-950 animate-pulse" />
+                  Call 817-231-2962
+                </a>
               </Button>
             </div>
             <p className="mt-8 text-lg font-bold opacity-80">

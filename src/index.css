@@ -95,7 +95,7 @@
 }
 
 :root {
-    --background: #ffffff;
+    --background: #FAF6EE;
     --foreground: #1a1a1a;
     --card: #ffffff;
     --card-foreground: #1a1a1a;
@@ -156,8 +156,79 @@
     }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
+    background-color: #FAF6EE;
+    background-image: 
+      radial-gradient(rgba(0, 168, 45, 0.045) 1.5px, transparent 1.5px), 
+      radial-gradient(rgba(212, 160, 23, 0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: 0 0, 24px 24px;
     }
   html {
     @apply font-sans overflow-x-hidden;
+    background-color: #FAF6EE;
     }
+}
+
+/* 
+ * Premium Design Palette Overrides
+ * Alternates page sections between a clean champagne-ivory base (#FAF9F6) 
+ * and a soft, modern blue-gray tone (#F3F6FA) for exceptional rhythm and visual structure.
+ * Standard cards, containers, and dialogs are styled with a pure white background (#FFFFFF),
+ * delicate micro-borders, and soft shadow elevations to look elegant, dynamic, and clean.
+ */
+.bg-white {
+  background-color: #FAF9F6 !important;
+  background-image: radial-gradient(#00a82d02 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Alternate light sections with soft, cool blue-gray tones */
+.bg-slate-50, 
+.bg-gray-50, 
+.bg-zinc-50, 
+.bg-neutral-50,
+.bg-gray-50\/50,
+.bg-slate-50\/50 {
+  background-color: #F3F6FA !important;
+  background-image: radial-gradient(#1e293b01 1px, transparent 1px);
+  background-size: 20px 20px;
+  border-top: 1px solid rgba(226, 232, 240, 0.6) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+}
+
+/* Keep interactive blocks, cards, and dialogue panels pure white with elevated bento-style design */
+div[class*="Card"], 
+.card, 
+input, 
+textarea, 
+select, 
+[role="dialog"],
+.bg-white.rounded-3xl,
+.bg-white.rounded-2xl,
+.bg-white.rounded-xl,
+.bg-white.rounded-\[2\.5rem\] {
+  background-color: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08), 0 2px 8px -1px rgba(148, 163, 184, 0.04) !important;
+}
+
+/* Light tinted contrast blocks */
+.bg-slate-100, 
+.bg-gray-100 {
+  background-color: #E6EDF5 !important;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@keyframes bounceEqualizer {
+  0% {
+    height: 15%;
+  }
+  100% {
+    height: 100%;
+  }
 }

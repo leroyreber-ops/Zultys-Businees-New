@@ -125,13 +125,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-charcoal/10 bg-charcoal text-white shadow-lg">
       {/* Top Bar with Contact Info */}
-      <div className="bg-zultys-green text-white">
+      <div className="bg-slate-950 text-white border-b border-white/5 py-1.5">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex items-center justify-between py-2 text-sm">
+          <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-6">
-              <a href="tel:817-231-2962" className="flex items-center gap-2 hover:text-white/80 transition-colors">
-                <Phone className="h-4 w-4" />
-                <span className="font-semibold">817-231-2962</span>
+              <a 
+                href="tel:817-231-2962" 
+                className="flex items-center gap-2 bg-zultys-green hover:bg-zultys-green/90 text-white px-4 py-1.5 rounded-full font-black shadow-lg shadow-zultys-green/20 hover:scale-[1.03] active:scale-95 transition-all"
+              >
+                <Phone className="h-4 w-4 animate-pulse" />
+                <span>817-231-2962</span>
               </a>
               <span className="hidden md:inline text-white/90">Fort Worth's Premier Zultys Dealer</span>
             </div>

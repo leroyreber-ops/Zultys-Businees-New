@@ -35,7 +35,7 @@ export function CTASection({}: CTASectionProps) {
             <Button
               size="lg"
               onClick={openQuote}
-              className="bg-zultys-green hover:bg-zultys-green/90 text-white text-lg px-10 py-7 shadow-xl hover:shadow-zultys-green/20 transition-all font-bold"
+              className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 text-lg px-10 py-7 shadow-xl hover:shadow-zultys-gold/20 transition-all font-black border-none hover:scale-[1.02] active:scale-95"
             >
               Get Free Consultation
               <ArrowRight className="ml-2 h-6 w-6" />
@@ -43,11 +43,10 @@ export function CTASection({}: CTASectionProps) {
             <Button
               size="lg"
               asChild
-              variant="outline"
-              className="border-2 border-white/20 bg-white/5 text-white hover:bg-white/10 text-lg px-10 py-7 transition-all font-bold"
+              className="bg-zultys-green hover:bg-zultys-green/90 text-white font-black border-none text-lg px-10 py-7 transition-all shadow-xl shadow-zultys-green/20 hover:scale-[1.02] active:scale-95"
             >
               <a href="tel:817-231-2962">
-                <Phone className="mr-2 h-6 w-6 text-zultys-gold" />
+                <Phone className="mr-2 h-6 w-6 text-white animate-pulse" />
                 Call 817-231-2962
               </a>
             </Button>

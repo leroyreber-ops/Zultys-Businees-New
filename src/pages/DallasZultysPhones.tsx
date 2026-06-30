@@ -110,19 +110,18 @@ export function DallasZultysPhones() {
                 <Button
                   size="lg"
                   onClick={openQuote}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xl px-10 py-8 shadow-2xl transition-all font-black uppercase tracking-wider rounded-xl"
+                  className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 text-xl px-10 py-8 shadow-2xl transition-all font-black uppercase tracking-wider rounded-xl border-none hover:scale-[1.02] active:scale-95"
                 >
                   Get a Free Dallas Quote
                   <ArrowRight className="ml-2 h-6 w-6" />
                 </Button>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="border-2 border-white/30 bg-white/5 text-white hover:bg-white/10 text-xl px-10 py-8 font-black transition-all rounded-xl backdrop-blur-md"
                   asChild
+                  className="bg-zultys-green hover:bg-zultys-green/90 text-white text-xl px-10 py-8 font-black transition-all rounded-xl shadow-2xl shadow-zultys-green/20 border-none hover:scale-[1.02] active:scale-95"
                 >
                   <a href="tel:8172312962" className="flex items-center gap-3">
-                    <Phone className="h-6 w-6 text-blue-400" />
+                    <Phone className="h-6 w-6 text-white animate-pulse" />
                     Call 817-231-2962
                   </a>
                 </Button>
@@ -429,16 +428,18 @@ export function DallasZultysPhones() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button
                 onClick={openQuote}
-                className="bg-white text-blue-600 hover:bg-slate-100 font-black px-12 py-8 text-xl shadow-2xl rounded-xl transition-all"
+                className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 font-black px-12 py-8 text-xl shadow-2xl rounded-xl border-none hover:scale-[1.02] active:scale-95 transition-all"
               >
                 Request a Free Dallas Quote
               </Button>
               <Button
                 asChild
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white/10 font-black px-12 py-8 text-xl rounded-xl transition-all"
+                className="bg-zultys-green hover:bg-zultys-green/90 text-white font-black px-12 py-8 text-xl rounded-xl border-none shadow-2xl shadow-zultys-green/20 hover:scale-[1.02] active:scale-95 transition-all"
               >
-                <a href="tel:8172312962">Call 817-231-2962</a>
+                <a href="tel:8172312962" className="flex items-center gap-3">
+                  <Phone className="h-6 w-6 text-white animate-pulse" />
+                  Call 817-231-2962
+                </a>
               </Button>
             </div>
             <p className="mt-10 text-lg font-bold opacity-80 uppercase tracking-widest">

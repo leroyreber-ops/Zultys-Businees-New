@@ -88,17 +88,19 @@ export function Pricing() {
               <Button
                 size="lg"
                 onClick={openQuote}
-                className="bg-zultys-green hover:bg-zultys-green/90 text-white text-xl px-10 py-8 font-black rounded-xl shadow-2xl"
+                className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 text-xl px-10 py-8 font-black rounded-xl shadow-2xl border-none hover:scale-[1.02] active:scale-95 transition-all"
               >
                 Request a Custom Quote
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-2 border-white/30 bg-white/5 text-white hover:bg-white/10 text-xl px-10 py-8 font-black rounded-xl backdrop-blur-md"
                 asChild
+                className="bg-zultys-green hover:bg-zultys-green/90 text-white text-xl px-10 py-8 font-black rounded-xl shadow-2xl shadow-zultys-green/20 border-none hover:scale-[1.02] active:scale-95 transition-all"
               >
-                <a href="tel:817-231-2962">Call 817-231-2962</a>
+                <a href="tel:817-231-2962" className="flex items-center gap-3">
+                  <Phone className="h-6 w-6 text-white animate-pulse" />
+                  Call 817-231-2962
+                </a>
               </Button>
             </div>
           </div>
