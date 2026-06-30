@@ -1,0 +1,656 @@
+import { useState, useEffect } from 'react';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
+import { CTASection } from '../components/CTASection';
+import { ScrollToTop } from '../components/ScrollToTop';
+import { useQuote } from '../context/QuoteContext';
+import { ServiceAreas } from '../components/ServiceAreas';
+import { FAQ } from '../components/FAQ';
+import { Comparison } from '../components/Comparison';
+import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
+import { HashLink as Link } from '../components/HashLink';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { ZultysLogo } from '../components/ZultysLogo';
+import { AuthorizedPartnerBadge } from '../components/AuthorizedPartnerBadge';
+import { ROICalculator } from '../components/ROICalculator';
+import {
+  OFFICE_COMMUNICATION,
+  SUPPORT_TEAM,
+  PEOPLE_ON_CALLS,
+  ZULTYS_MX250,
+  ZULTYS_ZIP_45G,
+  ZULTYS_ZIP_49G,
+  ZULTYS_IP_PHONES_BG,
+  ZULTYS_ZAC_MOBILE_COMBO,
+  ZULTYS_MX_MOBILE,
+  ZULTYS_FORT_WORTH_BG,
+} from '../constants/images';
+import { ReadMore } from '../components/ReadMore';
+import {
+  Phone,
+  Cloud,
+  MessageSquare,
+  Video,
+  Shield,
+  Zap,
+  Users,
+  TrendingUp,
+  Award,
+  CheckCircle,
+  ArrowRight,
+  Smartphone,
+  Star,
+  Building2,
+  Headphones,
+  Clock,
+  DollarSign,
+  Target,
+  Handshake,
+} from 'lucide-react';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+
+export function Home() {
+  const { openQuote } = useQuote();
+
+  useEffect(() => {
+    // Page Title
+    document.title = 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth';
+    
+    // Meta Description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    const description = 'Fort Worth\'s #1 authorized Zultys dealer. Expert phone system installation, support & sales in Dallas-Fort Worth. Local DFW support. Call 817-231-2962.';
+    if (metaDescription) {
+      metaDescription.setAttribute('content', description);
+    } else {
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = description;
+      document.head.appendChild(meta);
+    }
+
+    // Meta Keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', 'Fort Worth Zultys, Dallas Zultys dealer, Zultys partner Fort Worth, Zultys phone system Dallas, Zultys MX250 Fort Worth, Zultys dealer DFW, Fort Worth VoIP, Dallas business phone systems, Zultys authorized partner, DFW Zultys installation');
+
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/');
+
+    // Open Graph Tags
+    const ogTags = [
+      { property: 'og:title', content: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth' },
+      { property: 'og:description', content: 'Fort Worth\'s #1 Zultys dealer & authorized partner. Expert installation, support & sales. Best pricing on Zultys MX250, MX30, MX-SE. Local DFW support.' },
+      { property: 'og:url', content: 'https://dallasfortworthzultys.com/' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:locale', content: 'en_US' },
+      { property: 'og:site_name', content: 'DFW Business Communications' },
+    ];
+
+    ogTags.forEach(tag => {
+      let element = document.querySelector(`meta[property="${tag.property}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('property', tag.property);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', tag.content);
+    });
+
+    // Twitter Card Tags
+    const twitterTags = [
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth' },
+      { name: 'twitter:description', content: 'Fort Worth\'s #1 Zultys dealer & authorized partner. Expert installation, support & sales. Best pricing on Zultys MX250, MX30, MX-SE.' },
+    ];
+
+    twitterTags.forEach(tag => {
+      let element = document.querySelector(`meta[name="${tag.name}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('name', tag.name);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', tag.content);
+    });
+
+    // Additional SEO Meta Tags
+    const additionalMeta = [
+      { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
+      { name: 'googlebot', content: 'index, follow' },
+      { name: 'author', content: 'DFW Business Communications' },
+      { name: 'geo.region', content: 'US-TX' },
+      { name: 'geo.placename', content: 'Fort Worth, Dallas' },
+      { name: 'geo.position', content: '32.7555;-97.3308' },
+      { name: 'ICBM', content: '32.7555, -97.3308' },
+    ];
+
+    additionalMeta.forEach(tag => {
+      let element = document.querySelector(`meta[name="${tag.name}"]`);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('name', tag.name);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', tag.content);
+    });
+
+    // JSON-LD Schema - Local Business
+    const localBusinessSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      '@id': 'https://dallasfortworthzultys.com/#organization',
+      name: 'DFW Business Communications',
+      alternateName: 'Dallas Fort Worth Zultys',
+      description: 'Fort Worth\'s #1 authorized Zultys dealer and partner. Expert Zultys phone system installation, support, and sales throughout Dallas-Fort Worth metroplex.',
+      url: 'https://dallasfortworthzultys.com',
+      telephone: '817-231-2962',
+      email: 'info@dallasfortworthzultys.com',
+      priceRange: '$$',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Fort Worth',
+        addressRegion: 'TX',
+        addressCountry: 'US',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 32.7555,
+        longitude: -97.3308,
+      },
+      areaServed: ['Fort Worth', 'Dallas', 'Arlington', 'Irving', 'Plano', 'Frisco', 'DFW Metroplex'],
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.9',
+        reviewCount: '127',
+      },
+    };
+
+    // JSON-LD Schema - Organization
+    const organizationSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      '@id': 'https://dallasfortworthzultys.com/#organization',
+      name: 'DFW Business Communications',
+      url: 'https://dallasfortworthzultys.com',
+      description: 'Authorized Zultys dealer and partner serving Fort Worth and Dallas metroplex.',
+      email: 'info@dallasfortworthzultys.com',
+      telephone: '817-231-2962',
+    };
+
+    // JSON-LD Schema - Website
+    const websiteSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      '@id': 'https://dallasfortworthzultys.com/#website',
+      url: 'https://dallasfortworthzultys.com',
+      name: 'DFW Business Communications - Fort Worth Zultys Dealer',
+      publisher: {
+        '@id': 'https://dallasfortworthzultys.com/#organization',
+      },
+    };
+
+    // JSON-LD Schema - Breadcrumb
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://dallasfortworthzultys.com/',
+        },
+      ],
+    };
+
+    // Remove existing schemas
+    const existingSchemas = document.querySelectorAll('script[type="application/ld+json"]');
+    existingSchemas.forEach(script => script.remove());
+
+    // Add all schemas
+    [localBusinessSchema, organizationSchema, websiteSchema, breadcrumbSchema].forEach(schema => {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.text = JSON.stringify(schema);
+      document.head.appendChild(script);
+    });
+  }, []);
+
+  const benefits = [
+    'Reduce telecommunication costs by up to 60%',
+    'Scale instantly as your business grows',
+    '99.99% uptime SLA guarantee',
+    '24/7 local Fort Worth support',
+    'Mobile apps for iOS and Android',
+    'Easy integration with existing tools',
+    'Advanced call analytics and reporting',
+    'Voicemail-to-email transcription',
+  ];
+
+  const stats = [
+    { icon: Users, value: '500+', label: 'Fort Worth Businesses Served' },
+    { icon: TrendingUp, value: '99.99%', label: 'System Uptime' },
+    { icon: Award, value: '15+', label: 'Years of Experience' },
+    { icon: Phone, value: '10,000+', label: 'Active Lines Managed' },
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      <Header />
+      
+      <main className="flex-1">
+        {/* Hero Section - Inspired by Reference */}
+        <section className="relative min-h-[95vh] flex flex-col justify-center bg-slate-950 overflow-hidden">
+          {/* Background Image - Clear and sharp */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <ImageWithFallback
+              src={ZULTYS_FORT_WORTH_BG}
+              alt="Dallas Fort Worth Skyline"
+              className="w-full h-full object-cover"
+            />
+            {/* Subtle dark tint for text legibility */}
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+
+            {/* Blended Phone Image - Removed as requested */}
+            <div className="absolute right-0 bottom-0 top-0 w-1/2 hidden lg:block">
+            </div>
+
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-10 w-full pt-20 pb-40">
+            <div className="max-w-3xl">
+              <Link to="/about" className="inline-flex items-center gap-2 bg-zultys-green/20 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-zultys-green/30 hover:bg-zultys-green/30 transition-all group">
+                <Award className="h-5 w-5 text-zultys-green group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-bold text-white uppercase tracking-widest">Authorized Zultys Partner DFW</span>
+              </Link>
+              
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-8 leading-[1.1] text-white tracking-tight drop-shadow-2xl">
+                Zultys Business Phone Communications in Dallas-Fort Worth
+              </h1>
+              
+              <p className="text-lg md:text-xl lg:text-2xl mb-12 text-slate-200 leading-relaxed max-w-2xl font-medium">
+                Unified communications, VoIP phone systems, cloud calling, and business connectivity solutions built for DFW businesses.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6">
+                <Button
+                  size="lg"
+                  onClick={openQuote}
+                  className="bg-zultys-green hover:bg-zultys-green/90 text-white text-xl px-10 py-8 shadow-2xl transition-all font-black uppercase tracking-wider rounded-xl"
+                >
+                  Get a Free Quote
+                </Button>
+                <Button
+                  size="lg"
+                  asChild
+                  variant="outline"
+                  className="border-2 border-white/30 bg-white/5 text-white hover:bg-white/10 text-xl px-10 py-8 font-black transition-all rounded-xl backdrop-blur-md"
+                >
+                  <a href="tel:817-231-2962" className="flex items-center gap-3">
+                    <Phone className="h-6 w-6 text-zultys-gold" />
+                    Call 817-231-2962
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating Service Cards - Overlapping bottom */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-1/2">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { title: 'Zultys Business Phone Systems', icon: Phone, link: '/fort-worth-zultys-business-phone-systems' },
+                  { title: 'Cloud Phone Systems', icon: Cloud, link: '/fort-worth-zultys-cloud-services' },
+                  { title: 'VOIP', icon: MessageSquare, link: '/fort-worth-zultys-voip-phone-system' },
+                  { title: 'Business Connectivity', icon: Zap, link: '/solutions' },
+                ].map((service, index) => (
+                  <Link key={index} to={service.link} className="block group">
+                    <Card className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-none flex flex-col items-center text-center group-hover:translate-y-[-15px] transition-all duration-500 ease-out h-full">
+                      <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-3xl bg-slate-50 group-hover:bg-zultys-green/5 transition-colors duration-500">
+                        <service.icon className="h-12 w-12 sm:h-16 sm:w-16 text-zultys-green" strokeWidth={1} />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight tracking-tight">
+                        {service.title}
+                      </h3>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Spacer to account for overlapping cards */}
+        <div className="h-48 lg:h-56 bg-white"></div>
+
+        {/* Trust Section - Logos */}
+        <section className="py-12 border-y border-gray-100 bg-gray-50/50">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <p className="text-center text-sm font-bold text-gray-400 uppercase tracking-widest mb-8">
+              Trusted by 500+ North Texas Organizations
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+              {/* Placeholder for client logos - using descriptive text for now as per instructions */}
+              <div className="text-xl font-black text-charcoal">HEALTHCARE</div>
+              <div className="text-xl font-black text-charcoal">LEGAL</div>
+              <div className="text-xl font-black text-charcoal">EDUCATION</div>
+              <div className="text-xl font-black text-charcoal">RETAIL</div>
+              <div className="text-xl font-black text-charcoal">GOVERNMENT</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Why Choose Zultys Section */}
+        <section className="py-24 bg-white">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
+                Why choose Zultys in Dallas–Fort Worth
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="prose prose-lg text-gray-600 max-w-none">
+                <p>
+                  Zultys gives DFW businesses an enterprise‑grade phone system without the complexity and cost of old PBX hardware. You get a single unified communications platform for voice, video, messaging, and contact center, all tied to your business numbers and extensions. As your local Zultys partner in Dallas–Fort Worth, we help you match the right Zultys solution to the way your team actually works, whether they’re in one office, spread across the Metroplex, or working remotely. Our focus is simple: dependable call quality, easy day‑to‑day management, and features that directly support sales, service, and operations.
+                </p>
+                <p>
+                  In the competitive North Texas market, having a reliable communication backbone is essential. Whether you are a small startup in Frisco or a large healthcare provider in Fort Worth, Zultys provides the scalability and flexibility required to stay ahead. Our team ensures that your transition to Zultys is smooth, with minimal disruption to your daily activities. We handle the technical heavy lifting so you can focus on what you do best—running your business.
+                </p>
+                <p>
+                  With Zultys, you're not just getting a phone system; you're getting a comprehensive toolset designed to enhance collaboration and productivity. From advanced call routing to seamless mobile integration, every feature is built with the user in mind. Experience the difference that a truly unified platform can make for your DFW organization. We understand that every call could be a potential new client or a critical support request, which is why we prioritize reliability above all else.
+                </p>
+              </div>
+              <div className="relative">
+                <div className="absolute -inset-4 bg-zultys-green/10 blur-3xl rounded-full"></div>
+                <ImageWithFallback 
+                  src={ZULTYS_IP_PHONES_BG} 
+                  alt="Zultys Business Phone Systems Dallas Fort Worth" 
+                  className="relative w-full h-auto rounded-2xl shadow-2xl"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-24 bg-gray-50">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
+                Features DFW companies actually use every day
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="order-2 lg:order-1 relative">
+                <div className="absolute -inset-4 bg-zultys-gold/10 blur-3xl rounded-full"></div>
+                <ImageWithFallback 
+                  src={ZULTYS_ZAC_MOBILE_COMBO} 
+                  alt="Zultys VoIP phone systems DFW features" 
+                  className="relative w-full h-auto rounded-2xl shadow-2xl"
+                  loading="lazy"
+                />
+              </div>
+              <div className="order-1 lg:order-2 prose prose-lg text-gray-600 max-w-none">
+                <p>
+                  Most businesses don’t need complicated telecom jargon—they need features that make daily work easier. With a Zultys business phone system, Dallas–Fort Worth companies get powerful but practical tools: automated attendants to route calls quickly, call queues for busy departments, voicemail‑to‑email so nothing gets missed, mobile apps for on‑the‑go staff, and detailed call reporting for management.
+                </p>
+                <p>
+                  Unified communications tools like presence, instant messaging, and conferencing are built into the same Zultys platform, so your team can move from a chat to a call to a screen share without switching systems. We configure these features around your current call flows so your customers experience faster, more professional service from day one. Imagine a scenario where a client calls your main office in Dallas, and the call is seamlessly routed to a technician in the field in Arlington, all without the client ever knowing they were transferred.
+                </p>
+                <p>
+                  This level of professionalism is what Zultys brings to the table. Our call reporting tools provide valuable insights into peak call times and agent performance, allowing you to make data-driven decisions to improve your customer service. The Zultys mobile app ensures that your team is always reachable, whether they are at a client site, traveling between DFW locations, or working from home. By unifying all your communication channels, Zultys eliminates the silos that often hinder efficiency and customer satisfaction.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
+          {/* Cloud vs On-Premise Section */}
+          <section className="py-24 bg-white">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
+                  Cloud and on‑premise Zultys phone systems for DFW
+                </h2>
+              </div>
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                <div className="prose prose-lg text-gray-600 max-w-none">
+                  <p>
+                    Every business in Dallas–Fort Worth is at a different stage of its technology journey, so there’s no one‑size‑fits‑all phone deployment. Zultys supports both cloud‑hosted and on‑premise business phone systems, and we help you pick the model that fits your budget, risk tolerance, and IT environment. A Zultys cloud phone system is ideal if you want minimal hardware, predictable monthly costs, and easy support for remote work.
+                  </p>
+                  <p>
+                    On‑premise Zultys systems make sense when you need tighter control, specific integrations, or have existing infrastructure you want to leverage. Our team walks you through the pros and cons for your specific DFW business and designs a Zultys deployment that can grow with you. For many DFW companies, the cloud offers a path to modernization without the need for significant capital expenditure. It provides the agility to scale up or down as business needs change, which is particularly valuable in the dynamic North Texas economy.
+                  </p>
+                  <p>
+                    On the other hand, some organizations prefer the security and control of an on-premise solution, especially those in highly regulated industries like finance or healthcare. Regardless of the deployment model you choose, Zultys delivers the same high-quality features and reliable performance. We ensure that your system is configured for maximum uptime and security, providing you with peace of mind. Our local experts are here to support you every step of the way, from initial design to ongoing maintenance and upgrades.
+                  </p>
+                </div>
+                <div className="relative">
+                  <div className="absolute -inset-4 bg-zultys-green/5 blur-3xl rounded-full"></div>
+                  <ImageWithFallback 
+                    src={ZULTYS_MX_MOBILE} 
+                    alt="Cloud and on-premise Zultys deployments in Dallas Fort Worth" 
+                    className="relative w-full h-auto rounded-2xl shadow-2xl"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+        {/* Industries Section */}
+        <section className="py-24 bg-charcoal text-white">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black mb-6 text-white">
+                Zultys solutions for DFW industries
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="order-2 lg:order-1 relative">
+                <div className="absolute -inset-4 bg-zultys-green/10 blur-3xl rounded-full"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { name: 'Healthcare', icon: Shield },
+                    { name: 'Legal', icon: Award },
+                    { name: 'Retail', icon: Target },
+                    { name: 'Service', icon: Headphones },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-white/5 p-6 rounded-2xl border border-white/10 text-center">
+                      <item.icon className="h-8 w-8 text-zultys-green mx-auto mb-4" />
+                      <span className="font-bold text-white">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="order-1 lg:order-2 prose prose-lg prose-invert text-white max-w-none prose-headings:text-white prose-strong:text-white">
+                <p>
+                  Zultys business phone systems are flexible enough to support a wide range of industries across Dallas–Fort Worth. Professional offices and service firms use Zultys for clear call handling and reliable voicemail. Multi‑location retailers and franchises rely on Zultys to centralize communications across several sites. Healthcare practices and clinics use call queues, auto‑attendants, and secure messaging to keep patient communication organized.
+                </p>
+                <p>
+                  Contractors, logistics companies, and field service teams use the Zultys mobile apps to stay reachable on the road without exposing personal cell numbers. Whatever your industry, we design your Zultys configuration around the way your staff and customers actually communicate day to day. In the legal sector, features like call recording and confidential voicemail are essential for maintaining client trust and meeting compliance requirements.
+                </p>
+                <p>
+                  For DFW real estate agencies, the ability to seamlessly transfer calls to agents in the field can be the difference between closing a deal and losing a lead. Educational institutions in North Texas use Zultys to improve communication between staff, parents, and students, with features like mass notification and easy-to-use directories. Our deep understanding of the DFW business landscape allows us to provide tailored solutions that address the specific challenges of your industry.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Implementation Process Section */}
+        <section className="py-24 bg-white">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
+                Our local Zultys implementation process
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="prose prose-lg text-gray-600 max-w-none">
+                <p>
+                  As a dedicated Zultys partner in Dallas–Fort Worth, we handle the full lifecycle of your business phone project. We start with a discovery call to understand how your phones work today, which numbers and locations you have, and what’s not working. Then we design a Zultys call flow and extension plan that matches your departments, hours, and escalation paths.
+                </p>
+                <p>
+                  Our team manages porting your existing phone numbers, installing phones and network gear as needed, and configuring your Zultys system for go‑live. After launch, we provide local training for your staff and ongoing support so you’re never stuck waiting on a distant call center when something needs to be adjusted. Our implementation process is designed to be as non-disruptive as possible. We understand that your business can't afford downtime, so we plan every step carefully.
+                </p>
+                <p>
+                  From the initial site survey to the final user training, our goal is to ensure a smooth and successful transition. We take pride in our local presence, which allows us to provide on-site support and personalized service that national providers simply can't match. When you have a question or need an adjustment, you can call us directly and speak with someone who knows your system and your business. This commitment to local service is why so many DFW companies trust us with their communication needs.
+                </p>
+              </div>
+              <div className="relative">
+                <div className="absolute -inset-4 bg-zultys-gold/10 blur-3xl rounded-full"></div>
+                <ImageWithFallback 
+                  src={SUPPORT_TEAM} 
+                  alt="Our local Zultys implementation process in DFW" 
+                  className="relative w-full h-auto rounded-2xl shadow-2xl"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Service Areas Section */}
+        <section className="py-24 bg-gray-50">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
+                Service areas across Dallas–Fort Worth
+              </h2>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="order-2 lg:order-1 relative">
+                <div className="absolute -inset-4 bg-zultys-green/10 blur-3xl rounded-full"></div>
+                <ImageWithFallback 
+                  src={OFFICE_COMMUNICATION} 
+                  alt="Zultys service areas across Dallas Fort Worth" 
+                  className="relative w-full h-auto rounded-2xl shadow-2xl"
+                  loading="lazy"
+                />
+              </div>
+              <div className="order-1 lg:order-2 prose prose-lg text-gray-600 max-w-none">
+                <p>
+                  We provide Zultys business phone systems and unified communications support to companies across the Dallas–Fort Worth Metroplex. Our service area includes Dallas, Fort Worth, Arlington, Plano, Irving, Grand Prairie, Frisco, Lewisville, Denton, and surrounding North Texas communities. Whether you have a single office in Fort Worth or multiple locations spread across DFW, we can design one integrated Zultys platform that ties everything together.
+                </p>
+                <p>
+                  If you’re expanding into new offices, opening branches, or consolidating older phone systems, we’ll build a plan that keeps your numbers and call handling consistent across every location. Our local expertise means we understand the specific networking and telecommunications challenges in the DFW area. We work with local carriers to ensure your number porting is handled correctly and your voice traffic is prioritized for maximum quality.
+                </p>
+                <p>
+                  As your business grows and expands into new parts of the Metroplex, we are here to support you with scalable solutions that grow with you. Whether you are moving into a new high-rise in downtown Dallas or opening a warehouse in South Fort Worth, we have the experience and resources to ensure your communications are seamless. Trust the local Zultys experts to keep your DFW business connected and productive in every corner of North Texas.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        </ReadMore>
+
+        {/* FAQ Section */}
+        <section className="py-24 bg-white">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
+                Frequently asked questions about Zultys in DFW
+              </h2>
+            </div>
+            <div className="max-w-3xl mx-auto space-y-8">
+              {[
+                {
+                  q: "How is a Zultys system different from my old phone system?",
+                  a: "Unlike legacy PBX systems, Zultys is a true unified communications platform. It combines voice, video, chat, and mobile apps into one system. This eliminates the need for separate vendors and ensures your team can collaborate seamlessly from any device, whether in a Dallas office or working remotely in Fort Worth."
+                },
+                {
+                  q: "Can I keep my existing business phone numbers?",
+                  a: "Yes! We handle the entire number porting process for you. We work with your current Dallas or Fort Worth carriers to move your existing business numbers over to the Zultys platform with zero downtime during the transition."
+                },
+                {
+                  q: "Is Zultys a good fit for small businesses, or just larger companies?",
+                  a: "Zultys is highly scalable. We have successfully deployed Zultys systems for small DFW startups with 5 users and large enterprise organizations with over 500 users. You only pay for what you need, and you can easily add lines as your business grows."
+                },
+                {
+                  q: "What kind of internet connection do I need for Zultys VoIP in DFW?",
+                  a: "Zultys works with most business-grade internet connections (Fiber, Coax, etc.) available in the DFW area. During our discovery phase, we test your current connection to ensure it has the bandwidth and stability to support high-quality voice traffic."
+                },
+                {
+                  q: "How does Zultys handle remote workers and mobile staff?",
+                  a: "Remote work is where Zultys shines. The MXmobile app and ZAC desktop software allow your team to use their business extension from anywhere. They can make calls, join conferences, and chat with colleagues just as if they were sitting at their desk in your main DFW office."
+                },
+                {
+                  q: "What happens if my internet goes down in Dallas or Fort Worth?",
+                  a: "We design redundancy into every Zultys deployment. If your primary internet fails, calls can automatically failover to mobile devices or a backup location. For cloud-hosted systems, your auto-attendants and voicemail keep working in the cloud even if your physical office is offline."
+                },
+                {
+                  q: "How long does the installation process typically take for a DFW business?",
+                  a: "A typical Zultys implementation in Dallas-Fort Worth takes 2-4 weeks from the initial design to go-live. This timeline includes the time required for number porting, hardware delivery, and system configuration. We manage the entire schedule to ensure a smooth launch."
+                }
+              ].map((faq, i) => (
+                <div key={i} className="border-b border-gray-200 pb-8">
+                  <h3 className="text-xl font-black text-charcoal mb-4 flex items-start gap-3">
+                    <span className="text-zultys-green">Q:</span> {faq.q}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed pl-8">
+                    {faq.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <ServiceAreas />
+        <Comparison />
+        <FAQ />
+
+        {/* Final CTA Section */}
+        <section className="py-24 bg-zultys-green text-white">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+            <h2 className="text-4xl md:text-6xl font-black mb-8">
+              Ready to Upgrade Your DFW Business Communications?
+            </h2>
+            <p className="text-xl md:text-2xl mb-12 text-white max-w-3xl mx-auto">
+              Don't wait for your old phone system to fail. Schedule a free Zultys consultation today and see how we can help your Dallas–Fort Worth business stay connected.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Button
+                onClick={openQuote}
+                className="bg-white text-zultys-green hover:bg-gray-100 font-black px-12 py-8 text-xl shadow-2xl"
+              >
+                Request a Quote
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white/10 font-black px-12 py-8 text-xl"
+              >
+                <a href="tel:817-231-2962">Call 817-231-2962</a>
+              </Button>
+            </div>
+            <p className="mt-8 text-lg font-bold opacity-80">
+              Talk to a local Zultys communications specialist in DFW.
+            </p>
+          </div>
+        </section>
+
+        <CTASection />
+      </main>
+
+      <Footer />
+      <ScrollToTop />
+    </div>
+  );
+}
