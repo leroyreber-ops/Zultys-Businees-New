@@ -389,6 +389,7 @@ const canonicalMap: Record<string, string> = {
   '/north-richland-hills-voip': '/north-richland-hills-zultys',
   '/colleyville-ip-phones': '/colleyville-voip',
   '/zultys-vs-competition': '/zultys-vs-competitors',
+  '/sitemap': '/sitemap.html',
 };
 
 export default function App() {

@@ -300,7 +300,11 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
   const canonicalPath = canonicalMap[normalized] || normalized;
   const canonicalUrl = `https://dallasfortworthzultys.com${canonicalPath}`;
 
-  const cityName = getCityNameFromPath(currentPathname);
+  let cityName = getCityNameFromPath(currentPathname);
+  // Ensure we don't treat non-city routes (like '/products', '/solutions') as cities (e.g., "Products, Texas")
+  if (cityName !== 'Dallas-Fort Worth' && !cityCoordinates[cityName]) {
+    cityName = 'Dallas-Fort Worth';
+  }
   const geoInfo = cityCoordinates[cityName] || { lat: 32.7555, lng: -97.3308, zip: '76102' };
 
   // 1. LocalBusiness Schema
@@ -500,9 +504,18 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
     // Select any manually-inserted script tags with type application/ld+json that ARE NOT inside our react container
     const scriptTags = document.querySelectorAll('head > script[type="application/ld+json"]');
     scriptTags.forEach(tag => {
-      // If it doesn't have our data-centralized attribute, delete it to prevent double schema
+      // If it doesn't have our data-centralized attribute, delete it only if it is a duplicate general schema
       if (!tag.hasAttribute('data-centralized')) {
-        tag.remove();
+        try {
+          const content = JSON.parse(tag.textContent || '{}');
+          // Only remove duplicate business, organization, or website level schemas that we manage centrally
+          if (content['@type'] === 'LocalBusiness' || content['@type'] === 'Organization' || content['@type'] === 'WebSite') {
+            tag.remove();
+          }
+        } catch (e) {
+          // If not parseable, remove it as it is invalid markup
+          tag.remove();
+        }
       }
     });
   }, [currentPathname]);

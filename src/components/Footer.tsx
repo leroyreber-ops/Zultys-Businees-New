@@ -83,7 +83,7 @@ export function Footer() {
                   <li><Link to="/zultys-faq" className="text-slate-400 hover:text-zultys-green transition-colors">Help & FAQ</Link></li>
                   <li><Link to="/case-studies" className="text-slate-400 hover:text-zultys-green transition-colors">Case Studies</Link></li>
                   <li><Link to="/blog" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Blog</Link></li>
-                  <li><Link to="/sitemap" className="text-slate-400 hover:text-zultys-green transition-colors">HTML Sitemap</Link></li>
+                  <li><Link to="/sitemap.html" className="text-slate-400 hover:text-zultys-green transition-colors">HTML Sitemap</Link></li>
                 </ul>
               </div>
             </div>
