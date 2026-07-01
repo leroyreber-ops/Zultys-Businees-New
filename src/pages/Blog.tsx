@@ -104,7 +104,7 @@ export function Blog() {
                         <div className="flex items-center gap-4">
                           <img 
                             src={post.image} 
-                            alt="" 
+                            alt="Blog - SEO optimization and Zultys unified communications advice for DFW businesses" 
                             className="h-12 w-12 rounded-lg object-cover shadow-sm"
                             referrerPolicy="no-referrer"
                             loading="lazy"

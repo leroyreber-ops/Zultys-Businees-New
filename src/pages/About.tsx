@@ -20,6 +20,8 @@ import {
   Headphones
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { useSEO } from '../hooks/useSEO';
+import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
 import {
   HERO_BACKGROUND,
   SUPPORT_TEAM,
@@ -30,65 +32,14 @@ import {
 export function About() {
   const { openQuote } = useQuote();
 
-  useEffect(() => {
-    // Page Title
-    document.title = 'About Us | DFW Business Communications | Zultys Fort Worth & Dallas';
-    
-    // Meta Description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    const description = 'Learn about DFW Business Communications, your premier Zultys dealer in Fort Worth and Dallas. Over 15 years of experience in DFW business phone systems.';
-    if (metaDescription) {
-      metaDescription.setAttribute('content', description);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = description;
-      document.head.appendChild(meta);
-    }
-
-    // Meta Keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute('content', 'Zultys dealer Dallas, business phone provider Fort Worth, DFW communications company, phone system experts Texas, unified communications provider Dallas');
-
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/about-us');
-
-    // JSON-LD Schema
-    const schema = {
-      '@context': 'https://schema.org',
-      '@type': 'AboutPage',
-      name: 'About DFW Business Communications',
-      description: 'Premier Zultys dealer in Fort Worth and Dallas, specializing in business phone systems for over 15 years.',
-      publisher: {
-        '@type': 'LocalBusiness',
-        name: 'DFW Business Communications',
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'Fort Worth',
-          addressRegion: 'TX',
-          addressCountry: 'US'
-        }
-      }
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify(schema);
-    document.head.appendChild(script);
-
-    return () => script.remove();
-  }, []);
+  useSEO({
+    title: 'About Us | DFW Business Communications | Zultys Fort Worth & Dallas',
+    description: 'Learn about DFW Business Communications, your premier Zultys dealer in Fort Worth and Dallas. Over 15 years of experience in DFW business phone systems.',
+    keywords: 'Zultys dealer Dallas, business phone provider Fort Worth, DFW communications company, phone system experts Texas, unified communications provider Dallas',
+    canonicalUrl: 'https://dallasfortworthzultys.com/about',
+    ogTitle: 'About Us | DFW Business Communications | Zultys Fort Worth & Dallas',
+    ogDescription: 'Learn about DFW Business Communications, your premier Zultys dealer in Fort Worth and Dallas. Over 15 years of experience in DFW business phone systems.',
+  });
 
   const stats = [
     { label: 'Years Experience', value: '15+', icon: Clock },
@@ -99,6 +50,7 @@ export function About() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <LocalBusinessSchema path="/about" />
       <Header />
       
       <main className="flex-1">
@@ -216,7 +168,7 @@ export function About() {
         {/* Stats Section - SaaS Style */}
         <section className="py-32 bg-charcoal text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <img src={ZULTYS_FORT_WORTH_BG} alt="" className="w-full h-full object-cover" />
+            <img src={ZULTYS_FORT_WORTH_BG} alt="About DFW Business Communications - Experienced Zultys dealer in Fort Worth and Dallas, Texas" className="w-full h-full object-cover" />
           </div>
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">

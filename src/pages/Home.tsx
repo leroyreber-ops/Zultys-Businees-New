@@ -9,6 +9,7 @@ import { ServiceAreas } from '../components/ServiceAreas';
 import { FAQ } from '../components/FAQ';
 import { Comparison } from '../components/Comparison';
 import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
+import { useSEO } from '../hooks/useSEO';
 import { HashLink as Link } from '../components/HashLink';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -53,179 +54,16 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 export function Home() {
   const { openQuote } = useQuote();
 
-  useEffect(() => {
-    // Page Title
-    document.title = 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth';
-    
-    // Meta Description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    const description = 'Fort Worth\'s #1 authorized Zultys dealer. Expert phone system installation, support & sales in Dallas-Fort Worth. Local DFW support. Call 817-231-2962.';
-    if (metaDescription) {
-      metaDescription.setAttribute('content', description);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = description;
-      document.head.appendChild(meta);
-    }
-
-    // Meta Keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute('content', 'Fort Worth Zultys, Dallas Zultys dealer, Zultys partner Fort Worth, Zultys phone system Dallas, Zultys MX250 Fort Worth, Zultys dealer DFW, Fort Worth VoIP, Dallas business phone systems, Zultys authorized partner, DFW Zultys installation');
-
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/');
-
-    // Open Graph Tags
-    const ogTags = [
-      { property: 'og:title', content: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth' },
-      { property: 'og:description', content: 'Fort Worth\'s #1 Zultys dealer & authorized partner. Expert installation, support & sales. Best pricing on Zultys MX250, MX30, MX-SE. Local DFW support.' },
-      { property: 'og:url', content: 'https://dallasfortworthzultys.com/' },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:locale', content: 'en_US' },
-      { property: 'og:site_name', content: 'DFW Business Communications' },
-    ];
-
-    ogTags.forEach(tag => {
-      let element = document.querySelector(`meta[property="${tag.property}"]`);
-      if (!element) {
-        element = document.createElement('meta');
-        element.setAttribute('property', tag.property);
-        document.head.appendChild(element);
-      }
-      element.setAttribute('content', tag.content);
-    });
-
-    // Twitter Card Tags
-    const twitterTags = [
-      { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth' },
-      { name: 'twitter:description', content: 'Fort Worth\'s #1 Zultys dealer & authorized partner. Expert installation, support & sales. Best pricing on Zultys MX250, MX30, MX-SE.' },
-    ];
-
-    twitterTags.forEach(tag => {
-      let element = document.querySelector(`meta[name="${tag.name}"]`);
-      if (!element) {
-        element = document.createElement('meta');
-        element.setAttribute('name', tag.name);
-        document.head.appendChild(element);
-      }
-      element.setAttribute('content', tag.content);
-    });
-
-    // Additional SEO Meta Tags
-    const additionalMeta = [
-      { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
-      { name: 'googlebot', content: 'index, follow' },
-      { name: 'author', content: 'DFW Business Communications' },
-      { name: 'geo.region', content: 'US-TX' },
-      { name: 'geo.placename', content: 'Fort Worth, Dallas' },
-      { name: 'geo.position', content: '32.7555;-97.3308' },
-      { name: 'ICBM', content: '32.7555, -97.3308' },
-    ];
-
-    additionalMeta.forEach(tag => {
-      let element = document.querySelector(`meta[name="${tag.name}"]`);
-      if (!element) {
-        element = document.createElement('meta');
-        element.setAttribute('name', tag.name);
-        document.head.appendChild(element);
-      }
-      element.setAttribute('content', tag.content);
-    });
-
-    // JSON-LD Schema - Local Business
-    const localBusinessSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'LocalBusiness',
-      '@id': 'https://dallasfortworthzultys.com/#organization',
-      name: 'DFW Business Communications',
-      alternateName: 'Dallas Fort Worth Zultys',
-      description: 'Fort Worth\'s #1 authorized Zultys dealer and partner. Expert Zultys phone system installation, support, and sales throughout Dallas-Fort Worth metroplex.',
-      url: 'https://dallasfortworthzultys.com',
-      telephone: '817-231-2962',
-      email: 'info@dallasfortworthzultys.com',
-      priceRange: '$$',
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: 'Fort Worth',
-        addressRegion: 'TX',
-        addressCountry: 'US',
-      },
-      geo: {
-        '@type': 'GeoCoordinates',
-        latitude: 32.7555,
-        longitude: -97.3308,
-      },
-      areaServed: ['Fort Worth', 'Dallas', 'Arlington', 'Irving', 'Plano', 'Frisco', 'DFW Metroplex'],
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.9',
-        reviewCount: '127',
-      },
-    };
-
-    // JSON-LD Schema - Organization
-    const organizationSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      '@id': 'https://dallasfortworthzultys.com/#organization',
-      name: 'DFW Business Communications',
-      url: 'https://dallasfortworthzultys.com',
-      description: 'Authorized Zultys dealer and partner serving Fort Worth and Dallas metroplex.',
-      email: 'info@dallasfortworthzultys.com',
-      telephone: '817-231-2962',
-    };
-
-    // JSON-LD Schema - Website
-    const websiteSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      '@id': 'https://dallasfortworthzultys.com/#website',
-      url: 'https://dallasfortworthzultys.com',
-      name: 'DFW Business Communications - Fort Worth Zultys Dealer',
-      publisher: {
-        '@id': 'https://dallasfortworthzultys.com/#organization',
-      },
-    };
-
-    // JSON-LD Schema - Breadcrumb
-    const breadcrumbSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: 'Home',
-          item: 'https://dallasfortworthzultys.com/',
-        },
-      ],
-    };
-
-    // Remove existing schemas
-    const existingSchemas = document.querySelectorAll('script[type="application/ld+json"]');
-    existingSchemas.forEach(script => script.remove());
-
-    // Add all schemas
-    [localBusinessSchema, organizationSchema, websiteSchema, breadcrumbSchema].forEach(schema => {
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify(schema);
-      document.head.appendChild(script);
-    });
-  }, []);
+  useSEO({
+    title: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth',
+    description: "Fort Worth's #1 authorized Zultys dealer. Expert phone system installation, support & sales in Dallas-Fort Worth. Local DFW support. Call 817-231-2962.",
+    keywords: 'Fort Worth Zultys, Dallas Zultys dealer, Zultys partner Fort Worth, Zultys phone system Dallas, Zultys MX250 Fort Worth, Zultys dealer DFW, Fort Worth VoIP, Dallas business phone systems, Zultys authorized partner, DFW Zultys installation',
+    canonicalUrl: 'https://dallasfortworthzultys.com/',
+    ogTitle: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth',
+    ogDescription: "Fort Worth's #1 Zultys dealer & authorized partner. Expert installation, support & sales. Best pricing on Zultys MX250, MX30, MX-SE. Local DFW support.",
+    twitterTitle: 'Fort Worth Zultys Dealer | #1 Zultys Partner Dallas-Fort Worth',
+    twitterDescription: "Fort Worth's #1 Zultys dealer & authorized partner. Expert installation, support & sales. Best pricing on Zultys MX250, MX30, MX-SE.",
+  });
 
   const benefits = [
     'Reduce telecommunication costs by up to 60%',
@@ -247,6 +85,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
+      <LocalBusinessSchema path="/" />
       <Header />
       
       <main className="flex-1">

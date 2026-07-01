@@ -351,7 +351,7 @@ export function ZultysBusinessPhoneSystems() {
         {/* Long-tail Keyword Section 3: VoIP for Small Business - SaaS Style */}
         <section className="py-32 bg-charcoal text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <img src={ZULTYS_FORT_WORTH_BG} alt="" className="w-full h-full object-cover" />
+            <img src={ZULTYS_FORT_WORTH_BG} alt="Authorized Zultys Partner - Zultys Business Phone Systems showing Zultys Fort Worth Bg with Dallas-Fort Worth business communications" className="w-full h-full object-cover" />
           </div>
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-20 items-center">

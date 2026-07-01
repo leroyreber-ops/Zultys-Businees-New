@@ -69,7 +69,7 @@ export function Pricing() {
         {/* Hero Section */}
         <section className="relative pt-24 pb-32 overflow-hidden bg-slate-900">
           <div className="absolute inset-0 opacity-20">
-            <img src={HERO_BACKGROUND} alt="" className="w-full h-full object-cover" />
+            <img src={HERO_BACKGROUND} alt="DFW Zultys Phone Systems pricing packages and VoIP cloud subscription plans" className="w-full h-full object-cover" />
           </div>
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-10 text-center">
             <div className="inline-flex items-center gap-2 bg-zultys-green/20 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-zultys-green/30">

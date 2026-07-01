@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { Activity, AlertTriangle, CheckCircle, ChevronDown, Clock, Gauge, Layout, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, ChevronDown, Clock, Gauge, Layout, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ImageAltAudit } from './ImageAltAudit';
 
 // Scoring configuration parameters (p100 = perfect, p90 = threshold for score 90, p50 = threshold for score 50)
 const METRIC_CONFIGS = {
@@ -24,6 +25,7 @@ export function PerformanceMonitor() {
   const [cls, setCls] = useState<MetricState>({ value: null, score: 100 });
   
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [hasAlerted, setHasAlerted] = useState(false);
   const [isReadyForAlert, setIsReadyForAlert] = useState(false);
 
@@ -407,7 +409,35 @@ export function PerformanceMonitor() {
               <div className="mt-4 text-[10px] text-slate-500 font-medium leading-normal text-center">
                 Maintains our strict SLA standard of 100% SEO compliance and optimal rendering speed in DFW.
               </div>
+
+              <button
+                onClick={() => setIsAuditOpen(true)}
+                className="mt-3.5 w-full bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Audit Image Alt Tags
+              </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isAuditOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="w-full max-w-4xl"
+            >
+              <ImageAltAudit onClose={() => setIsAuditOpen(false)} />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

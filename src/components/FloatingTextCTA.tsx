@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, X, ArrowUpRight, CheckCircle, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useQuote } from '../context/QuoteContext';
 
 export function FloatingTextCTA() {
-  const { openQuote } = useQuote();
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -24,14 +22,6 @@ export function FloatingTextCTA() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const handleClick = (e: React.MouseEvent) => {
-    // On tablet and desktop (width >= 768px), open the gorgeous quote request form instead of SMS
-    if (window.innerWidth >= 768) {
-      e.preventDefault();
-      openQuote();
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -80,7 +70,6 @@ export function FloatingTextCTA() {
             {/* Floating Pill Trigger */}
             <motion.a
               href={`sms:817-231-2962?body=${encodeURIComponent("Hello Zulty's Team, I'm searching information on the Best Zulty's business phone solution for my company as soon as possible please contact me with your available options!")}`}
-              onClick={handleClick}
               initial={{ opacity: 0, scale: 0.8, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               whileHover={{ scale: 1.05 }}

@@ -295,7 +295,7 @@ export function Contact() {
 
               <div className="mt-20 bg-charcoal text-white p-16 rounded-[3rem] relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 pointer-events-none">
-                  <img src={ZULTYS_FORT_WORTH_BG} alt="" className="w-full h-full object-cover" />
+                  <img src={ZULTYS_FORT_WORTH_BG} alt="Contact DFW Business Communications - Speak with our Fort Worth Zultys IP phone installation experts" className="w-full h-full object-cover" />
                 </div>
                 <div className="relative z-10">
                   <h3 className="text-4xl mb-8 text-white">Serving the Entire Dallas-Fort Worth Metroplex</h3>

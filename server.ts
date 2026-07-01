@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { scanImagesInProject, generateSeoSuggestion, updateAltTagInFile } from "./src/utils/imageScanner";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -109,6 +110,51 @@ async function startServer() {
         sandboxMode: true,
         message: "Submission captured successfully in workspace. Note: live SMTP transmission bypassed." 
       });
+    }
+  });
+
+  // API Route to scan all images in the project for accessibility & SEO
+  app.get("/api/scan-images", (req, res) => {
+    try {
+      const items = scanImagesInProject();
+      res.json({ success: true, items });
+    } catch (error) {
+      console.error("Error scanning images:", error);
+      res.status(500).json({ success: false, message: "Failed to scan images" });
+    }
+  });
+
+  // API Route to generate auto-suggested Alt tag based on page and image source
+  app.post("/api/suggest-alt", (req, res) => {
+    try {
+      const { pageName, src } = req.body;
+      if (!pageName || !src) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+      }
+      const suggestion = generateSeoSuggestion(pageName, src);
+      res.json({ success: true, suggestion });
+    } catch (error) {
+      console.error("Error generating alt suggestion:", error);
+      res.status(500).json({ success: false, message: "Failed to generate suggestion" });
+    }
+  });
+
+  // API Route to write the updated Alt tag directly to the source file
+  app.post("/api/update-alt", (req, res) => {
+    try {
+      const { filePath, lineNumber, newAlt } = req.body;
+      if (!filePath || !lineNumber || newAlt === undefined) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+      }
+      const success = updateAltTagInFile(filePath, Number(lineNumber), newAlt);
+      if (success) {
+        res.json({ success: true, message: "Alt tag updated in source code successfully" });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to write alt tag to file" });
+      }
+    } catch (error) {
+      console.error("Error updating alt tag:", error);
+      res.status(500).json({ success: false, message: "Failed to update alt tag in file" });
     }
   });
 
@@ -271,6 +317,14 @@ async function startServer() {
       "/richland-hills-tx-zultys-phone-systems",
       "/sansom-park-tx-zultys-phone-systems",
       "/reno-tx-zultys-phone-systems",
+      "/addison-tx-zultys-phone-systems",
+      "/aledo-tx-zultys-phone-systems",
+      "/azle-tx-zultys-phone-systems",
+      "/bartonville-tx-zultys-phone-systems",
+      "/haslet-tx-zultys-phone-systems",
+      "/north-richland-hills-zultys",
+      "/flower-mound-business-phones",
+      "/colleyville-voip",
       "/bedford-zultys-solutions",
       "/benbrook-phone-systems",
       "/blue-mound-tx-zultys-phone-systems",
