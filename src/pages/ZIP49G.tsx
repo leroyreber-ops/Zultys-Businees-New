@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ReadMore } from '../components/ReadMore';
 import {
   ZULTYS_ZIP_49G,
   ZULTYS_FORT_WORTH_BG,
@@ -183,8 +182,7 @@ export function ZIP49G() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Detailed Content Section 2: Android Power */}
+                  {/* Detailed Content Section 2: Android Power */}
         <section className="py-20 bg-slate-50">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center mb-16">
@@ -507,8 +505,7 @@ export function ZIP49G() {
           </div>
         </section>
 
-        </ReadMore>
-
+        
         <CTASection />
       </main>
 

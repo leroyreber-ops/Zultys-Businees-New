@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ReadMore } from '../components/ReadMore';
 import {
   ZULTYS_MX250,
   ZULTYS_FORT_WORTH_BG,
@@ -163,8 +162,7 @@ export function MXSeries() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Detailed Content Section 2: All-in-One Architecture */}
+                  {/* Detailed Content Section 2: All-in-One Architecture */}
         <section className="py-20 bg-slate-50">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center mb-16">
@@ -596,8 +594,7 @@ export function MXSeries() {
           </div>
         </section>
 
-        </ReadMore>
-
+        
         <CTASection />
       </main>
 

@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Hero } from '../components/Hero';
-import { ReadMore } from '../components/ReadMore';
 import {
   ZULTYS_MXIE,
   ZULTYS_FORT_WORTH_BG,
@@ -261,8 +260,7 @@ export function ZAC() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Detailed Content Section 4: Advanced Call Handling - SaaS Style */}
+                  {/* Detailed Content Section 4: Advanced Call Handling - SaaS Style */}
         <section className="py-32 bg-charcoal text-white relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-zultys-green/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-zultys-green/20 transition-colors duration-700"></div>
           <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
@@ -409,8 +407,7 @@ export function ZAC() {
           </div>
         </section>
 
-        </ReadMore>
-
+        
         <CTASection />
       </main>
 

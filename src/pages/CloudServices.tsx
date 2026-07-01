@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Hero } from '../components/Hero';
-import { ReadMore } from '../components/ReadMore';
 import {
   ZULTYS_FORT_WORTH_BG,
   SUPPORT_TEAM,
@@ -183,8 +182,7 @@ export function CloudServices() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Detailed Content Section 2: The Advantage - SaaS Style */}
+                  {/* Detailed Content Section 2: The Advantage - SaaS Style */}
         <section className="py-32 bg-gray-50/50 border-y border-gray-100">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center mb-20">
@@ -524,8 +522,7 @@ export function CloudServices() {
           </div>
         </section>
 
-        </ReadMore>
-
+        
         <CTASection />
       </main>
 

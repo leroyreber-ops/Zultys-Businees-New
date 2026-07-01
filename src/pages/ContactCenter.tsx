@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ReadMore } from '../components/ReadMore';
 import {
   ZULTYS_FORT_WORTH_BG,
   SUPPORT_TEAM,
@@ -179,8 +178,7 @@ export function ContactCenter() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Detailed Content Section 2: The Power of Integration */}
+                  {/* Detailed Content Section 2: The Power of Integration */}
         <section className="py-20 bg-slate-50">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center mb-16">
@@ -604,8 +602,7 @@ export function ContactCenter() {
           </div>
         </section>
 
-        </ReadMore>
-
+        
         <CTASection />
       </main>
 

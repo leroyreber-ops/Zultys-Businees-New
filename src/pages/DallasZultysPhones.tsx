@@ -6,7 +6,6 @@ import { ScrollToTop } from '../components/ScrollToTop';
 import { useQuote } from '../context/QuoteContext';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { ReadMore } from '../components/ReadMore';
 import { 
   Phone, 
   Zap, 
@@ -244,8 +243,7 @@ export function DallasZultysPhones() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Technical Deep Dive */}
+                  {/* Technical Deep Dive */}
           <section className="py-24 bg-white">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -414,8 +412,7 @@ export function DallasZultysPhones() {
               </div>
             </div>
           </section>
-        </ReadMore>
-
+        
         {/* Final CTA */}
         <section className="py-24 bg-blue-600 text-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">

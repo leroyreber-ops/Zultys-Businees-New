@@ -193,6 +193,8 @@ export function CaddoMills() {
           </div>
         </section>
 
+        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
+
         {/* Introduction Section - SaaS Style */}
         <section className="py-32 bg-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -239,8 +241,7 @@ export function CaddoMills() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Section 1: Unified Communications - SaaS Style */}
+                  {/* Section 1: Unified Communications - SaaS Style */}
         <section className="py-32 bg-gray-50/50 border-y border-gray-100">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -477,6 +478,7 @@ export function CaddoMills() {
             </div>
           </div>
         </section>
+        
         </ReadMore>
 
         <CTASection />

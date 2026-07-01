@@ -21,7 +21,6 @@ import {
 import { Hero } from '../components/Hero';
 import { HashLink as Link } from '../components/HashLink';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { ReadMore } from '../components/ReadMore';
 import {
   ZULTYS_MXSE,
   ZULTYS_FORT_WORTH_BG,
@@ -176,8 +175,7 @@ export function MXSE() {
           </div>
         </section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Detailed Content Section 2: Big Features, Small Budget */}
+                  {/* Detailed Content Section 2: Big Features, Small Budget */}
         <section className="py-20 bg-slate-50">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center mb-16">
@@ -533,8 +531,7 @@ export function MXSE() {
           </div>
         </section>
 
-        </ReadMore>
-
+        
         <CTASection />
       </main>
 

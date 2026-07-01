@@ -27,7 +27,6 @@ import {
   ZULTYS_MX_MOBILE,
   ZULTYS_FORT_WORTH_BG,
 } from '../constants/images';
-import { ReadMore } from '../components/ReadMore';
 import {
   Phone,
   Cloud,
@@ -587,8 +586,7 @@ export function Home() {
           </div>
         </motion.section>
 
-        <ReadMore initialHeight="max-h-[0px]" className="bg-white">
-          {/* Cloud vs On-Premise Section */}
+                  {/* Cloud vs On-Premise Section */}
           <motion.section 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -752,8 +750,7 @@ export function Home() {
         </motion.section>
 
 
-        </ReadMore>
-
+        
         {/* FAQ Section */}
         <section className="py-24 bg-white">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
