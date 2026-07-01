@@ -80,7 +80,12 @@ export function ReadMoreText({ children, maxLength = 250 }: ReadMoreTextProps) {
   return (
     <div>
       <div className="leading-relaxed whitespace-pre-wrap">
-        {isExpanded ? text : preview + '...'}
+        <span className={isExpanded ? 'hidden' : 'inline'}>
+          {preview}...
+        </span>
+        <span className={isExpanded ? 'inline' : 'sr-only select-none pointer-events-none'}>
+          {text}
+        </span>
       </div>
       <Button
         variant="link"

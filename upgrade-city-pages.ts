@@ -1,4 +1,98 @@
-import { useEffect } from 'react';
+import fs from 'fs';
+import path from 'path';
+
+// Manual conversion map for special city names to maintain proper grammar and casing
+const MANUAL_MAP: Record<string, { name: string; kebab: string }> = {
+  'DallasZultysPhones': { name: 'Dallas', kebab: 'dallas-zultys-phones' },
+  'DalworthingtonGardens': { name: 'Dalworthington Gardens', kebab: 'dalworthington-gardens' },
+  'EdgecliffVillage': { name: 'Edgecliff Village', kebab: 'edgecliff-village' },
+  'WestoverHills': { name: 'Westover Hills', kebab: 'westover-hills' },
+  'SansomPark': { name: 'Sansom Park', kebab: 'sansom-park' },
+  'RichlandHills': { name: 'Richland Hills', kebab: 'richland-hills' },
+  'NorthRichlandHills': { name: 'North Richland Hills', kebab: 'north-richland-hills' },
+  'BlueMound': { name: 'Blue Mound', kebab: 'blue-mound' },
+  'BlueRidge': { name: 'Blue Ridge', kebab: 'blue-ridge' },
+  'BalchSprings': { name: 'Balch Springs', kebab: 'balch-springs' },
+  'CaddoMills': { name: 'Caddo Mills', kebab: 'caddo-mills' },
+  'CedarHill': { name: 'Cedar Hill', kebab: 'cedar-hill' },
+  'Collinsville': { name: 'Collinsville', kebab: 'collinsville' },
+  'DoddCity': { name: 'Dodd City', kebab: 'dodd-city' },
+  'Farmersville': { name: 'Farmersville', kebab: 'farmersville' },
+  'FlowerMound': { name: 'Flower Mound', kebab: 'flower-mound' },
+  'ForestHill': { name: 'Forest Hill', kebab: 'forest-hill' },
+  'GlennHeights': { name: 'Glenn Heights', kebab: 'glenn-heights' },
+  'GrandPrairie': { name: 'Grand Prairie', kebab: 'grand-prairie' },
+  'HoneyGrove': { name: 'Honey Grove', kebab: 'honey-grove' },
+  'HudsonOaks': { name: 'Hudson Oaks', kebab: 'hudson-oaks' },
+  'LakeWorth': { name: 'Lake Worth', kebab: 'lake-worth' },
+  'LittleElm': { name: 'Little Elm', kebab: 'little-elm' },
+  'PilotPoint': { name: 'Pilot Point', kebab: 'pilot-point' },
+  'RedOak': { name: 'Red Oak', kebab: 'red-oak' },
+  'RiverOaks': { name: 'River Oaks', kebab: 'river-oaks' },
+  'RoyseCity': { name: 'Royse City', kebab: 'royse-city' },
+  'TheColony': { name: 'The Colony', kebab: 'the-colony' },
+  'TomBean': { name: 'Tom Bean', kebab: 'tom-bean' },
+  'TrophyClub': { name: 'Trophy Club', kebab: 'trophy-club' },
+  'VanAlstyne': { name: 'Van Alstyne', kebab: 'van-alstyne' },
+  'WestworthVillage': { name: 'Westworth Village', kebab: 'westworth-village' },
+  'WhiteSettlement': { name: 'White Settlement', kebab: 'white-settlement' },
+  'WillowPark': { name: 'Willow Park', kebab: 'willow-park' },
+  'WolfeCity': { name: 'Wolfe City', kebab: 'wolfe-city' },
+  'McKinney': { name: 'McKinney', kebab: 'mckinney' },
+  'DeSoto': { name: 'DeSoto', kebab: 'desoto' }
+};
+
+// Exclusion list for non-city files in src/pages
+const EXCLUSIONS = new Set([
+  'About.tsx', 'Blog.tsx', 'BlogBestChoice.tsx', 'BlogCloudVsOnPremise.tsx',
+  'BlogNetworkOptimization.tsx', 'BlogPost.tsx', 'CaseStudies.tsx',
+  'CertificationsAwards.tsx', 'CityPage.tsx', 'CloudServices.tsx',
+  'Contact.tsx', 'ContactCenter.tsx', 'Education.tsx', 'EducationSolutions.tsx',
+  'Enterprise.tsx', 'FAQPage.tsx', 'FreeAudit.tsx', 'Gateways.tsx',
+  'HIPAACompliance.tsx', 'Healthcare.tsx', 'Home.tsx', 'HospitalitySolutions.tsx',
+  'Hybrid.tsx', 'Installation.tsx', 'LegalFirms.tsx', 'MXSE.tsx',
+  'MXSeries.tsx', 'MXconference.tsx', 'MXmeeting.tsx', 'MXmobile.tsx',
+  'ManufacturingLogistics.tsx', 'MobileZAC.tsx', 'MultiLocation.tsx',
+  'NonProfitSolutions.tsx', 'NotFound.tsx', 'OnPremise.tsx', 'OurTeam.tsx',
+  'Pricing.tsx', 'PrivacyPolicy.tsx', 'Products.tsx', 'ProfessionalServices.tsx',
+  'RealEstate.tsx', 'RealEstateSolutions.tsx', 'RemoteWorkSolutions.tsx',
+  'RetailAutomotive.tsx', 'RetailSolutions.tsx', 'Sitemap.tsx',
+  'SmallBusiness.tsx', 'Solutions.tsx', 'Support.tsx', 'Telephone.tsx',
+  'TermsOfService.tsx', 'Training.tsx', 'UserGuides.tsx', 'VoIPGlossary.tsx',
+  'VoIPSecurity.tsx', 'Z21i.tsx', 'Z22G.tsx', 'Z23GE.tsx', 'ZAC.tsx',
+  'ZIP43G.tsx', 'ZIP45G.tsx', 'ZIP47G.tsx', 'ZIP49G.tsx', 'ZultysBusinessPhoneSystems.tsx',
+  'ZultysCRMIntegration.tsx', 'ZultysMigrationGuide.tsx', 'ZultysVs8x8.tsx',
+  'ZultysVsATT.tsx', 'ZultysVsAvaya.tsx', 'ZultysVsCisco.tsx', 'ZultysVsComcast.tsx',
+  'ZultysVsCompetitors.tsx', 'ZultysVsDialpad.tsx', 'ZultysVsGoTo.tsx',
+  'ZultysVsIntermedia.tsx', 'ZultysVsMitel.tsx', 'ZultysVsNextiva.tsx',
+  'ZultysVsOoma.tsx', 'ZultysVsRingCentral.tsx', 'ZultysVsSpectrum.tsx',
+  'ZultysVsTeams.tsx', 'ZultysVsVonage.tsx', 'ZultysVsZoom.tsx'
+]);
+
+function getCityInfo(filename: string) {
+  const base = filename.replace(/\.(tsx|ts)$/, '');
+  if (MANUAL_MAP[base]) {
+    return MANUAL_MAP[base];
+  }
+
+  // Automatic CamelCase splitting
+  const name = base.replace(/([A-Z])/g, ' $1').trim();
+  const kebab = base.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  return { name, kebab };
+}
+
+function generateUpgradedContent(componentName: string, city: string, kebab: string, existingCanonical: string, lat: string | null, lng: string | null) {
+  const finalCanonical = existingCanonical || `https://dallasfortworthzultys.com/${kebab}-tx-zultys-phone-systems`;
+  
+  // Custom schema coordinates
+  const geoBlock = (lat && lng) ? `
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: '${lat}',
+        longitude: '${lng}',
+      },` : '';
+
+  return `import { useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { CTASection } from '../components/CTASection';
@@ -39,16 +133,16 @@ import {
   OFFICE_COMMUNICATION,
 } from '../constants/images';
 
-export function Prosper() {
+export function ${componentName}() {
   const { openQuote } = useQuote();
 
   useEffect(() => {
     // Dynamic Page Title
-    document.title = 'Prosper Zultys Business Phone Systems | VoIP & IP PBX Solutions';
+    document.title = '${city} Zultys Business Phone Systems | VoIP & IP PBX Solutions';
     
     // Meta Description setup
     const metaDescription = document.querySelector('meta[name="description"]');
-    const description = 'Expert Prosper Zultys business phone systems and VoIP solutions. Authorized Zultys dealer providing unified communications, cloud phone systems, and local support for Prosper businesses.';
+    const description = 'Expert ${city} Zultys business phone systems and VoIP solutions. Authorized Zultys dealer providing unified communications, cloud phone systems, and local support for ${city} businesses.';
     if (metaDescription) {
       metaDescription.setAttribute('content', description);
     } else {
@@ -65,7 +159,7 @@ export function Prosper() {
       metaKeywords.setAttribute('name', 'keywords');
       document.head.appendChild(metaKeywords);
     }
-    metaKeywords.setAttribute('content', 'Prosper Zultys, Zultys business phone systems Prosper, Prosper business VoIP solutions, Prosper unified communications, Zultys cloud phone system Prosper, authorized Zultys dealer Prosper TX');
+    metaKeywords.setAttribute('content', '${city} Zultys, Zultys business phone systems ${city}, ${city} business VoIP solutions, ${city} unified communications, Zultys cloud phone system ${city}, authorized Zultys dealer ${city} TX');
 
     // Canonical URL setup
     let canonical = document.querySelector('link[rel="canonical"]');
@@ -74,28 +168,23 @@ export function Prosper() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/prosper-tx-zultys-phone-systems');
+    canonical.setAttribute('href', '${finalCanonical}');
 
     // JSON-LD Schema
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
-      name: 'DFW Business Communications - Prosper Zultys Support',
-      description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Prosper, Texas.',
-      url: 'https://dallasfortworthzultys.com/prosper-tx-zultys-phone-systems',
+      name: 'DFW Business Communications - ${city} Zultys Support',
+      description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in ${city}, Texas.',
+      url: '${finalCanonical}',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: 'Prosper',
+        addressLocality: '${city}',
         addressRegion: 'TX',
         addressCountry: 'US',
-      },
-      geo: {
-        '@type': 'GeoCoordinates',
-        latitude: '33.2362',
-        longitude: '-96.8011',
-      },
-      areaServed: 'Prosper, TX',
+      },${geoBlock}
+      areaServed: '${city}, TX',
     };
 
     const script = document.createElement('script');
@@ -111,22 +200,22 @@ export function Prosper() {
   const benefits = [
     {
       title: 'Enterprise Support',
-      description: 'Tailored Zultys phone systems for Prosper\'s diverse economy, from local commercial offices to regional industrial centers.',
+      description: 'Tailored Zultys phone systems for ${city}\\'s diverse economy, from local commercial offices to regional industrial centers.',
       icon: MapPin,
     },
     {
       title: 'North Texas Hub',
-      description: 'Rapid on-site support for businesses located in the heart of Prosper\'s commercial and industrial districts.',
+      description: 'Rapid on-site support for businesses located in the heart of ${city}\\'s commercial and industrial districts.',
       icon: Zap,
     },
     {
       title: 'Unified Communications',
-      description: 'Integrate voice, video, and chat into a single platform for your Prosper workforce.',
+      description: 'Integrate voice, video, and chat into a single platform for your ${city} workforce.',
       icon: Users,
     },
     {
       title: 'Cloud Scalability',
-      description: 'Zultys cloud phone systems that scale effortlessly with Prosper\'s business growth.',
+      description: 'Zultys cloud phone systems that scale effortlessly with ${city}\\'s business growth.',
       icon: Cloud,
     },
   ];
@@ -137,11 +226,11 @@ export function Prosper() {
       
       <main className="flex-1">
         <Hero
-          title={<>Prosper Zultys <br /><span className="text-zultys-green">Business Phone Systems.</span></>}
-          subtitle="Empower your Prosper organization with the most reliable Zultys business phone systems in North Texas. As your local authorized Zultys dealer, we provide expert sales, professional installation, and 24/7 support for businesses across Prosper."
+          title={<>${city} Zultys <br /><span className="text-zultys-green">Business Phone Systems.</span></>}
+          subtitle="Empower your ${city} organization with the most reliable Zultys business phone systems in North Texas. As your local authorized Zultys dealer, we provide expert sales, professional installation, and 24/7 support for businesses across ${city}."
           icon={Zap}
-          iconLabel="Authorized Prosper Zultys Partner"
-          buttonText="Get a Free Prosper Quote"
+          iconLabel="Authorized ${city} Zultys Partner"
+          buttonText="Get a Free ${city} Quote"
           onButtonClick={openQuote}
         />
 
@@ -201,24 +290,24 @@ export function Prosper() {
               <div className="grid lg:grid-cols-2 gap-20 items-center">
                 <div>
                   <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-8 leading-tight">
-                    The Preferred <span className="text-zultys-green">Prosper Zultys</span> Partner for Business.
+                    The Preferred <span className="text-zultys-green">${city} Zultys</span> Partner for Business.
                   </h2>
                   <div className="prose prose-lg text-gray-600 prose-strong:text-charcoal max-w-none">
                     <p className="text-xl leading-relaxed mb-8">
-                      Prosper is a vital and growing business community within the larger Dallas-Fort Worth Metroplex. In this competitive North Texas business climate, organizations of all sizes—from growing local startups near key municipal districts to large-scale enterprises with multi-regional presence—require a state-of-the-art communication infrastructure that is stable, secure, and highly scalable. That is where professional <strong>Zultys business phone systems Prosper</strong> solutions from DFW Business Communications deliver a distinct competitive advantage.
+                      ${city} is a vital and growing business community within the larger Dallas-Fort Worth Metroplex. In this competitive North Texas business climate, organizations of all sizes—from growing local startups near key municipal districts to large-scale enterprises with multi-regional presence—require a state-of-the-art communication infrastructure that is stable, secure, and highly scalable. That is where professional <strong>Zultys business phone systems ${city}</strong> solutions from DFW Business Communications deliver a distinct competitive advantage.
                     </p>
                     <p className="leading-relaxed mb-8">
-                      We specialize in providing high-performance <strong>VoIP and unified communications systems</strong> that Prosper organizations rely on to keep their employees, partners, and customers connected. Our customized communication setups are designed to handle the specific operational demands of local businesses, whether you operate a medical facility requiring strict HIPAA compliance, a professional services firm looking to improve client experiences, or a logistics and manufacturing facility needing robust overhead paging and multi-device routing. By partnering with DFW Business Communications, you gain access to factory-certified engineers, expert on-site training, and dedicated 24/7 local support.
+                      We specialize in providing high-performance <strong>VoIP and unified communications systems</strong> that ${city} organizations rely on to keep their employees, partners, and customers connected. Our customized communication setups are designed to handle the specific operational demands of local businesses, whether you operate a medical facility requiring strict HIPAA compliance, a professional services firm looking to improve client experiences, or a logistics and manufacturing facility needing robust overhead paging and multi-device routing. By partnering with DFW Business Communications, you gain access to factory-certified engineers, expert on-site training, and dedicated 24/7 local support.
                     </p>
                     <p className="leading-relaxed mb-8">
-                      Our local presence in the DFW area ensures that we understand the unique challenges and opportunities facing Prosper organizations. We do not just sell hardware; we provide a comprehensive communication strategy that includes professional site surveys, seamless installation, and ongoing 24/7 local support.
+                      Our local presence in the DFW area ensures that we understand the unique challenges and opportunities facing ${city} organizations. We do not just sell hardware; we provide a comprehensive communication strategy that includes professional site surveys, seamless installation, and ongoing 24/7 local support.
                     </p>
                   </div>
 
                   <div className="mt-12 p-8 bg-gray-50 rounded-[2rem] border border-gray-100">
-                    <h3 className="text-2xl font-black text-charcoal mb-4">Why Prosper Businesses Choose Us</h3>
+                    <h3 className="text-2xl font-black text-charcoal mb-4">Why ${city} Businesses Choose Us</h3>
                     <p className="text-gray-600 leading-relaxed text-lg">
-                      Our commitment to Prosper goes beyond technology. We pride ourselves on being a local partner that understands the pulse of the city. We provide on-site training for your staff, ensuring everyone is comfortable with the new system from day one.
+                      Our commitment to ${city} goes beyond technology. We pride ourselves on being a local partner that understands the pulse of the city. We provide on-site training for your staff, ensuring everyone is comfortable with the new system from day one.
                     </p>
                   </div>
                 </div>
@@ -227,7 +316,7 @@ export function Prosper() {
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
                     <ImageWithFallback
                       src={OFFICE_COMMUNICATION}
-                      alt="Prosper Zultys Business Phone Systems and VoIP Experts"
+                      alt="${city} Zultys Business Phone Systems and VoIP Experts"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -250,7 +339,7 @@ export function Prosper() {
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 bg-white p-10">
                     <ImageWithFallback
                       src={ZULTYS_ZAC_MOBILE_COMBO}
-                      alt="Zultys Unified Communications for Prosper Business"
+                      alt="Zultys Unified Communications for ${city} Business"
                       className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -262,17 +351,17 @@ export function Prosper() {
                   </div>
                   <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-8 leading-tight">
                     Unified Communications <br />
-                    <span className="text-zultys-green">for Prosper Enterprises.</span>
+                    <span className="text-zultys-green">for ${city} Enterprises.</span>
                   </h2>
                   <div className="prose prose-lg text-gray-600 prose-strong:text-charcoal max-w-none">
                     <p className="text-xl leading-relaxed mb-8">
-                      Implementing <strong>Prosper unified communications</strong> is essential for modern businesses. Zultys brings voice, video, chat, and presence into a single interface, allowing your Prosper team to collaborate effectively regardless of their physical location.
+                      Implementing <strong>${city} unified communications</strong> is essential for modern businesses. Zultys brings voice, video, chat, and presence into a single interface, allowing your ${city} team to collaborate effectively regardless of their physical location.
                     </p>
                     <p className="leading-relaxed mb-6">
-                      With Zultys ZAC (Zultys Advanced Communicator), your employees have a powerful toolset at their fingertips. They can see the availability of colleagues, initiate a video conference with one click, and manage their calls with ease. This level of integration is particularly valuable for Prosper businesses with multiple locations or a distributed workforce.
+                      With Zultys ZAC (Zultys Advanced Communicator), your employees have a powerful toolset at their fingertips. They can see the availability of colleagues, initiate a video conference with one click, and manage their calls with ease. This level of integration is particularly valuable for ${city} businesses with multiple locations or a distributed workforce.
                     </p>
                     <p className="leading-relaxed">
-                      Furthermore, Zultys unified communications includes robust mobile integration. Your Prosper team can take their office extension with them on their smartphones, ensuring they stay connected and productive while traveling or working from home.
+                      Furthermore, Zultys unified communications includes robust mobile integration. Your ${city} team can take their office extension with them on their smartphones, ensuring they stay connected and productive while traveling or working from home.
                     </p>
                   </div>
                 </div>
@@ -290,17 +379,17 @@ export function Prosper() {
                   </div>
                   <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-8 leading-tight">
                     Zultys Cloud <br />
-                    <span className="text-zultys-gold">Solutions in Prosper.</span>
+                    <span className="text-zultys-gold">Solutions in ${city}.</span>
                   </h2>
                   <div className="prose prose-lg text-gray-600 prose-strong:text-charcoal max-w-none">
                     <p className="text-xl leading-relaxed mb-8">
-                      Choosing between a <strong>Zultys cloud phone system Prosper</strong> and an on-premise solution is a strategic decision. Zultys Cloud offers the ultimate in flexibility and scalability, moving your communication infrastructure to our secure, redundant data centers.
+                      Choosing between a <strong>Zultys cloud phone system ${city}</strong> and an on-premise solution is a strategic decision. Zultys Cloud offers the ultimate in flexibility and scalability, moving your communication infrastructure to our secure, redundant data centers.
                     </p>
                     <p className="leading-relaxed mb-6">
-                      For Prosper businesses that are rapidly growing or have a distributed workforce, the cloud is often the preferred choice. It eliminates the need for significant upfront hardware investment and provides a predictable monthly cost. Scalability is seamless—adding new users or locations is as simple as a few clicks.
+                      For ${city} businesses that are rapidly growing or have a distributed workforce, the cloud is often the preferred choice. It eliminates the need for significant upfront hardware investment and provides a predictable monthly cost. Scalability is seamless—adding new users or locations is as simple as a few clicks.
                     </p>
                     <p className="leading-relaxed">
-                      Hyper-growth companies in Prosper often find that the cloud model allows them to focus on their core business while we handle the complexities of their communication platform.
+                      Hyper-growth companies in ${city} often find that the cloud model allows them to focus on their core business while we handle the complexities of their communication platform.
                     </p>
                   </div>
                 </div>
@@ -309,7 +398,7 @@ export function Prosper() {
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
                     <ImageWithFallback
                       src={ZULTYS_CLOUD_SERVICES}
-                      alt="Zultys Cloud Phone Systems Prosper"
+                      alt="Zultys Cloud Phone Systems ${city}"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -328,7 +417,7 @@ export function Prosper() {
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
                       <ImageWithFallback
                         src={ZULTYS_MXSE}
-                        alt="Zultys MX-SE for Prosper Small Business"
+                        alt="Zultys MX-SE for ${city} Small Business"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -336,7 +425,7 @@ export function Prosper() {
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
                       <ImageWithFallback
                         src={ZULTYS_ZIP_45G_EASE}
-                        alt="Zultys ZIP 45G for Prosper Teams"
+                        alt="Zultys ZIP 45G for ${city} Teams"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -353,13 +442,13 @@ export function Prosper() {
                   </h2>
                   <div className="prose prose-lg prose-invert text-gray-100 max-w-none">
                     <p className="text-xl leading-relaxed mb-8">
-                      At the core of our <strong>Prosper Zultys</strong> solutions is the Zultys MX series. This enterprise-grade platform is designed for 99.999% reliability, ensuring your business communications are always up and running.
+                      At the core of our <strong>${city} Zultys</strong> solutions is the Zultys MX series. This enterprise-grade platform is designed for 99.999% reliability, ensuring your business communications are always up and running.
                     </p>
                     <p className="leading-relaxed mb-6">
-                      The MX series is a truly unified platform, meaning all features—from voice and video to contact center and mobile integration—run on a single software stream. This eliminates the complexity and instability often found in "bolted-on" solutions. For a Prosper business, this means a more stable system and a lower total cost of ownership.
+                      The MX series is a truly unified platform, meaning all features—from voice and video to contact center and mobile integration—run on a single software stream. This eliminates the complexity and instability often found in "bolted-on" solutions. For a ${city} business, this means a more stable system and a lower total cost of ownership.
                     </p>
                     <p className="leading-relaxed">
-                      Whether you choose the MX-SE for a growing office or the MX250 for a large enterprise, you get the same powerful feature set. This allows your Prosper organization to scale seamlessly as you grow, without having to learn a new system or replace your existing infrastructure.
+                      Whether you choose the MX-SE for a growing office or the MX250 for a large enterprise, you get the same powerful feature set. This allows your ${city} organization to scale seamlessly as you grow, without having to learn a new system or replace your existing infrastructure.
                     </p>
                   </div>
                 </div>
@@ -372,10 +461,10 @@ export function Prosper() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="text-center mb-20">
                 <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
-                  Empowering Your <span className="text-zultys-green">Prosper Workforce.</span>
+                  Empowering Your <span className="text-zultys-green">${city} Workforce.</span>
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Zultys provides a suite of applications that turn your phone system into a powerful productivity engine for your Prosper team.
+                  Zultys provides a suite of applications that turn your phone system into a powerful productivity engine for your ${city} team.
                 </p>
               </div>
               <div className="grid md:grid-cols-3 gap-10">
@@ -387,12 +476,12 @@ export function Prosper() {
                   },
                   {
                     title: 'MXmobile',
-                    description: 'Take your Prosper office extension anywhere. Full UC functionality on your smartphone with seamless handoff.',
+                    description: 'Take your ${city} office extension anywhere. Full UC functionality on your smartphone with seamless handoff.',
                     image: ZULTYS_MX_MOBILE,
                   },
                   {
                     title: 'MXmeeting',
-                    description: 'Professional web conferencing for up to 500 participants. Perfect for Prosper businesses with remote clients.',
+                    description: 'Professional web conferencing for up to 500 participants. Perfect for ${city} businesses with remote clients.',
                     image: ZULTYS_MXMEETING,
                   },
                 ].map((tool, index) => (
@@ -417,28 +506,28 @@ export function Prosper() {
                 <div>
                   <h2 className="text-4xl font-black text-charcoal mb-8 leading-tight">
                     Expert Implementation & <br />
-                    <span className="text-zultys-green">Support in Prosper.</span>
+                    <span className="text-zultys-green">Support in ${city}.</span>
                   </h2>
                   <div className="prose prose-lg text-gray-600 prose-strong:text-charcoal max-w-none">
                     <p className="leading-relaxed mb-6">
-                      A successful <strong>Prosper Zultys</strong> rollout requires more than just good hardware. It requires a partner who understands your network, your workflow, and your business goals. DFW Business Communications provides a white-glove implementation process that ensures a smooth transition with zero downtime.
+                      A successful <strong>${city} Zultys</strong> rollout requires more than just good hardware. It requires a partner who understands your network, your workflow, and your business goals. DFW Business Communications provides a white-glove implementation process that ensures a smooth transition with zero downtime.
                     </p>
                     <p className="leading-relaxed mb-6">
-                      We start with a comprehensive site survey of your Prosper office to identify any potential network issues. We then pre-configure your Zultys system to your exact specifications, including call routing, auto-attendants, and user profiles. Our professional installation team then handles the physical setup and provides hands-on training for your entire staff.
+                      We start with a comprehensive site survey of your ${city} office to identify any potential network issues. We then pre-configure your Zultys system to your exact specifications, including call routing, auto-attendants, and user profiles. Our professional installation team then handles the physical setup and provides hands-on training for your entire staff.
                     </p>
                     <p className="leading-relaxed">
-                      Once your system is live, our support doesn\'t stop. We provide 24/7 local monitoring and support for all our Prosper clients. If you ever have a question or an issue, you can speak directly to a local expert who can be on-site in Prosper quickly if needed. That\'s the DFW Business Communications difference.
+                      Once your system is live, our support doesn\\'t stop. We provide 24/7 local monitoring and support for all our ${city} clients. If you ever have a question or an issue, you can speak directly to a local expert who can be on-site in ${city} quickly if needed. That\\'s the DFW Business Communications difference.
                     </p>
                   </div>
                 </div>
                 <div className="bg-white p-12 rounded-[3rem] border border-gray-100 shadow-2xl">
-                  <h3 className="text-2xl font-black text-charcoal mb-8">Prosper Support Features</h3>
+                  <h3 className="text-2xl font-black text-charcoal mb-8">${city} Support Features</h3>
                   <div className="space-y-8">
                     {[
-                      { title: 'On-Site Training', desc: 'Personalized training for your Prosper team at your location.' },
-                      { title: '24/7 Monitoring', desc: 'Proactive monitoring of your Prosper Zultys system to ensure maximum uptime.' },
-                      { title: 'Local Technicians', desc: 'Expert DFW-based technicians who can be on-site in Prosper quickly.' },
-                      { title: 'Number Porting', desc: 'We handle the entire process of moving your existing Prosper numbers.' }
+                      { title: 'On-Site Training', desc: 'Personalized training for your ${city} team at your location.' },
+                      { title: '24/7 Monitoring', desc: 'Proactive monitoring of your ${city} Zultys system to ensure maximum uptime.' },
+                      { title: 'Local Technicians', desc: 'Expert DFW-based technicians who can be on-site in ${city} quickly.' },
+                      { title: 'Number Porting', desc: 'We handle the entire process of moving your existing ${city} numbers.' }
                     ].map((item, i) => (
                       <div key={i} className="flex gap-6">
                         <div className="bg-zultys-green/10 p-2 rounded-2xl h-fit">
@@ -464,7 +553,7 @@ export function Prosper() {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-zultys-green/10 to-transparent rounded-full blur-2xl"></div>
                   <h3 className="text-2xl font-black text-charcoal mb-6">Compliance & SLA Standard</h3>
                   <p className="text-gray-600 leading-relaxed mb-6">
-                    Our high-availability service level agreements are backed by local North Texas specialists, guaranteeing that your Prosper operations never skip a beat.
+                    Our high-availability service level agreements are backed by local North Texas specialists, guaranteeing that your ${city} operations never skip a beat.
                   </p>
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 font-bold text-slate-800">
@@ -490,7 +579,7 @@ export function Prosper() {
                     North Texas businesses face increasingly strict compliance mandates. From protecting personal health information (PHI) under HIPAA to adhering to corporate financial reporting guidelines, your telephone platform must be secure. DFW Business Communications installs hardened Zultys VoIP systems with fully encrypted call records, secure transmission channels, and high-security remote phone provisioning.
                   </p>
                   <p className="text-lg text-slate-600 leading-relaxed">
-                    Furthermore, every single communication package is backed by our strict regional uptime guarantee. We operate persistent monitoring servers that scan for device dropouts, SIP registration losses, and carrier route delays. If an anomaly is detected on your local system in Prosper, our team addresses it instantly, avoiding any visible disruption to your operations.
+                    Furthermore, every single communication package is backed by our strict regional uptime guarantee. We operate persistent monitoring servers that scan for device dropouts, SIP registration losses, and carrier route delays. If an anomaly is detected on your local system in ${city}, our team addresses it instantly, avoiding any visible disruption to your operations.
                   </p>
                 </div>
               </div>
@@ -507,10 +596,10 @@ export function Prosper() {
                     <span className="text-zultys-green">Advanced Call Center Analytics.</span>
                   </h2>
                   <p className="text-lg text-slate-600 leading-relaxed mb-6">
-                    Elevate your business intelligence by connecting your Prosper telephone system directly with your core database or CRM software. Zultys offers out-of-the-box integration with market-leading software suites like Salesforce, Microsoft Dynamics, HubSpot, and Zoho.
+                    Elevate your business intelligence by connecting your ${city} telephone system directly with your core database or CRM software. Zultys offers out-of-the-box integration with market-leading software suites like Salesforce, Microsoft Dynamics, HubSpot, and Zoho.
                   </p>
                   <p className="text-lg text-slate-600 leading-relaxed">
-                    When an inbound call arrives, the agent\'s screen automatically displays the customer\'s history, past tickets, and open proposals. This significantly reduces caller wait times, eliminates administrative routing steps, and drives higher conversion rates. Our reporting tools provide managers with real-time dashboards to track call metrics, staff utilization, and service speeds.
+                    When an inbound call arrives, the agent\\'s screen automatically displays the customer\\'s history, past tickets, and open proposals. This significantly reduces caller wait times, eliminates administrative routing steps, and drives higher conversion rates. Our reporting tools provide managers with real-time dashboards to track call metrics, staff utilization, and service speeds.
                   </p>
                 </div>
                 <div className="bg-white p-12 rounded-[3rem] border border-gray-100 shadow-2xl relative group">
@@ -539,26 +628,26 @@ export function Prosper() {
                   Frequently Asked <span className="text-zultys-green">Questions.</span>
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Answers to the most common questions regarding Zultys VoIP systems and support in Prosper.
+                  Answers to the most common questions regarding Zultys VoIP systems and support in ${city}.
                 </p>
               </div>
               <div className="max-w-4xl mx-auto grid gap-8">
                 {[
                   {
-                    q: 'Can we keep our existing Prosper phone numbers when migrating to Zultys?',
+                    q: 'Can we keep our existing ${city} phone numbers when migrating to Zultys?',
                     a: 'Absolutely! We manage the entire number porting process, coordinating with your current carrier to ensure a seamless transition of all your direct dials, main lines, and toll-free numbers with zero downtime on migration day.'
                   },
                   {
                     q: 'What is the difference between Zultys Cloud and Zultys On-Premise?',
-                    a: 'Zultys Cloud is hosted in our secure, redundant data centers, offering low upfront costs, automatic software updates, and simple scalability. Zultys On-Premise utilizes a dedicated hardware appliance at your Prosper office, providing maximum control and local network survivability independent of internet connectivity.'
+                    a: 'Zultys Cloud is hosted in our secure, redundant data centers, offering low upfront costs, automatic software updates, and simple scalability. Zultys On-Premise utilizes a dedicated hardware appliance at your ${city} office, providing maximum control and local network survivability independent of internet connectivity.'
                   },
                   {
-                    q: 'Does Zultys support remote and mobile workers in Prosper?',
+                    q: 'Does Zultys support remote and mobile workers in ${city}?',
                     a: 'Yes, remote work is a core feature of the Zultys platform. Through the MXmobile app and secure softphone technology, employees can access their full office extensions, chat, and video tools from home or while traveling, with no complex VPN configuration required.'
                   },
                   {
                     q: 'How does DFW Business Communications provide local support?',
-                    a: 'Unlike nationwide providers who rely on remote call centers, we are based locally in the DFW Metroplex. We provide on-site installation, face-to-face staff training, and rapid on-site dispatch of certified technicians if physical support is ever needed at your Prosper facility.'
+                    a: 'Unlike nationwide providers who rely on remote call centers, we are based locally in the DFW Metroplex. We provide on-site installation, face-to-face staff training, and rapid on-site dispatch of certified technicians if physical support is ever needed at your ${city} facility.'
                   }
                 ].map((faq, idx) => (
                   <div key={idx} className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
@@ -574,19 +663,19 @@ export function Prosper() {
           <section className="py-32 bg-white">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="max-w-4xl mx-auto text-center">
-                <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-10">Ready to Upgrade Your <span className="text-zultys-green">Prosper Communications?</span></h2>
+                <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-10">Ready to Upgrade Your <span className="text-zultys-green">${city} Communications?</span></h2>
                 <div className="prose prose-lg text-gray-600 mx-auto max-w-none prose-strong:text-charcoal">
                   <p className="text-xl leading-relaxed mb-8">
-                    Don\'t let an outdated phone system hold your Prosper business back. Experience the power, reliability, and flexibility of a modern <strong>Prosper Zultys business phone system</strong> solution from DFW Business Communications.
+                    Don\\'t let an outdated phone system hold your ${city} business back. Experience the power, reliability, and flexibility of a modern <strong>${city} Zultys business phone system</strong> solution from DFW Business Communications.
                   </p>
                   <p className="text-xl leading-relaxed mb-12">
-                    Whether you\'re looking for a cloud-based system, an on-premise appliance, or a hybrid solution, we have the expertise to design and implement the perfect platform for your needs. Contact us today to schedule your free Prosper site survey and discover how we can help your organization communicate more effectively.
+                    Whether you\\'re looking for a cloud-based system, an on-premise appliance, or a hybrid solution, we have the expertise to design and implement the perfect platform for your needs. Contact us today to schedule your free ${city} site survey and discover how we can help your organization communicate more effectively.
                   </p>
                   <div className="bg-gray-50 p-12 rounded-[2.5rem] border border-gray-100 shadow-xl">
                     <p className="font-black text-charcoal text-3xl mb-4">
                       Call Leroy today at <span className="text-zultys-green">817-231-2962</span>
                     </p>
-                    <p className="text-xl text-gray-500 font-bold uppercase tracking-widest">For a free Prosper Zultys consultation.</p>
+                    <p className="text-xl text-gray-500 font-bold uppercase tracking-widest">For a free ${city} Zultys consultation.</p>
                   </div>
                 </div>
               </div>
@@ -603,3 +692,50 @@ export function Prosper() {
     </div>
   );
 }
+`;
+}
+
+function processPages() {
+  const pagesDir = path.join(process.cwd(), 'src', 'pages');
+  if (!fs.existsSync(pagesDir)) {
+    console.error('Pages directory not found!');
+    return;
+  }
+
+  const files = fs.readdirSync(pagesDir);
+  let updatedCount = 0;
+
+  for (const file of files) {
+    if (!file.endsWith('.tsx')) continue;
+    if (EXCLUSIONS.has(file)) continue;
+
+    const filePath = path.join(pagesDir, file);
+    const content = fs.readFileSync(filePath, 'utf8');
+
+    // Extract component name from filename
+    const componentName = file.replace(/\.tsx$/, '');
+
+    // Get city metadata
+    const { name: city, kebab } = getCityInfo(file);
+
+    // Extract existing canonical URL if any
+    const canonicalMatch = content.match(/canonical\.setAttribute\('href',\s*['"](.*?)['"]\)/);
+    const existingCanonical = canonicalMatch ? canonicalMatch[1] : '';
+
+    // Extract geo-coordinates if any
+    const latMatch = content.match(/latitude:\s*['"]?(-?\d+\.\d+)['"]?/);
+    const lngMatch = content.match(/longitude:\s*['"]?(-?\d+\.\d+)['"]?/);
+    const lat = latMatch ? latMatch[1] : null;
+    const lng = lngMatch ? lngMatch[1] : null;
+
+    // Generate upgraded code
+    const upgradedCode = generateUpgradedContent(componentName, city, kebab, existingCanonical, lat, lng);
+
+    fs.writeFileSync(filePath, upgradedCode, 'utf8');
+    updatedCount++;
+  }
+
+  console.log(`Successfully upgraded ${updatedCount} city pages to the highly-optimized 1500+ word layout!`);
+}
+
+processPages();

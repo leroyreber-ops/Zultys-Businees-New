@@ -14,13 +14,26 @@ export function ReadMore({ children, previewContent, className = "", initialHeig
 
   return (
     <div className={`relative ${className}`}>
-      <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[5000px]' : initialHeight}`}>
-        {previewContent && !isExpanded ? previewContent : children}
+      <div className="relative">
+        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[5000px]' : initialHeight}`}>
+          {previewContent ? (
+            <>
+              <div className={isExpanded ? 'sr-only select-none pointer-events-none' : 'block'}>
+                {previewContent}
+              </div>
+              <div className={isExpanded ? 'block' : 'sr-only select-none pointer-events-none'}>
+                {children}
+              </div>
+            </>
+          ) : (
+            children
+          )}
+        </div>
+        
+        {!isExpanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none z-10" />
+        )}
       </div>
-      
-      {!isExpanded && (
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-      )}
       
       <div className="mt-4 flex justify-center">
         <Button

@@ -232,7 +232,6 @@ import { QuoteProvider } from './context/QuoteContext';
 import { QuotePopupWrapper } from './components/QuotePopupWrapper';
 import { FloatingTextCTA } from './components/FloatingTextCTA';
 import { LocalBusinessSchema } from './components/LocalBusinessSchema';
-import { PerformanceMonitor } from './components/PerformanceMonitor';
 
 // Advanced Canonical Normalization Lookup
 const canonicalMap: Record<string, string> = {
@@ -719,7 +718,6 @@ export default function App() {
       <Toaster position="top-right" richColors />
       <QuotePopupWrapper />
       <FloatingTextCTA />
-      <PerformanceMonitor />
     </QuoteProvider>
   );
 }
