@@ -4,6 +4,7 @@ import { Phone, Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { QuotePopup } from './QuotePopup';
 import { useQuote } from '../context/QuoteContext';
+import { Breadcrumbs } from './Breadcrumbs';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -123,6 +124,7 @@ export function Header() {
   ];
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full border-b border-charcoal/10 bg-charcoal text-white shadow-lg">
       {/* Top Bar with Contact Info */}
       <div className="bg-slate-950 text-white border-b border-white/5 py-1.5">
@@ -447,5 +449,7 @@ export function Header() {
         </div>
       )}
     </header>
+    <Breadcrumbs />
+    </>
   );
 }

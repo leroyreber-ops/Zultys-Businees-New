@@ -144,19 +144,51 @@ export function Celina() {
           onButtonClick={openQuote}
         />
 
-        {/* Benefits Grid - SaaS Style */}
-        <section className="py-24 bg-gray-50/50 border-y border-gray-100">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="group">
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 group-hover:border-zultys-green transition-colors duration-500 w-fit">
-                    <benefit.icon className="h-8 w-8 text-zultys-green" />
+                {/* Benefits Grid - SaaS Style */}
+        <section className="relative py-20 bg-slate-950 border-y border-white/10 overflow-hidden">
+          {/* Subtle tech dot grid overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff01_1px,transparent_1px),linear-gradient(to_bottom,#ffffff01_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,168,45,0.08),transparent_70%)]"></div>
+          
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+              {benefits.map((benefit, index) => {
+                const gradients = [
+                  'from-emerald-400 to-green-600',
+                  'from-sky-400 to-blue-600',
+                  'from-amber-400 to-zultys-gold',
+                  'from-rose-400 to-red-600'
+                ];
+                const glows = [
+                  'shadow-[0_0_20px_rgba(16,185,129,0.35)] group-hover:shadow-[0_0_35px_rgba(16,185,129,0.65)]',
+                  'shadow-[0_0_20px_rgba(56,189,248,0.35)] group-hover:shadow-[0_0_35px_rgba(56,189,248,0.65)]',
+                  'shadow-[0_0_20px_rgba(212,160,23,0.35)] group-hover:shadow-[0_0_35px_rgba(212,160,23,0.65)]',
+                  'shadow-[0_0_20px_rgba(239,68,68,0.35)] group-hover:shadow-[0_0_35px_rgba(239,68,68,0.65)]'
+                ];
+                const textColors = [
+                  'group-hover:text-emerald-400',
+                  'group-hover:text-sky-400',
+                  'group-hover:text-zultys-gold',
+                  'group-hover:text-rose-400'
+                ];
+                
+                return (
+                  <div key={index} className="flex flex-col items-center text-center group cursor-pointer">
+                    <div className="relative mb-5">
+                      <div className={"w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br " + gradients[index % 4] + " " + glows[index % 4] + " text-white flex items-center justify-center relative z-10 border border-white/20 transition-all duration-300 ease-in-out transform group-hover:scale-110 group-hover:rotate-6"}>
+                        <benefit.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" strokeWidth={2} />
+                      </div>
+                      <div className="absolute inset-0 rounded-full bg-white/5 scale-110 -z-0 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none"></div>
+                    </div>
+                    <h3 className={"text-sm sm:text-base font-extrabold text-slate-100 mb-2 transition-colors duration-300 " + textColors[index % 4]}>
+                      {benefit.title}
+                    </h3>
+                    <p className="text-slate-400 leading-relaxed text-xs sm:text-sm max-w-[240px]">
+                      {benefit.description}
+                    </p>
                   </div>
-                  <h3 className="text-xl font-black text-charcoal mb-3">{benefit.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
