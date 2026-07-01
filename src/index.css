@@ -95,25 +95,25 @@
 }
 
 :root {
-    --background: #FAF6EE;
-    --foreground: #1a1a1a;
+    --background: #FFFFFF;
+    --foreground: #0f172a;
     --card: #ffffff;
-    --card-foreground: #1a1a1a;
+    --card-foreground: #0f172a;
     --popover: #ffffff;
-    --popover-foreground: #1a1a1a;
+    --popover-foreground: #0f172a;
     --primary: #00A82D;
     --primary-foreground: #ffffff;
     --secondary: #D4A017;
     --secondary-foreground: #ffffff;
-    --muted: #f4f4f5;
-    --muted-foreground: #71717a;
-    --accent: #f4f4f5;
-    --accent-foreground: #1a1a1a;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
     --destructive: #ef4444;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
     --ring: #00A82D;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 }
 
 .dark {
@@ -156,29 +156,28 @@
     }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
-    background-color: #FAF6EE;
+    background-color: #FFFFFF;
     background-image: 
-      radial-gradient(rgba(0, 168, 45, 0.045) 1.5px, transparent 1.5px), 
-      radial-gradient(rgba(212, 160, 23, 0.035) 1px, transparent 1px);
-    background-size: 48px 48px;
-    background-position: 0 0, 24px 24px;
+      radial-gradient(rgba(148, 163, 184, 0.05) 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
+    background-position: 0 0;
     }
   html {
     @apply font-sans overflow-x-hidden;
-    background-color: #FAF6EE;
+    background-color: #FFFFFF;
     }
 }
 
 /* 
  * Premium Design Palette Overrides
- * Alternates page sections between a clean champagne-ivory base (#FAF9F6) 
- * and a soft, modern blue-gray tone (#F3F6FA) for exceptional rhythm and visual structure.
+ * Alternates page sections between a clean brilliant white base (#FFFFFF) 
+ * and a soft, modern blue-gray tone (#F8FAFC) for exceptional rhythm and visual structure.
  * Standard cards, containers, and dialogs are styled with a pure white background (#FFFFFF),
  * delicate micro-borders, and soft shadow elevations to look elegant, dynamic, and clean.
  */
 .bg-white {
-  background-color: #FAF9F6 !important;
-  background-image: radial-gradient(#00a82d02 1px, transparent 1px);
+  background-color: #FFFFFF !important;
+  background-image: radial-gradient(rgba(148, 163, 184, 0.02) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -189,11 +188,11 @@
 .bg-neutral-50,
 .bg-gray-50\/50,
 .bg-slate-50\/50 {
-  background-color: #F3F6FA !important;
+  background-color: #F8FAFC !important;
   background-image: radial-gradient(#1e293b01 1px, transparent 1px);
   background-size: 20px 20px;
-  border-top: 1px solid rgba(226, 232, 240, 0.6) !important;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
 }
 
 /* Keep interactive blocks, cards, and dialogue panels pure white with elevated bento-style design */

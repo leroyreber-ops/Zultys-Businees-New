@@ -6,6 +6,18 @@ import { Home, Phone, ArrowLeft } from 'lucide-react';
 import { HashLink as Link } from '../components/HashLink';
 
 export function NotFound() {
+  React.useEffect(() => {
+    document.title = 'Page Not Found | Zultys DFW';
+    const meta = document.querySelector('meta[name="robots"]');
+    if (meta) {
+      meta.setAttribute('content', 'noindex, nofollow');
+    }
+    const gbot = document.querySelector('meta[name="googlebot"]');
+    if (gbot) {
+      gbot.setAttribute('content', 'noindex, nofollow');
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />

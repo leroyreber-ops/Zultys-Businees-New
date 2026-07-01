@@ -325,12 +325,83 @@ async function startServer() {
       "/blog/how-to-optimize-your-office-network-for-voip-performance"
     ];
 
+    const lastmod = new Date().toISOString().split("T")[0];
+
+    const getPriority = (p: string): string => {
+      if (p === "/") return "1.0";
+      
+      const highPriority = [
+        "/products", "/solutions", "/about", "/contact", "/zultys-pricing", "/free-voip-site-audit", "/case-studies"
+      ];
+      if (highPriority.includes(p)) return "0.9";
+      
+      const seoHubs = [
+        "/zultys-business-phone-systems", "/dallas-zultys-phones", "/fort-worth-zultys-systems",
+        "/fort-worth-zultys-business-phone-systems", "/fort-worth-zultys-voip-phone-system", 
+        "/fort-worth-zultys-cloud-phone-system"
+      ];
+      if (seoHubs.includes(p)) return "0.85";
+      
+      const majorCitiesAndProducts = [
+        "/dallas", "/fort-worth", "/arlington-ip-pbx", "/plano-zultys-dealer", "/irving-business-phone-systems",
+        "/frisco-voip-solutions", "/grand-prairie-zultys", "/southlake-ip-phones", "/grapevine-business-voip",
+        "/carrollton-zultys", "/richardson-phone-systems", "/hurst-ip-pbx", "/bedford-zultys-solutions",
+        "/euless-business-phones", "/north-richland-hills-zultys", "/flower-mound-business-phones",
+        "/colleyville-voip", "/keller-zultys-dealer", "/saginaw-business-communications", "/haltom-city-zultys",
+        "/watauga-voip-solutions", "/rowlett-tx-zultys-dealer", "/mansfield-tx-zultys-phone-systems",
+        "/denton-business-phone-systems", "/lewisville-voip-solutions", "/allen-tx-zultys-voip",
+        "/fort-worth-zultys-mx-series", "/fort-worth-zultys-mx-se", "/fort-worth-zultys-zip-49g-phone",
+        "/fort-worth-zultys-zip-47g-phone", "/fort-worth-zultys-zip-45g-phone", "/fort-worth-zultys-zip-43g-phone",
+        "/fort-worth-zultys-z-23ge-phone", "/fort-worth-zultys-z-22g-phone", "/fort-worth-zultys-z-21i-phone",
+        "/fort-worth-zultys-zac", "/fort-worth-zultys-mxmobile", "/fort-worth-zultys-mxconference",
+        "/fort-worth-zultys-cloud-services"
+      ];
+      if (majorCitiesAndProducts.includes(p)) return "0.8";
+      
+      const industrySolutions = [
+        "/fort-worth-zultys-healthcare", "/fort-worth-zultys-professional-services", "/fort-worth-zultys-real-estate",
+        "/fort-worth-zultys-education", "/fort-worth-zultys-retail-automotive", "/fort-worth-zultys-enterprise",
+        "/fort-worth-zultys-multi-location", "/zultys-for-legal-firms", "/zultys-for-financial-services",
+        "/zultys-for-manufacturing-logistics", "/zultys-for-hospitality", "/zultys-for-non-profits",
+        "/zultys-for-education", "/zultys-for-real-estate", "/zultys-for-retail"
+      ];
+      if (industrySolutions.includes(p)) return "0.75";
+      
+      if (p.startsWith("/zultys-vs-")) return "0.7";
+      if (p.startsWith("/blog/")) return "0.55";
+      if (p === "/blog") return "0.6";
+      
+      const utilities = [
+        "/privacy", "/terms", "/zultys-faq", "/voip-glossary", "/our-team", "/certifications-awards",
+        "/zultys-user-guides", "/zultys-migration-guide-dfw", "/zultys-crm-integration-guide",
+        "/remote-work-solutions", "/voip-security-encryption"
+      ];
+      if (utilities.includes(p)) return "0.5";
+      
+      return "0.6";
+    };
+
+    const getChangefreq = (p: string): string => {
+      if (p === "/" || p === "/blog") return "daily";
+      if (p.startsWith("/blog/")) return "weekly";
+      
+      const highFreq = [
+        "/products", "/solutions", "/about", "/contact", "/zultys-pricing", "/free-voip-site-audit", "/case-studies",
+        "/zultys-business-phone-systems", "/dallas-zultys-phones", "/fort-worth-zultys-systems"
+      ];
+      if (highFreq.includes(p)) return "weekly";
+      
+      return "monthly";
+    };
+
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${paths.map(p => `  <url>
     <loc>https://dallasfortworthzultys.com${p}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>${p === "/" ? "1.0" : p.startsWith("/blog/") ? "0.7" : p.includes("-tx-zultys-") || p.includes("-business-") || p.includes("-voip") ? "0.8" : "0.6"}</priority>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${getChangefreq(p)}</changefreq>
+    <priority>${getPriority(p)}</priority>
   </url>`).join("\n")}
 </urlset>`;
 

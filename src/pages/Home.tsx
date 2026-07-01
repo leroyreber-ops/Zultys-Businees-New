@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { CTASection } from '../components/CTASection';
@@ -250,8 +251,8 @@ export function Home() {
       <Header />
       
       <main className="flex-1">
-        {/* Hero Section - Inspired by Reference */}
-        <section className="relative min-h-[95vh] flex flex-col justify-center bg-slate-950 overflow-hidden">
+        {/* Hero Section - Compact & Unified Layout */}
+        <section className="relative bg-slate-950 overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-20">
           {/* Background Image with vivid, colorful professional gradients & grid */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <ImageWithFallback
@@ -267,182 +268,218 @@ export function Home() {
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]"></div>
           </div>
 
-          {/* Connected Cloud Telecommunications Interactive Artwork Column */}
-          <div className="absolute right-12 top-1/2 -translate-y-[45%] w-[45%] hidden lg:flex items-center justify-center z-10">
-            {/* Premium Glassmorphic Telecom Network Card */}
-            <div className="relative w-full max-w-lg p-8 rounded-[2.5rem] bg-slate-900/85 backdrop-blur-xl border border-white/15 shadow-[0_50px_100px_-20px_rgba(0,168,45,0.3)] overflow-hidden">
-              {/* Neon Glow Effects */}
-              <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-zultys-green/20 blur-[80px]"></div>
-              <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-zultys-gold/20 blur-[80px]"></div>
-              
-              {/* Tech grid overlay */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
-
-              <div className="relative space-y-8">
-                {/* Title & Pulse Indicator */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zultys-green opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-zultys-green"></span>
-                    </div>
-                    <span className="text-xs font-black uppercase tracking-widest text-slate-300">Zultys Cloud Core Active</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-zultys-gold bg-zultys-gold/10 px-2.5 py-1 rounded-full border border-zultys-gold/20">DFW Cluster</span>
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-10 w-full">
+            {/* Main Row: Left content column and Right interactive artwork column */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              <div className="lg:col-span-7">
+                {/* Authorized Partner Badge */}
+                <Link to="/about" className="inline-flex items-center gap-2 bg-zultys-green/20 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-zultys-green/30 hover:bg-zultys-green/30 transition-all group">
+                  <Award className="h-5 w-5 text-zultys-green group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-bold text-white uppercase tracking-widest">Authorized Zultys Partner DFW</span>
+                </Link>
+                
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.15] text-white tracking-tight drop-shadow-2xl">
+                  Zultys Business Phone Systems in Dallas–Fort Worth
+                </h1>
+                
+                <p className="text-lg md:text-xl lg:text-2xl mb-8 text-slate-200/95 leading-relaxed max-w-xl font-medium">
+                  Enterprise‑grade VoIP, cloud calling, and unified communications built for North Texas organizations.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+                  <Button
+                    size="lg"
+                    onClick={openQuote}
+                    className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 text-xl px-10 py-7 shadow-[0_20px_50px_rgba(212,160,23,0.3)] transition-all font-black uppercase tracking-wider rounded-xl border-none hover:scale-[1.03] active:scale-95 animate-[pulse_3s_ease-in-out_infinite]"
+                  >
+                    Request a Free Quote
+                  </Button>
+                  <a 
+                    href="tel:817-231-2962" 
+                    className="text-center inline-flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 text-lg px-8 py-4 font-bold transition-all rounded-xl hover:scale-[1.02] active:scale-95"
+                  >
+                    <Phone className="h-5 w-5 text-zultys-green animate-pulse" />
+                    Call 817-231-2962
+                  </a>
                 </div>
+              </div>
 
-                {/* SVG Network Cloud Telephony Diagram */}
-                <div className="relative h-56 flex items-center justify-center">
-                  {/* SVG Connections & Nodes */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 220">
-                    <defs>
-                      <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#00A82D" stopOpacity="0.8" />
-                        <stop offset="100%" stopColor="#D4A017" stopOpacity="0.8" />
-                      </linearGradient>
-                    </defs>
-                    
-                    {/* Connection Lines with Pulsing Dash Array */}
-                    <path d="M 60 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_20s_linear_infinite]" />
-                    <path d="M 60 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_25s_linear_infinite]" />
-                    <path d="M 340 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_18s_linear_infinite]" />
-                    <path d="M 340 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_22s_linear_infinite]" />
-                    
-                    {/* Central Cloud Orbit */}
-                    <circle cx="200" cy="110" r="44" fill="#000000" fillOpacity="0.3" stroke="#00A82D" strokeWidth="2" strokeDasharray="4 4" className="animate-[spin_40s_linear_infinite]" />
-
-                    {/* Endpoint Nodes */}
-                    {/* Node 1: Small Business Phone */}
-                    <g className="translate-x-[40px] translate-y-[40px] cursor-pointer">
-                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                      <path d="M 14 17 L 14 23 M 17 20 L 23 20" stroke="#00A82D" strokeWidth="2" />
-                    </g>
-                    {/* Node 2: Mobile Softphone */}
-                    <g className="translate-x-[40px] translate-y-[140px] cursor-pointer">
-                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                      <rect x="15" y="14" width="10" height="12" rx="1.5" stroke="#D4A017" strokeWidth="1.5" fill="none" />
-                    </g>
-                    {/* Node 3: Satellite Office */}
-                    <g className="translate-x-[320px] translate-y-[40px] cursor-pointer">
-                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                      <path d="M 15 25 L 15 17 L 20 13 L 25 17 L 25 25 Z" stroke="#00A82D" strokeWidth="1.5" fill="none" />
-                    </g>
-                    {/* Node 4: Call Center Headset */}
-                    <g className="translate-x-[320px] translate-y-[140px] cursor-pointer">
-                      <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                      <path d="M 14 20 A 6 6 0 0 1 26 20 M 26 20 L 26 24" stroke="#D4A017" strokeWidth="1.5" fill="none" />
-                    </g>
-                  </svg>
+              {/* Right Column: Connected Cloud Telecommunications Interactive Artwork Card */}
+              <div className="lg:col-span-5 hidden lg:flex items-center justify-center">
+                <div className="relative w-full max-w-lg p-6 rounded-[2rem] bg-slate-900/85 backdrop-blur-xl border border-white/15 shadow-[0_50px_100px_-20px_rgba(0,168,45,0.3)] overflow-hidden">
+                  {/* Neon Glow Effects */}
+                  <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-zultys-green/20 blur-[80px]"></div>
+                  <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-zultys-gold/20 blur-[80px]"></div>
                   
-                  {/* Pulsing Central Cloud Device */}
-                  <div className="relative z-10 p-5 bg-slate-950/90 rounded-full border border-zultys-green shadow-[0_0_40px_rgba(0,168,45,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
-                    <Cloud className="h-12 w-12 text-zultys-green" />
-                  </div>
-                </div>
+                  {/* Tech grid overlay */}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
 
-                {/* Equalizer Wave / Realtime Telephony Feed */}
-                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SIP Jitter & Latency Feed</span>
-                    <span className="text-[10px] font-mono text-zultys-green font-bold">12ms (Excellent)</span>
-                  </div>
-                  {/* Equalizer Bars */}
-                  <div className="flex items-end justify-center gap-1.5 h-10 px-2 pt-2">
-                    {[30, 60, 45, 90, 75, 40, 80, 55, 95, 65, 35, 70, 50, 85, 40, 60].map((h, i) => (
-                      <div 
-                        key={i} 
-                        className="w-1 bg-zultys-green rounded-full transition-all duration-300"
-                        style={{ 
-                          height: `${h}%`,
-                          animation: `bounceEqualizer ${1 + (i % 3) * 0.3}s ease-in-out infinite alternate`,
-                          animationDelay: `${i * 0.05}s`
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
+                  <div className="relative space-y-6">
+                    {/* Title & Pulse Indicator */}
+                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zultys-green opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-zultys-green"></span>
+                        </div>
+                        <span className="text-xs font-black uppercase tracking-widest text-slate-300">Zultys Cloud Core Active</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-zultys-gold bg-zultys-gold/10 px-2.5 py-1 rounded-full border border-zultys-gold/20">DFW Cluster</span>
+                    </div>
 
-                {/* Active Features Badges */}
-                <div className="grid grid-cols-3 gap-2.5 pt-2">
-                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
-                    <span className="text-sm font-black text-white">99.999%</span>
-                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1">Uptime SLA</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
-                    <span className="text-sm font-black text-zultys-green">AES-256</span>
-                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1">Encrypted</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
-                    <span className="text-sm font-black text-zultys-gold">QoS VoIP</span>
-                    <span className="text-[9px] font-black uppercase text-slate-400 mt-1">Priority</span>
+                    {/* SVG Network Cloud Telephony Diagram */}
+                    <div className="relative h-44 flex items-center justify-center">
+                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 220">
+                        <defs>
+                          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#00A82D" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="#D4A017" stopOpacity="0.8" />
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Connection Lines with Pulsing Dash Array */}
+                        <path d="M 60 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_20s_linear_infinite]" />
+                        <path d="M 60 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_25s_linear_infinite]" />
+                        <path d="M 340 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_18s_linear_infinite]" />
+                        <path d="M 340 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_22s_linear_infinite]" />
+                        
+                        {/* Central Cloud Orbit */}
+                        <circle cx="200" cy="110" r="44" fill="#000000" fillOpacity="0.3" stroke="#00A82D" strokeWidth="2" strokeDasharray="4 4" className="animate-[spin_40s_linear_infinite]" />
+
+                        {/* Endpoint Nodes */}
+                        <g className="translate-x-[40px] translate-y-[40px] cursor-pointer">
+                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                          <path d="M 14 17 L 14 23 M 17 20 L 23 20" stroke="#00A82D" strokeWidth="2" />
+                        </g>
+                        <g className="translate-x-[40px] translate-y-[140px] cursor-pointer">
+                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                          <rect x="15" y="14" width="10" height="12" rx="1.5" stroke="#D4A017" strokeWidth="1.5" fill="none" />
+                        </g>
+                        <g className="translate-x-[320px] translate-y-[40px] cursor-pointer">
+                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                          <path d="M 15 25 L 15 17 L 20 13 L 25 17 L 25 25 Z" stroke="#00A82D" strokeWidth="1.5" fill="none" />
+                        </g>
+                        <g className="translate-x-[320px] translate-y-[140px] cursor-pointer">
+                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                          <path d="M 14 20 A 6 6 0 0 1 26 20 M 26 20 L 26 24" stroke="#D4A017" strokeWidth="1.5" fill="none" />
+                        </g>
+                      </svg>
+                      
+                      <div className="relative z-10 p-4 bg-slate-950/90 rounded-full border border-zultys-green shadow-[0_0_40px_rgba(0,168,45,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
+                        <Cloud className="h-10 w-10 text-zultys-green" />
+                      </div>
+                    </div>
+
+                    {/* Equalizer Feed */}
+                    <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">SIP Jitter Feed</span>
+                        <span className="text-[9px] font-mono text-zultys-green font-bold">12ms (Excellent)</span>
+                      </div>
+                      <div className="flex items-end justify-center gap-1.5 h-8 px-2">
+                        {[30, 60, 45, 90, 75, 40, 80, 55, 95, 65, 35, 70, 50, 85, 40, 60].map((h, i) => (
+                          <div 
+                            key={i} 
+                            className="w-1 bg-zultys-green rounded-full transition-all duration-300"
+                            style={{ 
+                              height: `${h}%`,
+                              animation: `bounceEqualizer ${1 + (i % 3) * 0.3}s ease-in-out infinite alternate`,
+                              animationDelay: `${i * 0.05}s`
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Active Features Badges */}
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <div className="p-2 rounded-lg bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-black text-white">99.999%</span>
+                        <span className="text-[8px] font-black uppercase text-slate-400 mt-0.5">Uptime SLA</span>
+                      </div>
+                      <div className="p-2 rounded-lg bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-black text-zultys-green">AES-256</span>
+                        <span className="text-[8px] font-black uppercase text-slate-400 mt-0.5">Encrypted</span>
+                      </div>
+                      <div className="p-2 rounded-lg bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-black text-zultys-gold">QoS VoIP</span>
+                        <span className="text-[8px] font-black uppercase text-slate-400 mt-0.5">Priority</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-10 w-full pt-20 pb-40">
-            <div className="max-w-3xl lg:max-w-2xl">
-              <Link to="/about" className="inline-flex items-center gap-2 bg-zultys-green/20 backdrop-blur-md px-4 py-2 rounded-full mb-8 border border-zultys-green/30 hover:bg-zultys-green/30 transition-all group">
-                <Award className="h-5 w-5 text-zultys-green group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-bold text-white uppercase tracking-widest">Authorized Zultys Partner DFW</span>
-              </Link>
-              
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.15] text-white tracking-tight drop-shadow-2xl">
-                Zultys Business Phone Systems in Dallas–Fort Worth
-              </h1>
-              
-              <p className="text-lg md:text-xl lg:text-2xl mb-10 text-slate-200/95 leading-relaxed max-w-xl font-medium">
-                Enterprise‑grade VoIP, cloud calling, and unified communications built for North Texas organizations.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-5 items-stretch sm:items-center">
-                <Button
-                  size="lg"
-                  onClick={openQuote}
-                  className="bg-zultys-gold hover:bg-zultys-gold/90 text-slate-950 text-xl px-12 py-8 shadow-[0_20px_50px_rgba(212,160,23,0.3)] transition-all font-black uppercase tracking-wider rounded-xl border-none hover:scale-[1.03] active:scale-95"
-                >
-                  Request a Free Quote
-                </Button>
-                <a 
-                  href="tel:817-231-2962" 
-                  className="text-center inline-flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 text-lg px-8 py-4.5 font-bold transition-all rounded-xl hover:scale-[1.02] active:scale-95"
-                >
-                  <Phone className="h-5 w-5 text-zultys-green animate-pulse" />
-                  Call 817-231-2962
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating Service Cards - Overlapping bottom */}
-          <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-1/2">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Bottom Row: Redesigned smaller, eye-catching, glowing circles with crisp titles underneath */}
+            <div className="mt-16 md:mt-20 pt-10 border-t border-white/10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 justify-items-center">
                 {[
-                  { title: 'Zultys Business Phone Systems', icon: Phone, link: '/fort-worth-zultys-business-phone-systems' },
-                  { title: 'Cloud Phone Systems', icon: Cloud, link: '/fort-worth-zultys-cloud-services' },
-                  { title: 'VOIP', icon: MessageSquare, link: '/fort-worth-zultys-voip-phone-system' },
-                  { title: 'Business Connectivity', icon: Zap, link: '/solutions' },
+                  { 
+                    title: 'Zultys Phone Systems', 
+                    icon: Phone, 
+                    link: '/fort-worth-zultys-business-phone-systems',
+                    gradient: 'from-emerald-400 to-green-600',
+                    glow: 'shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:shadow-[0_0_35px_rgba(16,185,129,0.75)]',
+                    textColor: 'group-hover:text-emerald-400',
+                  },
+                  { 
+                    title: 'Cloud Phone Systems', 
+                    icon: Cloud, 
+                    link: '/fort-worth-zultys-cloud-services',
+                    gradient: 'from-sky-400 to-blue-600',
+                    glow: 'shadow-[0_0_20px_rgba(56,189,248,0.4)] group-hover:shadow-[0_0_35px_rgba(56,189,248,0.75)]',
+                    textColor: 'group-hover:text-sky-400',
+                  },
+                  { 
+                    title: 'VOIP Solutions', 
+                    icon: MessageSquare, 
+                    link: '/fort-worth-zultys-voip-phone-system',
+                    gradient: 'from-amber-400 to-zultys-gold',
+                    glow: 'shadow-[0_0_20px_rgba(212,160,23,0.4)] group-hover:shadow-[0_0_35px_rgba(212,160,23,0.75)]',
+                    textColor: 'group-hover:text-zultys-gold',
+                  },
+                  { 
+                    title: 'Business Connectivity', 
+                    icon: Zap, 
+                    link: '/solutions',
+                    gradient: 'from-rose-400 to-red-600',
+                    glow: 'shadow-[0_0_20px_rgba(239,68,68,0.4)] group-hover:shadow-[0_0_35px_rgba(239,68,68,0.75)]',
+                    textColor: 'group-hover:text-rose-400',
+                  },
                 ].map((service, index) => (
                   <Link key={index} to={service.link} className="block group">
-                    <Card className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-none flex flex-col items-center text-center group-hover:translate-y-[-15px] transition-all duration-500 ease-out h-full">
-                      <div className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-3xl bg-slate-50 group-hover:bg-zultys-green/5 transition-colors duration-500">
-                        <service.icon className="h-12 w-12 sm:h-16 sm:w-16 text-zultys-green" strokeWidth={1} />
+                    <div className="flex flex-col items-center text-center">
+                      {/* Interactive Colored Circle */}
+                      <div className="relative mb-4">
+                        <motion.div
+                          whileHover={{ scale: 1.15, rotate: 5 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 12 }}
+                          className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br ${service.gradient} ${service.glow} text-white flex items-center justify-center relative z-10 border border-white/20 transition-all duration-300`}
+                        >
+                          <service.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" strokeWidth={2} />
+                        </motion.div>
+                        
+                        {/* Outer Pulse Ring */}
+                        <div className="absolute inset-0 rounded-full bg-white/5 scale-110 -z-0 opacity-0 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none"></div>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight tracking-tight">
+                      
+                      {/* Clear Readable Label Directly Underneath */}
+                      <h3 className={`text-xs sm:text-sm font-extrabold text-slate-100 tracking-wide uppercase leading-tight max-w-[140px] sm:max-w-[160px] transition-colors duration-300 ${service.textColor}`}>
                         {service.title}
                       </h3>
-                    </Card>
+                      
+                      {/* Short helper/guide line */}
+                      <span className="text-[10px] text-slate-400 mt-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        View Details &rarr;
+                      </span>
+                    </div>
                   </Link>
                 ))}
               </div>
             </div>
           </div>
         </section>
-
-        {/* Spacer to account for overlapping cards */}
-        <div className="h-48 lg:h-56 bg-white"></div>
 
         {/* Trust Section - Logos */}
         <section className="py-12 border-y border-gray-100 bg-gray-50/50">
@@ -462,7 +499,13 @@ export function Home() {
         </section>
 
         {/* Why Choose Zultys Section */}
-        <section className="py-24 bg-white">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="py-24 bg-white"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
@@ -492,7 +535,7 @@ export function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* ROI Calculator Section */}
         <ROICalculator
@@ -506,7 +549,13 @@ export function Home() {
         />
 
         {/* Features Section */}
-        <section className="py-24 bg-gray-50">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="py-24 bg-gray-50"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
@@ -536,11 +585,17 @@ export function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         <ReadMore initialHeight="max-h-[0px]" className="bg-white">
           {/* Cloud vs On-Premise Section */}
-          <section className="py-24 bg-white">
+          <motion.section 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7 }}
+            className="py-24 bg-white"
+          >
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="text-center mb-16">
                 <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
@@ -570,10 +625,16 @@ export function Home() {
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
 
         {/* Industries Section */}
-        <section className="py-24 bg-charcoal text-white">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="py-24 bg-charcoal text-white"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-black mb-6 text-white">
@@ -610,10 +671,16 @@ export function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Implementation Process Section */}
-        <section className="py-24 bg-white">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="py-24 bg-white"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
@@ -643,10 +710,16 @@ export function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Service Areas Section */}
-        <section className="py-24 bg-gray-50">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="py-24 bg-gray-50"
+        >
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-black text-charcoal mb-6">
@@ -676,7 +749,7 @@ export function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
 
         </ReadMore>
