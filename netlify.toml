@@ -1,0 +1,14 @@
+[[redirects]]
+  from = "/sitemap.html"
+  to = "/sitemap.html"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
