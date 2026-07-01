@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useSEO } from '../hooks/useSEO';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { CTASection } from '../components/CTASection';
@@ -41,42 +41,12 @@ import {
 export function Bowie() {
   const { openQuote } = useQuote();
 
-  useEffect(() => {
-    // Page Title
-    document.title = 'Bowie Zultys Business Phone Systems | VoIP & IP PBX Solutions';
-    
-    // Meta Description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    const description = 'Expert Bowie Zultys business phone systems and VoIP solutions. Authorized Zultys dealer providing unified communications, cloud phone systems, and local support for Bowie businesses.';
-    if (metaDescription) {
-      metaDescription.setAttribute('content', description);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = description;
-      document.head.appendChild(meta);
-    }
-
-    // Meta Keywords
-    let metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (!metaKeywords) {
-      metaKeywords = document.createElement('meta');
-      metaKeywords.setAttribute('name', 'keywords');
-      document.head.appendChild(metaKeywords);
-    }
-    metaKeywords.setAttribute('content', 'Bowie Zultys, Zultys business phone systems Bowie, Bowie business VoIP solutions, Bowie unified communications, Zultys cloud phone system Bowie, authorized Zultys dealer Bowie TX');
-
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/bowie-tx-zultys-phone-systems');
-
-    // JSON-LD Schema
-    const schema = {
+  useSEO({
+    title: 'Bowie Zultys Business Phone Systems | VoIP & IP PBX Solutions',
+    description: 'Expert Bowie Zultys business phone systems and VoIP solutions. Authorized Zultys dealer providing unified communications, cloud phone systems, and local support for Bowie businesses.',
+    keywords: 'Bowie Zultys, Zultys business phone systems Bowie, Bowie business VoIP solutions, Bowie unified communications, Zultys cloud phone system Bowie, authorized Zultys dealer Bowie TX',
+    canonicalUrl: 'https://dallasfortworthzultys.com/bowie-tx-zultys-phone-systems',
+    additionalSchema: {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Bowie Zultys Support',
@@ -95,17 +65,8 @@ export function Bowie() {
         longitude: '-97.8481',
       },
       areaServed: 'Bowie, TX',
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify(schema);
-    document.head.appendChild(script);
-
-    return () => {
-      script.remove();
-    };
-  }, []);
+    }
+  });
 
   const benefits = [
     {

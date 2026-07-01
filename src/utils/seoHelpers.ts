@@ -46,6 +46,7 @@ export interface SEOProps {
       image?: string;
     }[];
   };
+  additionalSchema?: object;
 }
 
 export function applySEO(props: SEOProps) {
@@ -229,6 +230,11 @@ function updateSchema(props: SEOProps) {
       }))
     };
     schemas.push(howToSchema);
+  }
+
+  // Additional Schema
+  if (props.additionalSchema) {
+    schemas.push(props.additionalSchema);
   }
 
   // Inject schemas
