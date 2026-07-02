@@ -233,6 +233,7 @@ import { QuotePopupWrapper } from './components/QuotePopupWrapper';
 import { FloatingTextCTA } from './components/FloatingTextCTA';
 import { LocalBusinessSchema } from './components/LocalBusinessSchema';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
+import { generateEliteMetadata } from './utils/seoHelpers';
 
 // Advanced Canonical Normalization Lookup
 const canonicalMap: Record<string, string> = {
@@ -429,6 +430,66 @@ export default function App() {
     updateCanonical();
     const timer = setTimeout(updateCanonical, 0);
 
+    // Apply Elite dynamic SEO title, description and keywords
+    const { title, description, keywords } = generateEliteMetadata(currentPath);
+
+    const applyEliteSEO = () => {
+      document.title = title;
+
+      let descMeta = document.querySelector('meta[name="description"]');
+      if (!descMeta) {
+        descMeta = document.createElement('meta');
+        descMeta.setAttribute('name', 'description');
+        document.head.appendChild(descMeta);
+      }
+      descMeta.setAttribute('content', description);
+
+      let keywMeta = document.querySelector('meta[name="keywords"]');
+      if (!keywMeta) {
+        keywMeta = document.createElement('meta');
+        keywMeta.setAttribute('name', 'keywords');
+        document.head.appendChild(keywMeta);
+      }
+      keywMeta.setAttribute('content', keywords);
+
+      // Also set Open Graph and Twitter card tags
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement('meta');
+        ogTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitle);
+      }
+      ogTitle.setAttribute('content', title);
+
+      let ogDesc = document.querySelector('meta[property="og:description"]');
+      if (!ogDesc) {
+        ogDesc = document.createElement('meta');
+        ogDesc.setAttribute('property', 'og:description');
+        document.head.appendChild(ogDesc);
+      }
+      ogDesc.setAttribute('content', description);
+
+      let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (!twitterTitle) {
+        twitterTitle = document.createElement('meta');
+        twitterTitle.setAttribute('name', 'twitter:title');
+        document.head.appendChild(twitterTitle);
+      }
+      twitterTitle.setAttribute('content', title);
+
+      let twitterDesc = document.querySelector('meta[name="twitter:description"]');
+      if (!twitterDesc) {
+        twitterDesc = document.createElement('meta');
+        twitterDesc.setAttribute('name', 'twitter:description');
+        document.head.appendChild(twitterDesc);
+      }
+      twitterDesc.setAttribute('content', description);
+    };
+
+    // Apply immediately & with a short deferment to override any local document modifications in page mount useEffects
+    applyEliteSEO();
+    const seoTimer = setTimeout(applyEliteSEO, 50);
+
     // Ensure robots instructions exist for maximum crawlability
     let robotsMeta = document.querySelector('meta[name="robots"]');
     if (!robotsMeta) {
@@ -446,7 +507,10 @@ export default function App() {
     }
     googlebotMeta.setAttribute('content', 'index, follow');
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(seoTimer);
+    };
   }, [currentPath]);
 
   // Simple routing logic

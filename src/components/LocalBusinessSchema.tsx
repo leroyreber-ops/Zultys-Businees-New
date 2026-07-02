@@ -458,45 +458,51 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
   };
 
   // 5. Localized FAQPage Schema (Rich Snippets for Google search results)
-  const faqSchema = {
+  // Ensure the FAQPage schema exactly matches the visible content on our city and industry pages
+  const isCityPage = cityName !== 'Dallas-Fort Worth' && !!cityCoordinates[cityName];
+  const isFinancialServices = currentPathname.toLowerCase().includes('financial-services');
+  const hasPageFAQ = isCityPage || isFinancialServices;
+  const subjectName = isCityPage ? cityName : 'Financial Services';
+
+  const faqSchema = hasPageFAQ ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     '@id': `${canonicalUrl}#faq`,
     mainEntity: [
       {
         '@type': 'Question',
-        name: `Why choose Zultys over RingCentral or Vonage in ${cityName === 'Dallas-Fort Worth' ? 'Dallas-Fort Worth' : cityName}?`,
+        name: `Can we keep our existing ${subjectName} phone numbers when migrating to Zultys?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `Zultys offers an all-in-one unified communications platform that runs on-premise, cloud, or hybrid with local support. Unlike national carriers who ship phones in a box, we provide expert on-site installation, zero-downtime porting, and ongoing direct engineering support for businesses in ${cityName === 'Dallas-Fort Worth' ? 'the DFW Metroplex' : cityName}.`
+          text: `Absolutely! We manage the entire number porting process, coordinating with your current carrier to ensure a seamless transition of all your direct dials, main lines, and toll-free numbers with zero downtime on migration day.`
         }
       },
       {
         '@type': 'Question',
-        name: `Do you provide professional on-site installation in ${cityName === 'Dallas-Fort Worth' ? 'Fort Worth and Dallas' : cityName}?`,
+        name: 'What is the difference between Zultys Cloud and Zultys On-Premise?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `Yes, we provide full, certified on-site installation and configuration of Zultys IP-PBX systems throughout ${cityName === 'Dallas-Fort Worth' ? 'the entire Dallas-Fort Worth Metroplex' : cityName}. Our local technicians ensure voice quality optimization, local network setup, and complete staff training so your transition is completely seamless.`
+          text: `Zultys Cloud is hosted in our secure, redundant data centers, offering low upfront costs, automatic software updates, and simple scalability. Zultys On-Premise utilizes a dedicated hardware appliance at your ${subjectName} office, providing maximum control and local network survivability independent of internet connectivity.`
         }
       },
       {
         '@type': 'Question',
-        name: 'Can we keep our existing business phone numbers when migrating?',
+        name: `Does Zultys support remote and mobile workers in ${subjectName}?`,
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Absolutely. We coordinate and execute the complete number porting process for your local, toll-free, and direct-dial numbers with zero downtime, ensuring your business stays fully operational throughout the transition.'
+          text: 'Yes, remote work is a core feature of the Zultys platform. Through the MXmobile app and secure softphone technology, employees can access their full office extensions, chat, and video tools from home or while traveling, with no complex VPN configuration required.'
         }
       },
       {
         '@type': 'Question',
-        name: 'Is Zultys compatible with remote employees and hybrid work models?',
+        name: 'How does DFW Business Communications provide local support?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes! The Zultys MXmobile and ZAC (Zultys Advanced Communicator) applications allow remote and hybrid employees to make and receive calls, use corporate chat, and check presence directly from their smartphones, tablets, or laptops as if they were in the office.'
+          text: `Unlike nationwide providers who rely on remote call centers, we are based locally in the DFW Metroplex. We provide on-site installation, face-to-face staff training, and rapid on-site dispatch of certified technicians if physical support is ever needed at your ${subjectName} facility.`
         }
       }
     ]
-  };
+  } : null;
 
   // Side-effect: Cleanup any manually added schema scripts to avoid duplicates,
   // while letting React handle injecting/updating its own declarative schema tags.
@@ -534,9 +540,11 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
       <script type="application/ld+json" data-centralized="true">
         {JSON.stringify(breadcrumbSchema)}
       </script>
-      <script type="application/ld+json" data-centralized="true">
-        {JSON.stringify(faqSchema)}
-      </script>
+      {faqSchema && (
+        <script type="application/ld+json" data-centralized="true">
+          {JSON.stringify(faqSchema)}
+        </script>
+      )}
     </>
   );
 }

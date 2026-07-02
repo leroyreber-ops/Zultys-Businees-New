@@ -3,18 +3,18 @@ import { MapPin, ChevronRight } from 'lucide-react';
 import { HashLink as Link } from './HashLink';
 
 const cities = [
-  { name: 'Fort Worth', path: '/' },
-  { name: 'Dallas', path: '/solutions' },
-  { name: 'Plano', path: '/solutions' },
-  { name: 'Arlington', path: '/solutions' },
-  { name: 'Frisco', path: '/solutions' },
-  { name: 'Irving', path: '/solutions' },
-  { name: 'Garland', path: '/solutions' },
-  { name: 'Grand Prairie', path: '/solutions' },
-  { name: 'McKinney', path: '/solutions' },
-  { name: 'Mesquite', path: '/solutions' },
-  { name: 'Carrollton', path: '/solutions' },
-  { name: 'Denton', path: '/solutions' },
+  { name: 'Fort Worth', path: '/fort-worth-zultys-systems' },
+  { name: 'Dallas', path: '/dallas-zultys-phones' },
+  { name: 'Plano', path: '/plano-zultys-dealer' },
+  { name: 'Arlington', path: '/arlington-ip-pbx' },
+  { name: 'Frisco', path: '/frisco-voip-solutions' },
+  { name: 'Irving', path: '/irving-business-phone-systems' },
+  { name: 'Garland', path: '/garland-business-voip' },
+  { name: 'Grand Prairie', path: '/grand-prairie-zultys' },
+  { name: 'McKinney', path: '/mckinney-zultys-dealer' },
+  { name: 'Mesquite', path: '/mesquite-zultys-phone-systems' },
+  { name: 'Carrollton', path: '/carrollton-zultys' },
+  { name: 'Denton', path: '/denton-business-phone-systems' },
 ];
 
 export function ServiceAreas() {

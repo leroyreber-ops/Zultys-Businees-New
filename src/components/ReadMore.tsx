@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { injectLinksIntoChildrenRecursive } from '../utils/seoLinker';
 
 interface ReadMoreProps {
   children: React.ReactNode;
@@ -12,21 +13,30 @@ interface ReadMoreProps {
 export function ReadMore({ children, previewContent, className = "", initialHeight = "max-h-[200px]" }: ReadMoreProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Apply automatic SEO link injection to long-tail prose paragraphs
+  const linkedChildren = React.useMemo(() => {
+    return injectLinksIntoChildrenRecursive(children);
+  }, [children]);
+
+  const linkedPreviewContent = React.useMemo(() => {
+    return previewContent ? injectLinksIntoChildrenRecursive(previewContent) : undefined;
+  }, [previewContent]);
+
   return (
     <div className={`relative ${className}`}>
       <div className="relative">
         <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[5000px]' : initialHeight}`}>
-          {previewContent ? (
+          {linkedPreviewContent ? (
             <>
               <div className={isExpanded ? 'sr-only select-none pointer-events-none' : 'block'}>
-                {previewContent}
+                {linkedPreviewContent}
               </div>
               <div className={isExpanded ? 'block' : 'sr-only select-none pointer-events-none'}>
-                {children}
+                {linkedChildren}
               </div>
             </>
           ) : (
-            children
+            linkedChildren
           )}
         </div>
         
