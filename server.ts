@@ -5,7 +5,15 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { scanImagesInProject, generateSeoSuggestion, updateAltTagInFile } from "./src/utils/imageScanner";
-import { buildSitemapXml, watchAndGenerateSitemap } from "./src/utils/sitemapGenerator";
+import { buildSitemapXml, watchAndGenerateSitemap, extractRoutesFromApp, getRouteSEO } from "./src/utils/sitemapGenerator";
+import {
+  isGoogleConfigured,
+  getIndexingHistory,
+  submitSitemapToGoogle,
+  notifyGoogleUrlChange,
+  getGoogleCredentials
+} from "./src/utils/googleIndexer";
+import { triggerGoogleIndexing, mapFilePathToRoute } from "./src/utils/indexing";
 
 const currentFilename = typeof import.meta !== "undefined" && import.meta.url
   ? fileURLToPath(import.meta.url)
@@ -154,6 +162,21 @@ async function startServer() {
       }
       const success = updateAltTagInFile(filePath, Number(lineNumber), newAlt);
       if (success) {
+        // Automatically trigger programmatic Google Indexing if configured
+        try {
+          const route = mapFilePathToRoute(filePath);
+          if (route) {
+            const targetUrl = `https://dallasfortworthzultys.com${route}`;
+            console.log(`[Google Indexer] SEO Page file updated (${filePath}). Triggering Google Indexing for ${targetUrl}...`);
+            triggerGoogleIndexing(targetUrl, 'URL_UPDATED')
+              .then(() => console.log(`[Google Indexer] Indexing request logged & accepted for ${targetUrl}`))
+              .catch((err) => console.warn(`[Google Indexer] Auto indexing trigger failed: ${err.message}`));
+          } else {
+            console.log(`[Google Indexer] No route mapped for file path: ${filePath}`);
+          }
+        } catch (err: any) {
+          console.error(`[Google Indexer] Auto-trigger error: ${err.message}`);
+        }
         res.json({ success: true, message: "Alt tag updated in source code successfully" });
       } else {
         res.status(500).json({ success: false, message: "Failed to write alt tag to file" });
@@ -221,6 +244,100 @@ async function startServer() {
     }
   });
 
+  // GET Google Search Console configuration status
+  app.get("/api/search-console/status", (req, res) => {
+    try {
+      const configured = isGoogleConfigured();
+      const { clientEmail } = getGoogleCredentials();
+      res.json({
+        success: true,
+        configured,
+        clientEmail: configured ? clientEmail : null,
+        message: configured ? "Google Search Console API connected." : "Google Search Console API credentials missing."
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // GET indexing and sitemap submission history
+  app.get("/api/search-console/history", (req, res) => {
+    try {
+      const history = getIndexingHistory();
+      res.json({ success: true, history });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // GET live dynamically parsed routes from App.tsx
+  app.get("/api/search-console/routes", (req, res) => {
+    try {
+      const routes = extractRoutesFromApp();
+      const routesData = routes.map((route) => {
+        const seo = getRouteSEO(route);
+        return {
+          path: route,
+          priority: seo.priority,
+          changefreq: seo.changefreq,
+          url: `https://dallasfortworthzultys.com${route}`
+        };
+      });
+      res.json({ success: true, routes: routesData });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // POST manually trigger sitemap submission
+  app.post("/api/search-console/submit-sitemap", async (req, res) => {
+    try {
+      const { siteUrl, sitemapUrl } = req.body;
+      const targetSiteUrl = siteUrl || "https://dallasfortworthzultys.com";
+      const targetSitemapUrl = sitemapUrl || "https://dallasfortworthzultys.com/sitemap.xml";
+
+      const statusText = await submitSitemapToGoogle(targetSiteUrl, targetSitemapUrl);
+      res.json({ success: true, message: statusText });
+    } catch (error: any) {
+      console.error("Manual sitemap submission failed:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // POST request programmatic URL re-crawl (Google Indexing API)
+  app.post("/api/search-console/request-recrawl", async (req, res) => {
+    try {
+      const { urls, action } = req.body;
+      const urlList: string[] = Array.isArray(urls) 
+        ? urls 
+        : (typeof urls === 'string' ? [urls] : []);
+
+      if (urlList.length === 0) {
+        return res.status(400).json({ success: false, error: "No URLs provided" });
+      }
+
+      const selectedAction = action || 'URL_UPDATED';
+      const results = [];
+
+      for (const targetUrl of urlList) {
+        const cleanUrl = targetUrl.trim();
+        if (!cleanUrl) continue;
+
+        try {
+          const response = await notifyGoogleUrlChange(cleanUrl, selectedAction);
+          results.push({ url: cleanUrl, success: true, data: response });
+        } catch (err: any) {
+          results.push({ url: cleanUrl, success: false, error: err.message });
+        }
+      }
+
+      res.json({ success: true, results });
+    } catch (error: any) {
+      console.error("Programmatic re-crawl request failed:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Dynamic XML Sitemap for rapid Google search indexing
   app.get("/sitemap.xml", (req, res) => {
     try {
@@ -273,6 +390,22 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
+
+    // Auto-submit sitemap to Google Search Console on server boot if Google integration is configured
+    if (isGoogleConfigured()) {
+      console.log("🚀 Google Search Console integration is active. Requesting automatic sitemap submission...");
+      const siteUrl = "https://dallasfortworthzultys.com";
+      const sitemapUrl = "https://dallasfortworthzultys.com/sitemap.xml";
+      submitSitemapToGoogle(siteUrl, sitemapUrl)
+        .then((status) => {
+          console.log(`✅ Automatic sitemap submission completed: ${status}`);
+        })
+        .catch((err) => {
+          console.error(`❌ Automatic sitemap submission failed on boot: ${err.message}`);
+        });
+    } else {
+      console.log("ℹ️ Google Search Console is not yet configured. Complete the integration using environment variables.");
+    }
   });
 }
 

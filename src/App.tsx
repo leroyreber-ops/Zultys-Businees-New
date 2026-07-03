@@ -227,6 +227,7 @@ const Randolph = lazy(() => import('./pages/Randolph').then(m => ({ default: m.R
 const Telephone = lazy(() => import('./pages/Telephone').then(m => ({ default: m.Telephone })));
 const Ivanhoe = lazy(() => import('./pages/Ivanhoe').then(m => ({ default: m.Ivanhoe })));
 const Gober = lazy(() => import('./pages/Gober').then(m => ({ default: m.Gober })));
+const SEODashboard = lazy(() => import('./pages/SEODashboard'));
 import { Toaster } from 'sonner';
 import { QuoteProvider } from './context/QuoteContext';
 import { QuotePopupWrapper } from './components/QuotePopupWrapper';
@@ -753,6 +754,7 @@ export default function App() {
     if (normalizedPath === '/fort-worth-zultys-multi-location') return <MultiLocation />;
     if (normalizedPath === '/fort-worth-zultys-enterprise') return <Enterprise />;
     if (normalizedPath === '/sitemap.html' || normalizedPath === '/sitemap') return <Sitemap />;
+    if (normalizedPath === '/seo-dashboard' || normalizedPath === '/admin/search-console') return <SEODashboard />;
     
     // Legacy/Other paths
     if (normalizedPath === '/zultys-support') return <Support />;

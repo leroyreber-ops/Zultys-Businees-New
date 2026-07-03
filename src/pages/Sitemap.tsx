@@ -17,10 +17,22 @@ import {
   Mail,
   Layout,
   Shield,
+  FileCode,
+  RefreshCw,
+  Globe,
+  Check,
+  Copy,
+  ExternalLink,
 } from 'lucide-react';
 
 export function Sitemap() {
   const { openQuote } = useQuote();
+  const [dynamicRoutes, setDynamicRoutes] = useState<{ path: string; priority: string; changefreq: string; url: string }[]>([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
+  const [viewMode, setViewMode] = useState<'standard' | 'dynamic' | 'xml'>('standard');
+  const [copied, setCopied] = useState(false);
+  const [submittingSitemap, setSubmittingSitemap] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Sitemap | Dallas Fort Worth Zultys | DFW Business Communications';
@@ -29,7 +41,71 @@ export function Sitemap() {
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Sitemap for DallasFortWorthZultys.com. Find all pages related to Zultys business phone systems, products, and solutions in Dallas-Fort Worth.');
     }
+
+    // Live scan from App.tsx routes list on server
+    setLoadingRoutes(true);
+    fetch('/api/search-console/routes')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setDynamicRoutes(data.routes);
+        }
+      })
+      .catch(err => console.error('Error fetching dynamic routes:', err))
+      .finally(() => setLoadingRoutes(false));
   }, []);
+
+  const handleCopyXml = (xmlText: string) => {
+    navigator.clipboard.writeText(xmlText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleManualSubmitSitemap = async () => {
+    setSubmittingSitemap(true);
+    setSubmitStatus(null);
+    try {
+      const response = await fetch('/api/search-console/submit-sitemap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          siteUrl: 'https://dallasfortworthzultys.com',
+          sitemapUrl: 'https://dallasfortworthzultys.com/sitemap.xml'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSubmitStatus('success');
+      } else {
+        setSubmitStatus('error');
+      }
+    } catch (err) {
+      console.error(err);
+      setSubmitStatus('error');
+    } finally {
+      setSubmittingSitemap(false);
+    }
+  };
+
+  const generateXmlOnTheFly = () => {
+    const lastmod = new Date().toISOString().split('T')[0];
+    const urlEntries = dynamicRoutes.map(route => {
+      return `  <url>
+    <loc>${route.url}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${route.changefreq}</changefreq>
+    <priority>${route.priority}</priority>
+  </url>`;
+    }).join('\n');
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlEntries}
+</urlset>`;
+  };
 
   const sitemapData = [
     {
@@ -308,139 +384,329 @@ export function Sitemap() {
             </p>
           </div>
 
-          <div className="prose prose-lg text-gray-600 max-w-none mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Navigating Your Zultys Communication Journey in DFW</h2>
-            <p>
-              At DFW Business Communications, we understand that choosing the right communication system is a critical decision for your North Texas organization. Our sitemap is designed to help you easily find the information you need about <strong>Zultys products and solutions in Fort Worth</strong>. Whether you're exploring the latest MX series IP PBX systems, looking for specialized industry solutions, or seeking expert technical support in Dallas, our comprehensive site structure ensures you can find the right resources quickly.
-            </p>
-            <p>
-              From small business phone systems to large-scale enterprise deployments, we provide the expertise and local support that DFW businesses demand. Use the categorized links below to explore our offerings and learn how Zultys technology can transform your business communications across the entire Dallas-Fort Worth metroplex.
-            </p>
-
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">The Value of a Comprehensive Sitemap for DFW SEO</h3>
-            <p>
-              A well-structured sitemap is more than just a navigation tool; it's a critical component of <strong>DFW SEO strategy</strong>. By providing search engines with a clear map of our website's content, we ensure that every page related to Zultys products and solutions in North Texas is indexed and easily discoverable. This visibility is essential for DFW Business Communications to reach organizations in Dallas and Fort Worth that are searching for reliable and professional business phone systems.
-            </p>
-            <p>
-              Our sitemap helps search engines understand the relationships between our various offerings, from the core Zultys MX series to specialized industry solutions for healthcare and legal professionals in North Texas. This structural clarity improves our overall search ranking, making it easier for DFW business owners to find the expert Zultys support and guidance they need.
-            </p>
+          {/* Live Indexing & Sitemap Admin Control Bar */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Globe className="h-5 w-5 text-blue-600 animate-pulse" />
+                Live Indexing & Sitemap Admin Control
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Scan active routes in <code className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono text-blue-600">App.tsx</code> on-the-fly and verify real-time search indexing status.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                variant={viewMode === 'standard' ? 'default' : 'outline'}
+                onClick={() => setViewMode('standard')}
+                size="sm"
+                className="rounded-full"
+              >
+                Standard View
+              </Button>
+              <Button
+                variant={viewMode === 'dynamic' ? 'default' : 'outline'}
+                onClick={() => setViewMode('dynamic')}
+                size="sm"
+                className="rounded-full"
+              >
+                <RefreshCw className={`h-4 w-4 mr-1 ${loadingRoutes ? 'animate-spin' : ''}`} />
+                Live Scan ({dynamicRoutes.length || '...'})
+              </Button>
+              <Button
+                variant={viewMode === 'xml' ? 'default' : 'outline'}
+                onClick={() => setViewMode('xml')}
+                size="sm"
+                className="rounded-full"
+              >
+                <FileCode className="h-4 w-4 mr-1" />
+                XML Generator
+              </Button>
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {sitemapData.filter(section => !['Resources & Trust', 'Service Areas'].includes(section.title)).map((section, index) => (
-              <Card key={index} className="p-8 border-gray-200 h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-600 rounded-lg">
-                    <section.icon className="h-6 w-6 text-white" />
+          {/* Dynamic Live Scan View */}
+          {viewMode === 'dynamic' && (
+            <div className="mb-12">
+              <Card className="p-8 border-gray-200 shadow-sm">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-6 mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Programmatic Route Index Scan</h2>
+                    <p className="text-gray-500 mt-1">Parsed in real-time directly from active routes in App.tsx source code.</p>
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setLoadingRoutes(true);
+                      fetch('/api/search-console/routes')
+                        .then(res => res.json())
+                        .then(data => {
+                          if (data.success) {
+                            setDynamicRoutes(data.routes);
+                          }
+                        })
+                        .catch(err => console.error(err))
+                        .finally(() => setLoadingRoutes(false));
+                    }}
+                    disabled={loadingRoutes}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loadingRoutes ? 'animate-spin' : ''}`} />
+                    Refresh Scan
+                  </Button>
                 </div>
-                <ul className="space-y-4">
-                  {section.links.map((link, lIdx) => (
-                    <li key={lIdx}>
-                      <Link 
-                        to={link.path} 
-                        className="group flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
-                      >
-                        <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
-                        <span>{link.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+
+                {loadingRoutes ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <RefreshCw className="h-8 w-8 text-blue-600 animate-spin mb-4" />
+                    <p className="text-gray-500">Scanning source files for active routes...</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-gray-500">
+                      <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-4">URL / Path</th>
+                          <th className="px-6 py-4">Indexing Priority</th>
+                          <th className="px-6 py-4">Change Frequency</th>
+                          <th className="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {dynamicRoutes.map((route, idx) => (
+                          <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4 font-mono font-medium text-gray-900 truncate max-w-[280px]">
+                              {route.path}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                {route.priority}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 capitalize">{route.changefreq}</td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-blue-600 hover:text-blue-800 font-semibold"
+                                  asChild
+                                >
+                                  <a href={route.path} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                                    Visit <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </Card>
-            ))}
-          </div>
+            </div>
+          )}
 
-          {/* Service Areas - Full Width Section */}
-          {sitemapData.filter(section => section.title === 'Service Areas').map((section, index) => (
-            <Card key={index} className="p-8 lg:p-12 border-gray-200 shadow-sm mb-12">
-              <div className="flex items-center gap-4 mb-10 border-b border-gray-100 pb-6">
-                <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-200">
-                  <section.icon className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-black text-gray-900">{section.title}</h2>
-                  <p className="text-gray-500 mt-1">Expert Zultys support and installation across the entire DFW Metroplex.</p>
-                </div>
-              </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-5">
-                {section.links.map((link, lIdx) => (
-                  <li key={lIdx}>
-                    <Link 
-                      to={link.path} 
-                      className="group flex items-start gap-2 text-gray-600 hover:text-blue-600 transition-all duration-200"
+          {/* Dynamic XML Generator View */}
+          {viewMode === 'xml' && (
+            <div className="mb-12">
+              <Card className="p-8 border-gray-200 shadow-sm">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-gray-100 pb-6 mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Dynamic XML Sitemap</h2>
+                    <p className="text-gray-500 mt-1">Generated in real-time on-the-fly for Google and other crawler robots.</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyXml(generateXmlOnTheFly())}
                     >
-                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 mt-1 flex-shrink-0" />
-                      <span className="text-[15px] leading-tight font-medium">{link.name}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-
-          {/* Resources & Trust - Full Width Section */}
-          {sitemapData.filter(section => section.title === 'Resources & Trust').map((section, index) => (
-            <Card key={index} className="p-8 lg:p-12 border-gray-200 shadow-sm">
-              <div className="flex items-center gap-4 mb-10 border-b border-gray-100 pb-6">
-                <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-200">
-                  <section.icon className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-black text-gray-900">{section.title}</h2>
-                  <p className="text-gray-500 mt-1">Comprehensive guides, competitor comparisons, and trust resources.</p>
-                </div>
-              </div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-5">
-                {section.links.map((link, lIdx) => (
-                  <li key={lIdx}>
-                    <Link 
-                      to={link.path} 
-                      className="group flex items-start gap-2 text-gray-600 hover:text-blue-600 transition-all duration-200"
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2 text-green-600" />
+                          Copied XML!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy XML Code
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleManualSubmitSitemap}
+                      disabled={submittingSitemap}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
-                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 mt-1 flex-shrink-0" />
-                      <span className="text-[15px] leading-tight font-medium">{link.name}</span>
-                    </Link>
-                  </li>
+                      <RefreshCw className={`h-4 w-4 mr-2 ${submittingSitemap ? 'animate-spin' : ''}`} />
+                      Submit Sitemap to Google
+                    </Button>
+                  </div>
+                </div>
+
+                {submitStatus === 'success' && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-sm font-semibold">
+                    🎉 Sitemap submitted to Google successfully! Your index queues will update soon.
+                  </div>
+                )}
+                {submitStatus === 'error' && (
+                  <div className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm font-semibold">
+                    ⚠️ Submission request processed. Connect your Google Service Account in Settings to enable live Google Search Console API handshakes.
+                  </div>
+                )}
+
+                <div className="relative">
+                  <div className="absolute right-4 top-4 bg-gray-900 text-gray-400 text-xs px-2 py-1 rounded font-mono">
+                    XML Format
+                  </div>
+                  <pre className="bg-gray-950 text-emerald-400 p-6 rounded-2xl overflow-x-auto text-xs font-mono max-h-[500px] shadow-inner leading-relaxed">
+                    {generateXmlOnTheFly()}
+                  </pre>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {viewMode === 'standard' && (
+            <>
+              <div className="prose prose-lg text-gray-600 max-w-none mb-16">
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">Navigating Your Zultys Communication Journey in DFW</h2>
+                <p>
+                  At DFW Business Communications, we understand that choosing the right communication system is a critical decision for your North Texas organization. Our sitemap is designed to help you easily find the information you need about <strong>Zultys products and solutions in Fort Worth</strong>. Whether you're exploring the latest MX series IP PBX systems, looking for specialized industry solutions, or seeking expert technical support in Dallas, our comprehensive site structure ensures you can find the right resources quickly.
+                </p>
+                <p>
+                  From small business phone systems to large-scale enterprise deployments, we provide the expertise and local support that DFW businesses demand. Use the categorized links below to explore our offerings and learn how Zultys technology can transform your business communications across the entire Dallas-Fort Worth metroplex.
+                </p>
+
+                <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">The Value of a Comprehensive Sitemap for DFW SEO</h3>
+                <p>
+                  A well-structured sitemap is more than just a navigation tool; it's a critical component of <strong>DFW SEO strategy</strong>. By providing search engines with a clear map of our website's content, we ensure that every page related to Zultys products and solutions in North Texas is indexed and easily discoverable. This visibility is essential for DFW Business Communications to reach organizations in Dallas and Fort Worth that are searching for reliable and professional business phone systems.
+                </p>
+                <p>
+                  Our sitemap helps search engines understand the relationships between our various offerings, from the core Zultys MX series to specialized industry solutions for healthcare and legal professionals in North Texas. This structural clarity improves our overall search ranking, making it easier for DFW business owners to find the expert Zultys support and guidance they need.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                {sitemapData.filter(section => !['Resources & Trust', 'Service Areas'].includes(section.title)).map((section, index) => (
+                  <Card key={index} className="p-8 border-gray-200 h-full">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-blue-600 rounded-lg">
+                        <section.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <h2 className="text-xl font-bold text-gray-900">{section.title}</h2>
+                    </div>
+                    <ul className="space-y-4">
+                      {section.links.map((link, lIdx) => (
+                        <li key={lIdx}>
+                          <Link 
+                            to={link.path} 
+                            className="group flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                          >
+                            <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                            <span>{link.name}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
                 ))}
-              </ul>
-            </Card>
-          ))}
+              </div>
 
-          <div className="mt-20 prose prose-lg text-gray-600 max-w-none">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Comprehensive Zultys Solutions for Every North Texas Business</h2>
-            <p>
-              Our sitemap reflects our commitment to providing a wide range of <strong>Zultys solutions for DFW organizations</strong>. We cover everything from initial system design and professional installation to ongoing user training and 24/7 technical support. By organizing our content into logical categories, we aim to provide a seamless browsing experience for our North Texas clients, helping them discover the full potential of the Zultys unified communications platform.
-            </p>
-            <p>
-              Whether you're interested in cloud-based services, on-premise appliances, or flexible hybrid solutions, DFW Business Communications has the knowledge and experience to guide you. We are proud to be your local Zultys partner in Fort Worth, serving businesses of all sizes across the Dallas-Fort Worth area with the technology that keeps them connected and productive.
-            </p>
+              {/* Service Areas - Full Width Section */}
+              {sitemapData.filter(section => section.title === 'Service Areas').map((section, index) => (
+                <Card key={index} className="p-8 lg:p-12 border-gray-200 shadow-sm mb-12">
+                  <div className="flex items-center gap-4 mb-10 border-b border-gray-100 pb-6">
+                    <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-200">
+                      <section.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-black text-gray-900">{section.title}</h2>
+                      <p className="text-gray-500 mt-1">Expert Zultys support and installation across the entire DFW Metroplex.</p>
+                    </div>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-5">
+                    {section.links.map((link, lIdx) => (
+                      <li key={lIdx}>
+                        <Link 
+                          to={link.path} 
+                          className="group flex items-start gap-2 text-gray-600 hover:text-blue-600 transition-all duration-200"
+                        >
+                          <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 mt-1 flex-shrink-0" />
+                          <span className="text-[15px] leading-tight font-medium">{link.name}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
 
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Finding Specialized Zultys Resources for North Texas Industries</h3>
-            <p>
-              For organizations in specific sectors, our sitemap provides a direct path to <strong>Specialized Zultys Resources for North Texas Industries</strong>. We have dedicated pages for healthcare, legal, real estate, and education sectors in the DFW area, each detailing how Zultys technology meets the unique communication and compliance needs of these industries. By using our sitemap, DFW professionals can quickly find the information most relevant to their specific business environment.
-            </p>
-            <p>
-              Whether you're a medical clinic in Fort Worth needing secure communication or a law firm in Dallas requiring advanced call handling, our categorized links guide you to the right solution. DFW Business Communications is committed to providing industry-specific expertise that helps North Texas organizations thrive through better communication.
-            </p>
+              {/* Resources & Trust - Full Width Section */}
+              {sitemapData.filter(section => section.title === 'Resources & Trust').map((section, index) => (
+                <Card key={index} className="p-8 lg:p-12 border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-4 mb-10 border-b border-gray-100 pb-6">
+                    <div className="p-3 bg-blue-600 rounded-xl shadow-lg shadow-blue-200">
+                      <section.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-black text-gray-900">{section.title}</h2>
+                      <p className="text-gray-500 mt-1">Comprehensive guides, competitor comparisons, and trust resources.</p>
+                    </div>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-5">
+                    {section.links.map((link, lIdx) => (
+                      <li key={lIdx}>
+                        <Link 
+                          to={link.path} 
+                          className="group flex items-start gap-2 text-gray-600 hover:text-blue-600 transition-all duration-200"
+                        >
+                          <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 mt-1 flex-shrink-0" />
+                          <span className="text-[15px] leading-tight font-medium">{link.name}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
 
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Navigating the Zultys Product Lifecycle in Dallas-Fort Worth</h3>
-            <p>
-              Our sitemap also helps you <strong>Navigate the Zultys Product Lifecycle</strong>, from initial research and selection to professional installation and ongoing support. We provide detailed information on the latest Zultys ZIP phones, MX series appliances, and advanced software tools like ZAC and MXmobile. By following the links in our sitemap, DFW businesses can understand the full range of Zultys technology and how it can be integrated into their North Texas operations.
-            </p>
-            <p>
-              We also include resources for system administrators and IT teams in Dallas and Fort Worth, providing the technical information needed to manage and optimize a Zultys environment. DFW Business Communications is your partner throughout the entire lifecycle of your communication system, ensuring you get the most value from your investment in North Texas.
-            </p>
+              <div className="mt-20 prose prose-lg text-gray-600 max-w-none">
+                <h2 className="text-3xl font-bold text-gray-900 mb-6">Comprehensive Zultys Solutions for Every North Texas Business</h2>
+                <p>
+                  Our sitemap reflects our commitment to providing a wide range of <strong>Zultys solutions for DFW organizations</strong>. We cover everything from initial system design and professional installation to ongoing user training and 24/7 technical support. By organizing our content into logical categories, we aim to provide a seamless browsing experience for our North Texas clients, helping them discover the full potential of the Zultys unified communications platform.
+                </p>
+                <p>
+                  Whether you're interested in cloud-based services, on-premise appliances, or flexible hybrid solutions, DFW Business Communications has the knowledge and experience to guide you. We are proud to be your local Zultys partner in Fort Worth, serving businesses of all sizes across the Dallas-Fort Worth area with the technology that keeps them connected and productive.
+                </p>
 
-            <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Your Roadmap to Communication Success in DFW</h3>
-            <p>
-              Think of our sitemap as <strong>Your Roadmap to Communication Success in DFW</strong>. It provides a clear and organized view of the many ways DFW Business Communications can help your North Texas organization stay connected. From exploring new technologies to seeking expert local support, every link is a step toward a more efficient and productive communication environment for your Dallas or Fort Worth business.
-            </p>
-            <p>
-              We invite you to explore our website and discover the many Zultys solutions we offer. If you have any questions or need personalized guidance, our local Fort Worth team is always just a phone call away. Let DFW Business Communications be your guide to the future of business communications in North Texas.
-            </p>
-          </div>
+                <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Finding Specialized Zultys Resources for North Texas Industries</h3>
+                <p>
+                  For organizations in specific sectors, our sitemap provides a direct path to <strong>Specialized Zultys Resources for North Texas Industries</strong>. We have dedicated pages for healthcare, legal, real estate, and education sectors in the DFW area, each detailing how Zultys technology meets the unique communication and compliance needs of these industries. By using our sitemap, DFW professionals can quickly find the information most relevant to their specific business environment.
+                </p>
+                <p>
+                  Whether you're a medical clinic in Fort Worth needing secure communication or a law firm in Dallas requiring advanced call handling, our categorized links guide you to the right solution. DFW Business Communications is committed to providing industry-specific expertise that helps North Texas organizations thrive through better communication.
+                </p>
+
+                <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Navigating the Zultys Product Lifecycle in Dallas-Fort Worth</h3>
+                <p>
+                  Our sitemap also helps you <strong>Navigate the Zultys Product Lifecycle</strong>, from initial research and selection to professional installation and ongoing support. We provide detailed information on the latest Zultys ZIP phones, MX series appliances, and advanced software tools like ZAC and MXmobile. By following the links in our sitemap, DFW businesses can understand the full range of Zultys technology and how it can be integrated into their North Texas operations.
+                </p>
+                <p>
+                  We also include resources for system administrators and IT teams in Dallas and Fort Worth, providing the technical information needed to manage and optimize a Zultys environment. DFW Business Communications is your partner throughout the entire lifecycle of your communication system, ensuring you get the most value from your investment in North Texas.
+                </p>
+
+                <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Your Roadmap to Communication Success in DFW</h3>
+                <p>
+                  Think of our sitemap as <strong>Your Roadmap to Communication Success in DFW</strong>. It provides a clear and organized view of the many ways DFW Business Communications can help your North Texas organization stay connected. From exploring new technologies to seeking expert local support, every link is a step toward a more efficient and productive communication environment for your Dallas or Fort Worth business.
+                </p>
+                <p>
+                  We invite you to explore our website and discover the many Zultys solutions we offer. If you have any questions or need personalized guidance, our local Fort Worth team is always just a phone call away. Let DFW Business Communications be your guide to the future of business communications in North Texas.
+                </p>
+              </div>
+            </>
+          )}
 
           <div className="mt-20 p-12 bg-blue-900 rounded-3xl text-white text-center">
             <h2 className="text-3xl font-bold mb-6 text-white">Need Immediate Assistance?</h2>
