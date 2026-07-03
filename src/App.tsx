@@ -234,6 +234,7 @@ import { FloatingTextCTA } from './components/FloatingTextCTA';
 import { LocalBusinessSchema } from './components/LocalBusinessSchema';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { generateEliteMetadata } from './utils/seoHelpers';
+import { CityPageSkeleton, ProductPageSkeleton, GeneralPageSkeleton } from './components/SkeletonLoaders';
 
 // Advanced Canonical Normalization Lookup
 const canonicalMap: Record<string, string> = {
@@ -770,14 +771,67 @@ export default function App() {
     return <NotFound />;
   };
 
+  const getSuspenseFallback = (path: string) => {
+    const lp = path.toLowerCase();
+    
+    // Check if it's a product page
+    const isProduct = lp.includes('-phone') || 
+                      lp.includes('-zac') || 
+                      lp.includes('mx-series') || 
+                      lp.includes('mx-se') || 
+                      lp.includes('mxmobile') || 
+                      lp.includes('mxconference') || 
+                      lp.includes('gateways') || 
+                      lp === '/zultys-ip-phones' ||
+                      lp.startsWith('/products');
+
+    if (isProduct) {
+      return <ProductPageSkeleton />;
+    }
+
+    // Check if it's a city page
+    const isCity = lp.includes('-tx-zultys-phone-systems') || 
+                   lp.includes('-tx-zultys') ||
+                   lp.includes('-zultys') ||
+                   [
+                     '/dallas', '/fort-worth', '/addison', '/aledo', '/blue-mound', '/springtown',
+                     '/granbury', '/glen-rose', '/godley', '/grandview', '/venus', '/maypearl',
+                     '/italy', '/milford', '/palmer', '/mesquite', '/garland', '/mckinney',
+                     '/denton', '/lewisville', '/allen', '/mansfield', '/rowlett', '/cedar-hill',
+                     '/desoto', '/coppell', '/duncanville', '/lancaster', '/the-colony',
+                     '/little-elm', '/wylie', '/rockwall', '/forney', '/midlothian', '/waxahachie',
+                     '/ennis', '/cleburne', '/weatherford', '/burleson', '/terrell', '/prosper',
+                     '/murphy', '/sachse', '/seagoville', '/balch-springs', '/celina', '/princeton',
+                     '/anna', '/melissa', '/royse-city', '/fate', '/heath', '/sunnyvale',
+                     '/crandall', '/lavon', '/red-oak', '/ovilla', '/glenn-heights', '/hutchins',
+                     '/wilmer', '/kaufman', '/pilot-point', '/sanger', '/aubrey', '/alvarado',
+                     '/decatur', '/bridgeport', '/justin', '/krum', '/ponder', '/trophy-club',
+                     '/roanoke', '/argyle', '/kennedale', '/forest-hill', '/azle', '/bartonville',
+                     '/bowie', '/boyd', '/brock', '/crowley', '/haslet', '/joshua', '/lake-worth',
+                     '/lakeside', '/colleyville', '/saginaw', '/haltom-city', '/watauga',
+                     '/benbrook', '/westworth-village', '/white-settlement', '/river-oaks',
+                     '/hudson-oaks', '/willow-park', '/everman', '/pantego', '/dalworthington-gardens',
+                     '/westover-hills', '/edgecliff-village', '/richland-hills', '/sansom-park',
+                     '/reno', '/van-alstyne', '/leonard', '/farmersville', '/howe', '/whitewright',
+                     '/gunter', '/collinsville', '/tioga', '/tom-bean', '/trenton', '/savoy',
+                     '/bells', '/blue-ridge', '/ector', '/ravenna', '/bonham', '/honey-grove',
+                     '/ladonia', '/windom', '/dodd-city', '/merit', '/celeste', '/wolfe-city',
+                     '/caddo-mills', '/nevada', '/josephine', '/bailey', '/randolph', '/telephone',
+                     '/ivanhoe', '/gober'
+                   ].includes(lp);
+
+    if (isCity) {
+      return <CityPageSkeleton />;
+    }
+
+    // Default general page skeleton loader
+    return <GeneralPageSkeleton />;
+  };
+
   return (
     <QuoteProvider>
       <LocalBusinessSchema path={currentPath} />
-      <Suspense fallback={
-        <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
-          <div className="w-12 h-12 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      }>
+      <Suspense fallback={getSuspenseFallback(currentPath)}>
         {renderPage()}
       </Suspense>
       <Toaster position="top-right" richColors />

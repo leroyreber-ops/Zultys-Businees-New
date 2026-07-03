@@ -164,6 +164,63 @@ async function startServer() {
     }
   });
 
+  // API Route for logging 404/Not Found telemetry to track broken links
+  app.post("/api/telemetry/404", (req, res) => {
+    try {
+      const { path: errorPath, referrer, timestamp, userAgent } = req.body;
+      if (!errorPath) {
+        return res.status(400).json({ success: false, message: "Missing path parameter" });
+      }
+
+      const logEntry = {
+        path: errorPath,
+        referrer: referrer || "Direct",
+        timestamp: timestamp || new Date().toISOString(),
+        userAgent: userAgent || "Unknown",
+        count: 1
+      };
+
+      console.log("----------------------------------------");
+      console.log("⚠️ TELEMETRY: 404 NOT FOUND DETECTED!");
+      console.log(`   Path:      ${logEntry.path}`);
+      console.log(`   Referrer:  ${logEntry.referrer}`);
+      console.log(`   Time:      ${logEntry.timestamp}`);
+      console.log(`   UserAgent: ${logEntry.userAgent}`);
+      console.log("----------------------------------------");
+
+      const logFilePath = path.join(process.cwd(), "404-errors.json");
+      let existingLogs: any[] = [];
+
+      if (fs.existsSync(logFilePath)) {
+        try {
+          const fileContent = fs.readFileSync(logFilePath, "utf8");
+          existingLogs = JSON.parse(fileContent || "[]");
+        } catch (e) {
+          console.error("Error reading existing 404-errors.json, resetting file:", e);
+        }
+      }
+
+      // Check if this path + referrer already exists in the logs to avoid bloating and instead increment count
+      const existingEntryIdx = existingLogs.findIndex(
+        (log) => log.path === logEntry.path && log.referrer === logEntry.referrer
+      );
+
+      if (existingEntryIdx !== -1) {
+        existingLogs[existingEntryIdx].count = (existingLogs[existingEntryIdx].count || 1) + 1;
+        existingLogs[existingEntryIdx].timestamp = logEntry.timestamp;
+        existingLogs[existingEntryIdx].userAgent = logEntry.userAgent;
+      } else {
+        existingLogs.push(logEntry);
+      }
+
+      fs.writeFileSync(logFilePath, JSON.stringify(existingLogs, null, 2), "utf8");
+      res.json({ success: true, message: "404 logged successfully" });
+    } catch (error) {
+      console.error("Error logging 404 telemetry:", error);
+      res.status(500).json({ success: false, message: "Failed to log 404 telemetry" });
+    }
+  });
+
   // Dynamic XML Sitemap for rapid Google search indexing
   app.get("/sitemap.xml", (req, res) => {
     try {

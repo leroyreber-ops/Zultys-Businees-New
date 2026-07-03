@@ -16,6 +16,29 @@ export function NotFound() {
     if (gbot) {
       gbot.setAttribute('content', 'noindex, nofollow');
     }
+
+    // Unreachable URL Telemetry logging for SEO & broken link tracking
+    const reportTelemetry = async () => {
+      try {
+        await fetch('/api/telemetry/404', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            path: window.location.pathname + window.location.search,
+            referrer: document.referrer || 'Direct / Bookmark',
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+          }),
+        });
+      } catch (err) {
+        // Silently swallow telemetry error to maintain a perfect user experience
+        console.warn('Unable to send 404 telemetry report:', err);
+      }
+    };
+
+    reportTelemetry();
   }, []);
 
   return (
