@@ -129,6 +129,112 @@ const cityCoordinates: Record<string, { lat: number; lng: number; zip: string }>
   'DeSoto': { lat: 32.5896, lng: -96.8569, zip: '75115' },
   'Duncanville': { lat: 32.6501, lng: -96.9075, zip: '75116' },
   'Lancaster': { lat: 32.5921, lng: -96.7561, zip: '75146' },
+  'Addison': { lat: 32.9618, lng: -96.8295, zip: '75001' },
+  'Aledo': { lat: 32.6951, lng: -97.6022, zip: '76008' },
+  'Springtown': { lat: 32.9626, lng: -97.6836, zip: '76082' },
+  'Granbury': { lat: 32.4421, lng: -97.7942, zip: '76048' },
+  'Glen Rose': { lat: 32.2351, lng: -97.7553, zip: '76043' },
+  'Godley': { lat: 32.4496, lng: -97.5256, zip: '76044' },
+  'Grandview': { lat: 32.2704, lng: -97.1789, zip: '76050' },
+  'Venus': { lat: 32.4335, lng: -97.1022, zip: '76084' },
+  'Maypearl': { lat: 32.3115, lng: -97.0164, zip: '76064' },
+  'Italy': { lat: 32.1838, lng: -96.8856, zip: '76651' },
+  'Milford': { lat: 32.1449, lng: -96.9450, zip: '76670' },
+  'Palmer': { lat: 32.4312, lng: -96.6692, zip: '75152' },
+  'Murphy': { lat: 33.0151, lng: -96.6131, zip: '75094' },
+  'Sachse': { lat: 32.9768, lng: -96.5861, zip: '75048' },
+  'Seagoville': { lat: 32.6396, lng: -96.5389, zip: '75159' },
+  'Balch Springs': { lat: 32.7204, lng: -96.6119, zip: '75180' },
+  'Celina': { lat: 33.3243, lng: -96.7844, zip: '75009' },
+  'Princeton': { lat: 33.1798, lng: -96.4983, zip: '75407' },
+  'Anna': { lat: 33.3484, lng: -96.5508, zip: '75409' },
+  'Melissa': { lat: 33.2859, lng: -96.5739, zip: '75454' },
+  'Royse City': { lat: 32.9015, lng: -96.3303, zip: '75189' },
+  'Fate': { lat: 32.9412, lng: -96.3817, zip: '75087' },
+  'Heath': { lat: 32.8335, lng: -96.4719, zip: '75032' },
+  'Sunnyvale': { lat: 32.7960, lng: -96.5617, zip: '75182' },
+  'Crandall': { lat: 32.6282, lng: -96.4528, zip: '75114' },
+  'Lavon': { lat: 33.0232, lng: -96.4380, zip: '75166' },
+  'Red Oak': { lat: 32.5188, lng: -96.8042, zip: '75154' },
+  'Ovilla': { lat: 32.5290, lng: -96.8897, zip: '75154' },
+  'Glenn Heights': { lat: 32.5540, lng: -96.8569, zip: '75154' },
+  'Hutchins': { lat: 32.6437, lng: -96.7092, zip: '75141' },
+  'Wilmer': { lat: 32.5899, lng: -96.6853, zip: '75172' },
+  'Kaufman': { lat: 32.5890, lng: -96.3117, zip: '75142' },
+  'Pilot Point': { lat: 33.3968, lng: -96.9617, zip: '76258' },
+  'Sanger': { lat: 33.3632, lng: -97.1739, zip: '76266' },
+  'Aubrey': { lat: 33.3032, lng: -96.9850, zip: '76227' },
+  'Alvarado': { lat: 32.4063, lng: -97.2117, zip: '76009' },
+  'Decatur': { lat: 33.2343, lng: -97.5884, zip: '76234' },
+  'Bridgeport': { lat: 33.2101, lng: -97.7547, zip: '76226' },
+  'Justin': { lat: 33.0851, lng: -97.2961, zip: '76247' },
+  'Krum': { lat: 33.2626, lng: -97.2345, zip: '76249' },
+  'Ponder': { lat: 33.1593, lng: -97.2217, zip: '76259' },
+  'Trophy Club': { lat: 33.0112, lng: -97.1917, zip: '76262' },
+  'Roanoke': { lat: 33.0035, lng: -97.2289, zip: '76262' },
+  'Argyle': { lat: 33.1235, lng: -97.1814, zip: '76226' },
+  'Kennedale': { lat: 32.6474, lng: -97.2211, zip: '76060' },
+  'Forest Hill': { lat: 32.6840, lng: -97.2689, zip: '76119' },
+  'Blue Mound': { lat: 32.8424, lng: -97.3372, zip: '76131' },
+  'Azle': { lat: 32.8951, lng: -97.5459, zip: '76020' },
+  'Bartonville': { lat: 33.0735, lng: -97.1331, zip: '76226' },
+  'Bowie': { lat: 33.5590, lng: -97.8481, zip: '76230' },
+  'Boyd': { lat: 33.0790, lng: -97.5661, zip: '76023' },
+  'Brock': { lat: 32.6793, lng: -97.9103, zip: '76087' },
+  'Crowley': { lat: 32.5768, lng: -97.3603, zip: '76036' },
+  'Haslet': { lat: 32.9618, lng: -97.3400, zip: '76052' },
+  'Joshua': { lat: 32.4579, lng: -97.3828, zip: '76058' },
+  'Lake Worth': { lat: 32.8126, lng: -97.4267, zip: '76135' },
+  'Lakeside': { lat: 32.8157, lng: -97.4795, zip: '76135' },
+  'Colleyville': { lat: 32.8851, lng: -97.1439, zip: '76034' },
+  'Saginaw': { lat: 32.8640, lng: -97.3622, zip: '76179' },
+  'Haltom City': { lat: 32.7996, lng: -97.2797, zip: '76117' },
+  'Watauga': { lat: 32.8682, lng: -97.2517, zip: '76148' },
+  'Benbrook': { lat: 32.6732, lng: -97.4606, zip: '76126' },
+  'Westworth Village': { lat: 32.7604, lng: -97.3989, zip: '76114' },
+  'White Settlement': { lat: 32.7574, lng: -97.4589, zip: '76108' },
+  'River Oaks': { lat: 32.7762, lng: -97.3964, zip: '76114' },
+  'Hudson Oaks': { lat: 32.7512, lng: -97.6895, zip: '76087' },
+  'Willow Park': { lat: 32.7537, lng: -97.6495, zip: '76087' },
+  'Everman': { lat: 32.6318, lng: -97.2886, zip: '76140' },
+  'Pantego': { lat: 32.7154, lng: -97.1558, zip: '76013' },
+  'Dalworthington Gardens': { lat: 32.7001, lng: -97.1611, zip: '76016' },
+  'Westover Hills': { lat: 32.7443, lng: -97.4114, zip: '76107' },
+  'Edgecliff Village': { lat: 32.6582, lng: -97.3372, zip: '76134' },
+  'Richland Hills': { lat: 32.8124, lng: -97.2272, zip: '76118' },
+  'Sansom Park': { lat: 32.7951, lng: -97.3995, zip: '76114' },
+  'Reno': { lat: 32.9443, lng: -97.5792, zip: '76020' },
+  'Van Alstyne': { lat: 33.4246, lng: -96.5775, zip: '75495' },
+  'Leonard': { lat: 33.3821, lng: -96.2464, zip: '75452' },
+  'Farmersville': { lat: 33.1640, lng: -96.3597, zip: '75442' },
+  'Howe': { lat: 33.5048, lng: -96.7142, zip: '75459' },
+  'Whitewright': { lat: 33.5118, lng: -96.3939, zip: '75491' },
+  'Gunter': { lat: 33.4479, lng: -96.7483, zip: '75058' },
+  'Collinsville': { lat: 33.5607, lng: -96.9094, zip: '76233' },
+  'Tioga': { lat: 33.4754, lng: -96.9142, zip: '76271' },
+  'Tom Bean': { lat: 33.5234, lng: -96.5369, zip: '75489' },
+  'Trenton': { lat: 33.4293, lng: -96.3414, zip: '75490' },
+  'Savoy': { lat: 33.5612, lng: -96.3639, zip: '75479' },
+  'Bells': { lat: 33.6115, lng: -96.4111, zip: '75414' },
+  'Blue Ridge': { lat: 33.2982, lng: -96.3989, zip: '75424' },
+  'Ector': { lat: 33.5826, lng: -96.2764, zip: '75439' },
+  'Ravenna': { lat: 33.6668, lng: -96.2394, zip: '75476' },
+  'Bonham': { lat: 33.5773, lng: -96.1783, zip: '75418' },
+  'Honey Grove': { lat: 33.5879, lng: -95.9080, zip: '75446' },
+  'Ladonia': { lat: 33.4273, lng: -95.9464, zip: '75449' },
+  'Windom': { lat: 33.5665, lng: -95.9997, zip: '75492' },
+  'Dodd City': { lat: 33.5804, lng: -96.1139, zip: '75438' },
+  'Merit': { lat: 33.1873, lng: -96.2241, zip: '75458' },
+  'Celeste': { lat: 33.2926, lng: -96.1930, zip: '75423' },
+  'Wolfe City': { lat: 33.3673, lng: -96.0691, zip: '75496' },
+  'Caddo Mills': { lat: 33.0640, lng: -96.2775, zip: '75135' },
+  'Nevada': { lat: 33.0415, lng: -96.3644, zip: '75173' },
+  'Josephine': { lat: 33.0621, lng: -96.3150, zip: '75164' },
+  'Bailey': { lat: 33.4357, lng: -96.1708, zip: '75413' },
+  'Randolph': { lat: 33.4862, lng: -96.2514, zip: '75475' },
+  'Telephone': { lat: 33.7154, lng: -95.9839, zip: '75488' },
+  'Ivanhoe': { lat: 33.6823, lng: -96.2164, zip: '75447' },
+  'Gober': { lat: 33.4834, lng: -96.0528, zip: '75443' }
 };
 
 // Canonicals mapping reference for robust page-specific schema urls
@@ -504,6 +610,24 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
     ]
   } : null;
 
+  // 6. Localized Service Schema for City Pages (Business VoIP / Unified Communications / IP-PBX)
+  const serviceSchema = isCityPage ? {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${canonicalUrl}#service`,
+    name: `Business VoIP & Zultys Phone Systems in ${cityName}`,
+    description: `Enterprise-grade Zultys business phone systems, cloud hosted VoIP, IP-PBX installation, and 24/7 certified engineering support for companies in ${cityName}, Texas.`,
+    serviceType: 'TelecommunicationsService',
+    provider: {
+      '@id': 'https://dallasfortworthzultys.com/#organization'
+    },
+    areaServed: {
+      '@type': 'City',
+      name: cityName,
+      sameAs: `https://en.wikipedia.org/wiki/${cityName.replace(/\s+/g, '_')},_Texas`
+    }
+  } : null;
+
   // Side-effect: Cleanup any manually added schema scripts to avoid duplicates,
   // while letting React handle injecting/updating its own declarative schema tags.
   useEffect(() => {
@@ -514,8 +638,8 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
       if (!tag.hasAttribute('data-centralized')) {
         try {
           const content = JSON.parse(tag.textContent || '{}');
-          // Only remove duplicate business, organization, or website level schemas that we manage centrally
-          if (content['@type'] === 'LocalBusiness' || content['@type'] === 'Organization' || content['@type'] === 'WebSite') {
+          // Only remove duplicate business, organization, website, or service level schemas that we manage centrally
+          if (content['@type'] === 'LocalBusiness' || content['@type'] === 'Organization' || content['@type'] === 'WebSite' || content['@type'] === 'Service') {
             tag.remove();
           }
         } catch (e) {
@@ -543,6 +667,11 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
       {faqSchema && (
         <script type="application/ld+json" data-centralized="true">
           {JSON.stringify(faqSchema)}
+        </script>
+      )}
+      {serviceSchema && (
+        <script type="application/ld+json" data-centralized="true">
+          {JSON.stringify(serviceSchema)}
         </script>
       )}
     </>

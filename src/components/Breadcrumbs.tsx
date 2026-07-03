@@ -321,6 +321,34 @@ const exactMatches: Record<string, BreadcrumbItem[]> = {
   ]
 };
 
+const KNOWN_CITIES = new Set([
+  'Dallas', 'Fort Worth', 'Arlington', 'Plano', 'Garland', 'Irving', 
+  'Grand Prairie', 'McKinney', 'Frisco', 'Carrollton', 'Denton', 'Richardson', 
+  'Lewisville', 'Allen', 'Flower Mound', 'North Richland Hills', 'Mansfield', 
+  'Rowlett', 'Euless', 'Southlake', 'Grapevine', 'Bedford', 'Keller', 
+  'Hurst', 'Coppell', 'Waxahachie', 'Cleburne', 'Weatherford', 'Burleson', 
+  'Terrell', 'Prosper', 'The Colony', 'Little Elm', 'Wylie', 'Rockwall', 
+  'Forney', 'Midlothian', 'Ennis', 'Mesquite', 'Cedar Hill', 'DeSoto', 
+  'Duncanville', 'Lancaster', 'Addison', 'Aledo', 'Springtown', 'Granbury', 
+  'Glen Rose', 'Godley', 'Grandview', 'Venus', 'Maypearl', 'Italy', 
+  'Milford', 'Palmer', 'Murphy', 'Sachse', 'Seagoville', 'Balch Springs', 
+  'Celina', 'Princeton', 'Anna', 'Melissa', 'Royse City', 'Fate', 'Heath', 
+  'Sunnyvale', 'Crandall', 'Lavon', 'Red Oak', 'Ovilla', 'Glenn Heights', 
+  'Hutchins', 'Wilmer', 'Kaufman', 'Pilot Point', 'Sanger', 'Aubrey', 
+  'Alvarado', 'Decatur', 'Bridgeport', 'Justin', 'Krum', 'Ponder', 
+  'Trophy Club', 'Roanoke', 'Argyle', 'Kennedale', 'Forest Hill', 'Blue Mound', 
+  'Azle', 'Bartonville', 'Bowie', 'Boyd', 'Brock', 'Crowley', 'Haslet', 
+  'Joshua', 'Lake Worth', 'Lakeside', 'Colleyville', 'Saginaw', 'Haltom City', 
+  'Watauga', 'Benbrook', 'Westworth Village', 'White Settlement', 'River Oaks', 
+  'Hudson Oaks', 'Willow Park', 'Everman', 'Pantego', 'Dalworthington Gardens', 
+  'Westover Hills', 'Edgecliff Village', 'Richland Hills', 'Sansom Park', 'Reno', 
+  'Van Alstyne', 'Leonard', 'Farmersville', 'Howe', 'Whitewright', 'Gunter', 
+  'Collinsville', 'Tioga', 'Tom Bean', 'Trenton', 'Savoy', 'Bells', 
+  'Blue Ridge', 'Ector', 'Ravenna', 'Bonham', 'Honey Grove', 'Ladonia', 
+  'Windom', 'Dodd City', 'Merit', 'Celeste', 'Wolfe City', 'Caddo Mills', 
+  'Nevada', 'Josephine', 'Bailey', 'Randolph', 'Telephone', 'Ivanhoe', 'Gober'
+]);
+
 function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const cleanPathname = pathname.toLowerCase().replace(/\/$/, '');
 
@@ -334,13 +362,49 @@ function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return exactMatches[cleanPathname];
   }
 
-  // Fallback / dynamic classification for city service area pages
+  // Handle blog posts dynamically (e.g. /blog/post-slug)
+  if (cleanPathname.startsWith('/blog/')) {
+    const postSlug = cleanPathname.substring('/blog/'.length);
+    const postTitle = postSlug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    return [
+      { label: 'Blog', href: '/blog' },
+      { label: postTitle }
+    ];
+  }
+
+  // Check if it's a city page using the known cities set and suffixes
   const formattedCity = formatCityName(cleanPathname);
-  if (formattedCity) {
+  if (formattedCity && KNOWN_CITIES.has(formattedCity)) {
     return [
       { label: 'Service Areas', href: '/sitemap.html' },
       { label: formattedCity }
     ];
+  }
+
+  // General multi-segment path fallback (e.g. /solutions/industry)
+  const segments = cleanPathname.split('/').filter(Boolean);
+  if (segments.length > 1) {
+    const breadcrumbItems: BreadcrumbItem[] = [];
+    let currentHref = '';
+    
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      currentHref += `/${segment}`;
+      
+      const label = segment
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+        
+      breadcrumbItems.push({
+        label,
+        href: i === segments.length - 1 ? undefined : currentHref
+      });
+    }
+    return breadcrumbItems;
   }
 
   // Default fallback if we can't figure it out perfectly

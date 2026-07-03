@@ -299,7 +299,7 @@ export function Hybrid() {
               <div className="relative">
                 <div className="rounded-2xl overflow-hidden shadow-2xl bg-white p-4 border border-slate-200">
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=1080"
+                    src="https://images.unsplash.com/photo-1597852074816-d933c7d2b988?auto=format&fit=crop&q=80&w=1080"
                     alt="Hybrid Cloud Survivability DFW"
                     className="w-full h-auto rounded-xl"
                   />
