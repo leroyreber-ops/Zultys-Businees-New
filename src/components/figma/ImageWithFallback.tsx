@@ -100,7 +100,7 @@ export function ImageWithFallback(props: ImageWithFallbackProps) {
     : '';
 
   return (
-    <img 
+    <img
       ref={imgRef}
       src={displaySrc} 
       alt={alt} 

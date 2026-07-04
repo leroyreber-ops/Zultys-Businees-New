@@ -13,7 +13,7 @@ export function CTASection({}: CTASectionProps) {
   return (
     <section className="relative py-24 overflow-hidden bg-charcoal">
       <div className="absolute inset-0 z-0 opacity-20">
-        <ImageWithFallback
+        <ImageWithFallback 
           src="https://images.unsplash.com/photo-1641084697408-041fff393f79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxGb3J0JTIwV29ydGglMjBkb3dudG93biUyMHNreWxpbmV8ZW58MXx8fHwxNzcxMDg4MzE1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
           alt="Fort Worth Downtown Skyline - DFW Business Communications Zultys Dealer"
           className="w-full h-full object-cover"

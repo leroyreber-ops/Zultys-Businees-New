@@ -8,7 +8,6 @@ import { useQuote } from '../context/QuoteContext';
 import { ServiceAreas } from '../components/ServiceAreas';
 import { FAQ } from '../components/FAQ';
 import { Comparison } from '../components/Comparison';
-import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
 import { useSEO } from '../hooks/useSEO';
 import { HashLink as Link } from '../components/HashLink';
 import { Button } from '../components/ui/button';
@@ -50,6 +49,7 @@ import {
   Handshake,
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import { SEOControlPanelWidget } from '../components/SEOControlPanelWidget';
 
 export function Home() {
   const { openQuote } = useQuote();
@@ -85,7 +85,6 @@ export function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <LocalBusinessSchema path="/" />
       <Header />
       
       <main className="flex-1">
@@ -683,6 +682,7 @@ export function Home() {
 
       <Footer />
       <ScrollToTop />
+      <SEOControlPanelWidget />
     </div>
   );
 }

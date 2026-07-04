@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useSEO } from '../hooks/useSEO';
-import { LocalBusinessSchema } from '../components/LocalBusinessSchema';
 import {
   HERO_BACKGROUND,
   SUPPORT_TEAM,
@@ -50,7 +49,6 @@ export function About() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <LocalBusinessSchema path="/about" />
       <Header />
       
       <main className="flex-1">
@@ -58,7 +56,7 @@ export function About() {
         <section className="relative bg-white pt-24 pb-32 overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none">
-            <img
+            <img 
               src={HERO_BACKGROUND}
               alt="Background Pattern"
               className="w-full h-full object-cover"

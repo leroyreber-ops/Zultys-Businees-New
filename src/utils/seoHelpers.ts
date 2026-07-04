@@ -1,3 +1,5 @@
+import { seoOverrides } from './seoOverrides';
+
 export interface SEOProps {
   title: string;
   description: string;
@@ -384,6 +386,15 @@ export function generateEliteMetadata(path: string): { title: string; descriptio
   const normalized = path.toLowerCase().endsWith('/') && path.length > 1
     ? path.toLowerCase().slice(0, -1)
     : path.toLowerCase();
+
+  // 0. Check for daily Health Check / Automated Calibration overrides first
+  if (seoOverrides && seoOverrides[normalized]) {
+    return {
+      title: seoOverrides[normalized].title || 'DFW Zultys Partner',
+      description: seoOverrides[normalized].description || 'Zultys business phone systems and cloud VoIP in Dallas-Fort Worth.',
+      keywords: 'Zultys business phone systems, DFW VoIP, Dallas business phones, Fort Worth telecommunications'
+    };
+  }
 
   // 1. Home / Root Page
   if (normalized === '' || normalized === '/' || normalized === '/index.html') {

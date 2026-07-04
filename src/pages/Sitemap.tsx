@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { CTASection } from '../components/CTASection';
 import { ScrollToTop } from '../components/ScrollToTop';
+import { SEOControlPanelWidget } from '../components/SEOControlPanelWidget';
 import { useQuote } from '../context/QuoteContext';
 import { HashLink as Link } from '../components/HashLink';
 import { Button } from '../components/ui/button';
@@ -23,16 +25,161 @@ import {
   Check,
   Copy,
   ExternalLink,
+  Key,
+  Send,
+  AlertTriangle,
+  ArrowRight,
+  FileText,
+  Plus,
+  List,
+  ShieldAlert,
+  History,
+  Link2,
+  XCircle,
+  CheckCircle,
 } from 'lucide-react';
 
 export function Sitemap() {
   const { openQuote } = useQuote();
   const [dynamicRoutes, setDynamicRoutes] = useState<{ path: string; priority: string; changefreq: string; url: string }[]>([]);
   const [loadingRoutes, setLoadingRoutes] = useState(false);
-  const [viewMode, setViewMode] = useState<'standard' | 'dynamic' | 'xml'>('standard');
+  const [viewMode, setViewMode] = useState<'standard' | 'dynamic' | 'xml' | 'seo'>('standard');
   const [copied, setCopied] = useState(false);
   const [submittingSitemap, setSubmittingSitemap] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+
+  // Integrated Google Search Console & Indexing API States
+  const [seoStatus, setSeoStatus] = useState<{ configured: boolean; clientEmail: string | null; message: string } | null>(null);
+  const [seoHistory, setSeoHistory] = useState<any[]>([]);
+  const [loadingSeoStatus, setLoadingSeoStatus] = useState(true);
+  const [loadingSeoHistory, setLoadingSeoHistory] = useState(true);
+  const [submittingSeoRecrawl, setSubmittingSeoRecrawl] = useState(false);
+  const [submittingSeoSitemap, setSubmittingSeoSitemap] = useState(false);
+
+  // Form states for the integrated console
+  const [seoSiteUrl, setSeoSiteUrl] = useState('https://dallasfortworthzultys.com');
+  const [seoSitemapUrl, setSeoSitemapUrl] = useState('https://dallasfortworthzultys.com/sitemap.xml');
+  const [seoRecrawlUrls, setSeoRecrawlUrls] = useState('');
+  const [seoRecrawlAction, setSeoRecrawlAction] = useState<'URL_UPDATED' | 'URL_DELETED'>('URL_UPDATED');
+
+  // Load Status and History for Google Search Console API
+  const loadSeoStatus = async () => {
+    setLoadingSeoStatus(true);
+    try {
+      const res = await fetch('/api/search-console/status');
+      const data = await res.json();
+      if (data.success) {
+        setSeoStatus({
+          configured: data.configured,
+          clientEmail: data.clientEmail,
+          message: data.message,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load Google indexing status:', err);
+    } finally {
+      setLoadingSeoStatus(false);
+    }
+  };
+
+  const loadSeoHistory = async () => {
+    setLoadingSeoHistory(true);
+    try {
+      const res = await fetch('/api/search-console/history');
+      const data = await res.json();
+      if (data.success) {
+        setSeoHistory(data.history || []);
+      }
+    } catch (err) {
+      console.error('Failed to load indexing history:', err);
+    } finally {
+      setLoadingSeoHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    if (viewMode === 'seo') {
+      loadSeoStatus();
+      loadSeoHistory();
+    }
+  }, [viewMode]);
+
+  // Handle Sitemap registration to Search Console API
+  const handleSeoSitemapSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingSeoSitemap(true);
+    const toastId = toast.loading('Submitting sitemap to Google Search Console...');
+
+    try {
+      const res = await fetch('/api/search-console/submit-sitemap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ siteUrl: seoSiteUrl, sitemapUrl: seoSitemapUrl }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message || 'Sitemap registered with Google successfully!', { id: toastId });
+        loadSeoHistory();
+      } else {
+        toast.error(`Sitemap registration failed: ${data.error}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message || 'Failed to register sitemap'}`, { id: toastId });
+    } finally {
+      setSubmittingSeoSitemap(false);
+    }
+  };
+
+  // Handle Programmatic Re-crawl request
+  const handleSeoRecrawlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const urls = seoRecrawlUrls
+      .split('\n')
+      .map((u) => u.trim())
+      .filter((u) => u.length > 0);
+
+    if (urls.length === 0) {
+      toast.error('Please enter at least one URL to re-crawl.');
+      return;
+    }
+
+    // Basic URL validation
+    const invalidUrl = urls.find((u) => !u.startsWith('http://') && !u.startsWith('https://'));
+    if (invalidUrl) {
+      toast.error(`Invalid URL: "${invalidUrl}". Must start with http:// or https://`);
+      return;
+    }
+
+    setSubmittingSeoRecrawl(true);
+    const toastId = toast.loading(`Submitting ${urls.length} URL(s) to Google Indexing API...`);
+
+    try {
+      const res = await fetch('/api/search-console/request-recrawl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls, action: seoRecrawlAction }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const successes = data.results.filter((r: any) => r.success).length;
+        const failures = data.results.filter((r: any) => !r.success).length;
+
+        if (failures === 0) {
+          toast.success(`Successfully requested indexing for all ${successes} URL(s)!`, { id: toastId });
+        } else {
+          toast.warning(`Submitted: ${successes} succeeded, ${failures} failed. Check logs below.`, { id: toastId });
+        }
+        setSeoRecrawlUrls('');
+        loadSeoHistory();
+      } else {
+        toast.error(`Indexing request failed: ${data.error}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message || 'Failed to submit re-crawl request'}`, { id: toastId });
+    } finally {
+      setSubmittingSeoRecrawl(false);
+    }
+  };
 
   useEffect(() => {
     document.title = 'Sitemap | Dallas Fort Worth Zultys | DFW Business Communications';
@@ -422,6 +569,15 @@ ${urlEntries}
                 <FileCode className="h-4 w-4 mr-1" />
                 XML Generator
               </Button>
+              <Button
+                variant={viewMode === 'seo' ? 'default' : 'outline'}
+                onClick={() => setViewMode('seo')}
+                size="sm"
+                className="rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              >
+                <Globe className="h-4 w-4 mr-1 animate-pulse" />
+                Google Indexing Console
+              </Button>
             </div>
           </div>
 
@@ -567,6 +723,302 @@ ${urlEntries}
                   </pre>
                 </div>
               </Card>
+            </div>
+          )}
+
+          {/* Google Search Console & Indexing Console */}
+          {viewMode === 'seo' && (
+            <div className="space-y-10 mb-16">
+              {/* Quick Status, Submit & Re-crawl cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Connection Status */}
+                <Card className="p-6 border-gray-200 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+                      <Key className="h-5 w-5 text-blue-600" />
+                      Google Cloud API Connection
+                    </h3>
+                    {loadingSeoStatus ? (
+                      <div className="space-y-3 py-4 animate-pulse">
+                        <div className="h-4 w-2/3 bg-gray-100 rounded" />
+                        <div className="h-10 w-full bg-gray-50 rounded-lg" />
+                      </div>
+                    ) : seoStatus?.configured ? (
+                      <div className="space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-xs font-semibold">
+                          <CheckCircle className="h-3.5 w-3.5" /> Google Service Account Connected
+                        </div>
+                        <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+                          <span className="text-xs text-gray-500 font-mono block">Client Email Account</span>
+                          <span className="text-xs font-semibold font-mono text-gray-800 break-all select-all">
+                            {seoStatus.clientEmail}
+                          </span>
+                        </div>
+                        <p className="text-xs text-green-600 font-medium">
+                          ✔ Ready to trigger real-time Google Indexing and sitemap submissions.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-semibold">
+                          <AlertTriangle className="h-3.5 w-3.5" /> Missing Service Account
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          Search Console and Indexing API integrations are currently dormant.
+                        </p>
+                        <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-start gap-2.5">
+                          <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                          <span className="text-xs text-amber-800 leading-relaxed">
+                            Provide <strong>GOOGLE_CLIENT_EMAIL</strong> &amp; <strong>GOOGLE_PRIVATE_KEY</strong>, or <strong>GOOGLE_SERVICE_ACCOUNT_JSON</strong> in settings.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="border-t border-gray-100 pt-4 mt-6">
+                    <a
+                      href="#gsc-integration-guide"
+                      className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline"
+                    >
+                      View Setup Guide <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </Card>
+
+                {/* Sitemap Submission Card */}
+                <Card className="p-6 border-gray-200 shadow-sm">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    Sitemap Register (API)
+                  </h3>
+                  <form onSubmit={handleSeoSitemapSubmit} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-600 block">Site Property URL</label>
+                      <input
+                        type="text"
+                        value={seoSiteUrl}
+                        onChange={(e) => setSeoSiteUrl(e.target.value)}
+                        placeholder="https://example.com"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-gray-600 block">Sitemap URL Path</label>
+                      <input
+                        type="text"
+                        value={seoSitemapUrl}
+                        onChange={(e) => setSeoSitemapUrl(e.target.value)}
+                        placeholder="https://example.com/sitemap.xml"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={submittingSeoSitemap || !seoStatus?.configured}
+                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-100 disabled:text-gray-400 transition text-white py-2 px-4 rounded-lg text-sm font-semibold shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <Send className="h-4 w-4" />
+                      {submittingSeoSitemap ? 'Submitting...' : 'Register Sitemap'}
+                    </button>
+                  </form>
+                </Card>
+
+                {/* Programmatic URL Re-crawl Card */}
+                <Card className="p-6 border-gray-200 shadow-sm">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+                    <Plus className="h-5 w-5 text-blue-600" />
+                    Programmatic Re-crawl
+                  </h3>
+                  <form onSubmit={handleSeoRecrawlSubmit} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-semibold text-gray-600">Target URLs <span className="text-gray-400 font-normal">(one per line)</span></label>
+                        <span className="text-3xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Instant API</span>
+                      </div>
+                      <textarea
+                        value={seoRecrawlUrls}
+                        onChange={(e) => setSeoRecrawlUrls(e.target.value)}
+                        placeholder="https://dallasfortworthzultys.com/about&#10;https://dallasfortworthzultys.com/sitemap"
+                        className="w-full h-[96px] bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 resize-none"
+                        required
+                      />
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="seoRecrawlAction"
+                          checked={seoRecrawlAction === 'URL_UPDATED'}
+                          onChange={() => setSeoRecrawlAction('URL_UPDATED')}
+                          className="text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+                        />
+                        Create or Update
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="seoRecrawlAction"
+                          checked={seoRecrawlAction === 'URL_DELETED'}
+                          onChange={() => setSeoRecrawlAction('URL_DELETED')}
+                          className="text-red-600 focus:ring-red-500 h-3.5 w-3.5"
+                        />
+                        Remove URL
+                      </label>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={submittingSeoRecrawl || !seoStatus?.configured}
+                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-100 disabled:text-gray-400 transition text-white py-2 px-4 rounded-lg text-sm font-semibold shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${submittingSeoRecrawl ? 'animate-spin' : ''}`} />
+                      {submittingSeoRecrawl ? 'Requesting...' : 'Submit Re-crawl Request'}
+                    </button>
+                  </form>
+                </Card>
+
+              </div>
+
+              {/* History Log Table */}
+              <Card className="border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <History className="h-5 w-5 text-blue-600" />
+                    Google Search Indexing Logs
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => { loadSeoStatus(); loadSeoHistory(); }}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5"
+                    >
+                      <RefreshCw className={`h-3 w-3 ${loadingSeoHistory ? 'animate-spin' : ''}`} />
+                      Sync Logs
+                    </button>
+                    <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                      <List className="h-3.5 w-3.5" /> {seoHistory.length} actions logged
+                    </span>
+                  </div>
+                </div>
+
+                {loadingSeoHistory ? (
+                  <div className="p-12 text-center text-gray-500 space-y-3">
+                    <RefreshCw className="h-8 w-8 text-gray-400 animate-spin mx-auto" />
+                    <p className="text-sm">Retrieving indexing history logs...</p>
+                  </div>
+                ) : seoHistory.length === 0 ? (
+                  <div className="p-12 text-center text-gray-500 space-y-2">
+                    <Info className="h-10 w-10 text-gray-300 mx-auto" />
+                    <h4 className="text-sm font-semibold text-gray-700">No indexing logs found</h4>
+                    <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                      Submit a sitemap or request a URL re-crawl to populate this table with live Search Console logs.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left text-xs text-gray-500">
+                      <thead className="bg-gray-50 text-gray-700 uppercase font-semibold border-b border-gray-200 text-3xs tracking-wider">
+                        <tr>
+                          <th className="py-3 px-6">Timestamp</th>
+                          <th className="py-3 px-6">Type</th>
+                          <th className="py-3 px-6">URL / Resource</th>
+                          <th className="py-3 px-6 text-center">API Status</th>
+                          <th className="py-3 px-6">Google API Response / Details</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 font-medium">
+                        {seoHistory.map((log, index) => (
+                          <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="py-3.5 px-6 whitespace-nowrap text-gray-400 font-mono">
+                              {new Date(log.timestamp).toLocaleString()}
+                            </td>
+                            <td className="py-3.5 px-6 whitespace-nowrap">
+                              {log.type === 'sitemap' ? (
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-bold uppercase tracking-wider text-4xs">
+                                  <FileText className="h-2.5 w-2.5" /> Sitemap
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md font-bold uppercase tracking-wider text-4xs">
+                                  <Link2 className="h-2.5 w-2.5" /> Indexing
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-6 font-mono text-gray-900 select-all max-w-xs truncate" title={log.url}>
+                              {log.url}
+                            </td>
+                            <td className="py-3.5 px-6 text-center whitespace-nowrap">
+                              {log.status === 'SUCCESS' ? (
+                                <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded font-bold text-4xs uppercase tracking-wider">
+                                  <CheckCircle className="h-2.5 w-2.5" /> Success
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-red-700 bg-red-50 px-2 py-0.5 rounded font-bold text-4xs uppercase tracking-wider">
+                                  <XCircle className="h-2.5 w-2.5" /> Failed
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-6 max-w-sm text-gray-500 leading-normal">
+                              {log.action && (
+                                <span className="inline-block bg-gray-100 text-gray-600 text-3xs font-bold px-1 py-0.2 rounded mr-1.5 font-mono">
+                                  {log.action}
+                                </span>
+                              )}
+                              {log.message}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </Card>
+
+              {/* Step-by-Step Google Integration Guide */}
+              <section id="gsc-integration-guide" className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm space-y-6">
+                <div className="border-b border-gray-100 pb-4">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <Info className="h-5 w-5 text-blue-600" />
+                    How to Activate Instant Google Search Console API Indexing
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Follow these 3 simple authorization steps to establish live secure connections to Google Search indexing:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm text-gray-600 leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold font-mono">1</span>
+                      <h4 className="font-bold text-gray-900">1. Cloud Service Account</h4>
+                    </div>
+                    <p className="text-xs">
+                      Go to the <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold hover:text-blue-800">Google Cloud Console</a>, search for and enable the <strong>Webmaster Tools / Search Console API</strong> and <strong>Google Indexing API</strong>, then create a <strong>Service Account</strong> and download a JSON Private Key.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold font-mono">2</span>
+                      <h4 className="font-bold text-gray-900">2. Authorize via Search Console</h4>
+                    </div>
+                    <p className="text-xs">
+                      Copy the generated Service Account <code>client_email</code> address (e.g. <code>my-service-account@project.iam.gserviceaccount.com</code>). 
+                      Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold hover:text-blue-800">Google Search Console</a>, go to <strong>Settings &gt; Users &amp; Permissions</strong>, and add this email as a <strong>Full User</strong> or <strong>Owner</strong> of your site property.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 text-xs font-bold font-mono">3</span>
+                      <h4 className="font-bold text-gray-900">3. Provide Keys to AI Studio</h4>
+                    </div>
+                    <p className="text-xs">
+                      Define the credentials as environment variables in your workspace: <strong>GOOGLE_SERVICE_ACCOUNT_JSON</strong> or separate <strong>GOOGLE_CLIENT_EMAIL</strong> and <strong>GOOGLE_PRIVATE_KEY</strong>. Your server will instantly establish secure handshakes!
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
           )}
 
@@ -736,6 +1188,7 @@ ${urlEntries}
 
       <Footer />
       <ScrollToTop />
+      <SEOControlPanelWidget />
     </div>
   );
 }

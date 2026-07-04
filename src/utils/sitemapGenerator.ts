@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { isGoogleConfigured, notifyGoogleUrlChange, submitSitemapToGoogle, logIndexingActivity } from "./googleIndexer.js";
 
 /**
  * Interface representing a route's SEO configuration.
@@ -192,6 +193,10 @@ export function generateSitemapFiles(): void {
       fs.writeFileSync(distSitemapPath, xml, "utf8");
       console.log(`[Sitemap] Automatically updated dist/sitemap.xml`);
     }
+
+    // Check if new city or product pages require programmatic Google Indexing Auto-Pings
+    const routes = extractRoutesFromApp();
+    checkAndTriggerAutoPing(routes);
   } catch (err) {
     console.error("❌ [Sitemap] Failed to generate sitemap files:", err);
   }
@@ -248,4 +253,143 @@ export function buildSitemapXml(): string {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${xmlEntries}
 </urlset>`;
+}
+
+export function isCityOrProductRoute(route: string): boolean {
+  const normalized = route.toLowerCase();
+  
+  // City page check
+  const isCity = 
+    normalized.includes("-tx-zultys") || 
+    normalized.endsWith("-zultys-phones") ||
+    normalized === "/dallas" ||
+    normalized === "/fort-worth" ||
+    normalized === "/dfw" ||
+    normalized.includes("dallas") ||
+    normalized.includes("fort-worth");
+    
+  // Product page check
+  const isProduct = 
+    normalized === "/products" ||
+    normalized.includes("zip") || 
+    normalized.includes("z21") || 
+    normalized.includes("z22") || 
+    normalized.includes("z23") || 
+    normalized.includes("mx-") || 
+    normalized.includes("mxse") || 
+    normalized.includes("mxseries") || 
+    normalized.includes("phone-system") || 
+    normalized.includes("telephone");
+    
+  return isCity || isProduct;
+}
+
+export function checkAndTriggerAutoPing(currentRoutes: string[]): void {
+  try {
+    const configPath = path.join(process.cwd(), "seo-config.json");
+    let autoPingEnabled = false;
+    
+    if (fs.existsSync(configPath)) {
+      try {
+        const config = JSON.parse(fs.readFileSync(configPath, "utf8") || "{}");
+        autoPingEnabled = !!config.autoPingEnabled;
+      } catch (e) {
+        console.error("Error reading seo-config.json:", e);
+      }
+    }
+
+    const knownRoutesPath = path.join(process.cwd(), "known-routes.json");
+    let knownRoutes: string[] = [];
+    
+    const firstRun = !fs.existsSync(knownRoutesPath);
+    if (!firstRun) {
+      try {
+        knownRoutes = JSON.parse(fs.readFileSync(knownRoutesPath, "utf8") || "[]");
+      } catch (e) {
+        console.error("Error reading known-routes.json:", e);
+      }
+    }
+
+    // Filter current routes to only keep valid ones
+    const activeRoutes = currentRoutes.filter(r => r && r !== "/*");
+
+    if (firstRun) {
+      // First run: just initialize known-routes with existing pages
+      fs.writeFileSync(knownRoutesPath, JSON.stringify(activeRoutes, null, 2), "utf8");
+      console.log(`[Auto-Ping] Initialized known-routes.json with ${activeRoutes.length} existing routes.`);
+      return;
+    }
+
+    // Find new routes that are NOT in knownRoutes
+    const newRoutes = activeRoutes.filter(route => !knownRoutes.includes(route));
+
+    if (newRoutes.length > 0) {
+      console.log(`[Auto-Ping] Found ${newRoutes.length} new routes:`, newRoutes);
+      
+      const targetNewPages = newRoutes.filter(route => isCityOrProductRoute(route));
+      
+      if (targetNewPages.length > 0) {
+        console.log(`[Auto-Ping] Detected ${targetNewPages.length} new city or product routes:`, targetNewPages);
+        
+        if (autoPingEnabled) {
+          const configured = isGoogleConfigured();
+          
+          for (const route of targetNewPages) {
+            const targetUrl = `https://dallasfortworthzultys.com${route}`;
+            
+            if (configured) {
+              console.log(`[Auto-Ping] GSC is configured. Sending live ping to Google for: ${targetUrl}`);
+              notifyGoogleUrlChange(targetUrl, "URL_UPDATED")
+                .then(() => {
+                  console.log(`[Auto-Ping] Live re-crawl request accepted by Google for ${targetUrl}`);
+                })
+                .catch((err) => {
+                  console.error(`[Auto-Ping] Live re-crawl request failed for ${targetUrl}:`, err.message);
+                });
+            } else {
+              // Sandbox demo mode logging fallback
+              console.log(`[Auto-Ping Sandbox] GSC unconfigured. Logging simulated success for: ${targetUrl}`);
+              logIndexingActivity({
+                type: 'indexing',
+                url: targetUrl,
+                status: 'SUCCESS',
+                action: 'URL_UPDATED',
+                message: `[Auto-Ping Sandbox Mode] Programmatic re-crawl simulation accepted. Go to settings to configure Google Credentials.`,
+                timestamp: new Date().toISOString()
+              });
+            }
+          }
+
+          // Trigger sitemap submission to Google Search Console
+          const siteUrl = "https://dallasfortworthzultys.com";
+          const sitemapUrl = "https://dallasfortworthzultys.com/sitemap.xml";
+          
+          if (configured) {
+            submitSitemapToGoogle(siteUrl, sitemapUrl)
+              .then(() => {
+                console.log(`[Auto-Ping] Google Search Console sitemap update successfully triggered.`);
+              })
+              .catch((err) => {
+                console.error(`[Auto-Ping] Google Search Console sitemap update failed:`, err.message);
+              });
+          } else {
+            logIndexingActivity({
+              type: 'sitemap',
+              url: sitemapUrl,
+              status: 'SUCCESS',
+              message: `[Auto-Ping Sandbox Mode] Sitemap submission simulation completed. Go to settings to configure Google Credentials.`,
+              timestamp: new Date().toISOString()
+            });
+          }
+        } else {
+          console.log(`[Auto-Ping] Auto-Ping is disabled. Bypassing Google notification.`);
+        }
+      }
+      
+      // Update known routes to include these new routes so we don't notify again
+      fs.writeFileSync(knownRoutesPath, JSON.stringify(activeRoutes, null, 2), "utf8");
+    }
+  } catch (err: any) {
+    console.error("❌ [Auto-Ping] Error in checkAndTriggerAutoPing:", err);
+  }
 }
