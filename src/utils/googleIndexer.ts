@@ -326,7 +326,7 @@ export async function fetchSearchConsoleData(siteUrl: string) {
         startDate: startDateStr,
         endDate: endDateStr,
         dimensions: ['query'],
-        rowLimit: 10
+        rowLimit: 100
       })
     });
     if (queriesRes.ok) {
@@ -350,7 +350,7 @@ export async function fetchSearchConsoleData(siteUrl: string) {
         startDate: startDateStr,
         endDate: endDateStr,
         dimensions: ['page'],
-        rowLimit: 10
+        rowLimit: 50
       })
     });
     if (pagesRes.ok) {
