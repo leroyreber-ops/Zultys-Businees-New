@@ -8,6 +8,7 @@ import { CTASection } from '../components/CTASection';
 import { ServiceAreas } from '../components/ServiceAreas';
 import { Comparison } from '../components/Comparison';
 import { useQuote } from '../context/QuoteContext';
+import { generateEliteMetadata } from '../utils/seoHelpers';
 
 interface CityPageProps {
   city: string;
@@ -17,13 +18,13 @@ export function CityPage({ city }: CityPageProps) {
   const { openQuote } = useQuote();
 
   useEffect(() => {
-    document.title = `Zultys Business Phone Systems ${city} | VoIP Solutions ${city} | DFW Business Communications`;
+    const meta = generateEliteMetadata(window.location.pathname);
+    document.title = meta.title;
     window.scrollTo(0, 0);
     
     const metaDescription = document.querySelector('meta[name="description"]');
-    const description = `Looking for Zultys business phone systems in ${city}? Expert Zultys VoIP solutions, cloud phone systems, and unified communications for ${city} businesses. Call 817-231-2962 for local DFW support.`;
     if (metaDescription) {
-      metaDescription.setAttribute('content', description);
+      metaDescription.setAttribute('content', meta.description);
     }
   }, [city]);
 

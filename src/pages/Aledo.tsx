@@ -326,17 +326,15 @@ export function Aledo() {
                 <div className="order-2 lg:order-1">
                   <div className="grid grid-cols-1 gap-8">
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
-                      <ImageWithFallback
+                      <ImageWithFallback alt="Zultys MX-SE for Aledo Small Business"
                         src={ZULTYS_MXSE}
-                        alt="Zultys MX-SE for Aledo Small Business"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
                     </div>
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
-                      <ImageWithFallback
+                      <ImageWithFallback alt="Zultys ZIP 45G for Aledo Teams"
                         src={ZULTYS_ZIP_45G_EASE}
-                        alt="Zultys ZIP 45G for Aledo Teams"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -398,7 +396,7 @@ export function Aledo() {
                 ].map((tool, index) => (
                   <Card key={index} className="p-0 border border-gray-100 bg-white hover:shadow-xl transition-all duration-500 group rounded-[2rem] overflow-hidden">
                     <div className="aspect-video bg-gray-50 p-8 group-hover:bg-white transition-colors duration-500">
-                      <ImageWithFallback src={tool.image} alt={tool.title} className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                      <ImageWithFallback src={tool.image} alt="tool.title" className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     </div>
                     <div className="p-10">
                       <h3 className="text-2xl font-black text-charcoal mb-4">{tool.title}</h3>

@@ -225,9 +225,8 @@ export function Azle() {
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-zultys-green/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Azle Zultys Business Phone Systems and VoIP Experts"
                       src={OFFICE_COMMUNICATION}
-                      alt="Azle Zultys Business Phone Systems and VoIP Experts"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -248,9 +247,8 @@ export function Azle() {
                 <div className="order-2 lg:order-1 relative group">
                   <div className="absolute -inset-4 bg-zultys-green/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 bg-white p-10">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Zultys Unified Communications for Azle Business"
                       src={ZULTYS_ZAC_MOBILE_COMBO}
-                      alt="Zultys Unified Communications for Azle Business"
                       className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -307,9 +305,8 @@ export function Azle() {
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-zultys-gold/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Zultys Cloud Phone Systems Azle"
                       src={ZULTYS_CLOUD_SERVICES}
-                      alt="Zultys Cloud Phone Systems Azle"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -326,9 +323,8 @@ export function Azle() {
                 <div className="order-2 lg:order-1">
                   <div className="grid grid-cols-1 gap-8">
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
-                      <ImageWithFallback
+                      <ImageWithFallback alt="Zultys MX-SE for Azle Small Business"
                         src={ZULTYS_MXSE}
-                        alt="Zultys MX-SE for Azle Small Business"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />

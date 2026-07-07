@@ -6,9 +6,8 @@ interface ZultysLogoProps {
 
 export function ZultysLogo({ className = "h-16" }: ZultysLogoProps) {
   return (
-    <ImageWithFallback 
+    <ImageWithFallback  alt="Zultys VoIP Phone Systems and Unified Communications"
       src="https://images.dallasfortworthzultys.com/fort-worth-zultys-logo.jpg" 
-      alt="Zultys VoIP Phone Systems and Unified Communications" 
       className={className}
     />
   );

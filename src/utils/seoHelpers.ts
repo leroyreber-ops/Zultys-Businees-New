@@ -382,7 +382,7 @@ export function getCityNameFromPath(path: string): string {
  * for any given page path, prioritizing search ranking for Zultys phone systems,
  * cloud systems, business connectivity, and VoIP solutions.
  */
-export function generateEliteMetadata(path: string): { title: string; description: string; keywords: string } {
+export function generateEliteRawMetadata(path: string): { title: string; description: string; keywords: string } {
   const normalized = path.toLowerCase().endsWith('/') && path.length > 1
     ? path.toLowerCase().slice(0, -1)
     : path.toLowerCase();
@@ -636,6 +636,102 @@ export function generateEliteMetadata(path: string): { title: string; descriptio
     title: `Zultys Business Phone Systems ${cityName} TX | Cloud VoIP & IP PBX`,
     description: `Expert ${cityName}, TX Zultys business phone systems and cloud VoIP solutions. DFW Business Communications is your authorized local Zultys partner providing expert on-site setup, number porting, and 24/7 technical support.`,
     keywords: `Zultys ${cityName} TX, business phone systems ${cityName} TX, VoIP solutions ${cityName} Texas, office phone systems ${cityName}, ${cityName} Zultys dealer, cloud phone system ${cityName} TX, DFW VoIP`
+  };
+}
+
+/**
+ * Helper to dynamically append/prefix focus keywords to document titles
+ * based on slug/category, matching Google search expectations perfectly.
+ */
+function enhanceTitleWithFocusKeywords(title: string, path: string): string {
+  const lp = path.toLowerCase();
+  
+  // Clean off existing site suffixes if any to avoid trailing duplicates
+  let cleanTitle = title
+    .replace(/\s*\|\s*DFW Zultys Dealer/gi, '')
+    .replace(/\s*\|\s*Dallas-Fort Worth/gi, '')
+    .replace(/\s*\|\s*Dallas Fort Worth Zultys/gi, '')
+    .replace(/\s*\|\s*DFW Telecom/gi, '');
+
+  // 1. Dallas specific paths
+  if (lp.includes('dallas')) {
+    return `VoIP Phone System Dallas | ${cleanTitle} - Zultys Business Communications`;
+  }
+  
+  // 2. Fort Worth specific paths
+  if (lp.includes('fort-worth')) {
+    return `Business Phone System Fort Worth | ${cleanTitle} - Fort Worth Zultys Dealer`;
+  }
+  
+  // 3. Products/IP Phone paths
+  if (
+    lp.includes('phone') || 
+    lp.includes('product') || 
+    lp.includes('zip-') || 
+    lp.includes('z-2') || 
+    lp.includes('gateways') || 
+    lp.includes('mx-series') || 
+    lp.includes('mxse') || 
+    lp.includes('zac') || 
+    lp.includes('mxmobile') || 
+    lp.includes('mxconference')
+  ) {
+    return `${cleanTitle} | Zultys Phone System - Unified Communications for Business`;
+  }
+  
+  // 4. Cloud specific paths
+  if (lp.includes('cloud')) {
+    return `Cloud Phone System for Business | ${cleanTitle} - Zultys Communications`;
+  }
+  
+  // 5. Solution/vertical paths (healthcare, education, real-estate, legal, financial)
+  if (
+    lp.includes('healthcare') ||
+    lp.includes('education') ||
+    lp.includes('professional-services') ||
+    lp.includes('real-estate') ||
+    lp.includes('retail-automotive') ||
+    lp.includes('multi-location') ||
+    lp.includes('enterprise') ||
+    lp.includes('small-business') ||
+    lp.includes('legal-firms') ||
+    lp.includes('financial-services') ||
+    lp.includes('manufacturing-logistics') ||
+    lp.includes('hospitality') ||
+    lp.includes('non-profit') ||
+    lp.includes('solutions')
+  ) {
+    return `${cleanTitle} | Unified Communications Provider & Office Phone System`;
+  }
+  
+  // 6. Compare/VS paths
+  if (lp.includes('-vs-') || lp.includes('compare')) {
+    return `Best Business Phone Systems | ${cleanTitle} - VoIP Provider for Business`;
+  }
+  
+  // 7. General City Page fallback
+  const cityName = getCityNameFromPath(lp);
+  if (cityName && cityName !== 'Dallas-Fort Worth') {
+    const hash = cityName.length % 3;
+    if (hash === 0) {
+      return `${cityName} Business Phone System | ${cleanTitle} - Zultys Business Communications`;
+    } else if (hash === 1) {
+      return `${cityName} VoIP Phone System | ${cleanTitle} - Fort Worth Zultys Dealer`;
+    } else {
+      return `${cityName} Business Phone Service | ${cleanTitle} - Zultys Unified Communications`;
+    }
+  }
+  
+  // Default fallback
+  return `${cleanTitle} | Zultys Business Communications`;
+}
+
+export function generateEliteMetadata(path: string): { title: string; description: string; keywords: string } {
+  const metadata = generateEliteRawMetadata(path);
+  return {
+    title: enhanceTitleWithFocusKeywords(metadata.title, path),
+    description: metadata.description,
+    keywords: metadata.keywords
   };
 }
 

@@ -234,6 +234,7 @@ import { QuotePopupWrapper } from './components/QuotePopupWrapper';
 import { FloatingTextCTA } from './components/FloatingTextCTA';
 import { LocalBusinessSchema } from './components/LocalBusinessSchema';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
+import { FloatingSEOAssistant } from './components/FloatingSEOAssistant';
 import { generateEliteMetadata } from './utils/seoHelpers';
 import { CityPageSkeleton, ProductPageSkeleton, GeneralPageSkeleton } from './components/SkeletonLoaders';
 
@@ -840,6 +841,7 @@ export default function App() {
       <QuotePopupWrapper />
       <FloatingTextCTA />
       <PerformanceMonitor />
+      <FloatingSEOAssistant />
     </QuoteProvider>
   );
 }

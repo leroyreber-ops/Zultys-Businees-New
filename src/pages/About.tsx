@@ -231,9 +231,8 @@ export function About() {
               <div className="relative group">
                 <div className="absolute -inset-4 bg-zultys-gold/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                  <ImageWithFallback
+                  <ImageWithFallback alt="DFW Business Communications Office"
                     src={OFFICE_COMMUNICATION}
-                    alt="DFW Business Communications Office"
                     className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>

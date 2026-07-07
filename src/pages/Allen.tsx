@@ -225,9 +225,8 @@ export function Allen() {
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-zultys-green/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Allen Zultys Business Phone Systems and VoIP Experts"
                       src={OFFICE_COMMUNICATION}
-                      alt="Allen Zultys Business Phone Systems and VoIP Experts"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -248,9 +247,8 @@ export function Allen() {
                 <div className="order-2 lg:order-1 relative group">
                   <div className="absolute -inset-4 bg-zultys-green/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 bg-white p-10">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Zultys Unified Communications for Allen Business"
                       src={ZULTYS_ZAC_MOBILE_COMBO}
-                      alt="Zultys Unified Communications for Allen Business"
                       className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -307,9 +305,8 @@ export function Allen() {
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-zultys-gold/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Zultys Cloud Phone Systems Allen"
                       src={ZULTYS_CLOUD_SERVICES}
-                      alt="Zultys Cloud Phone Systems Allen"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -326,17 +323,15 @@ export function Allen() {
                 <div className="order-2 lg:order-1">
                   <div className="grid grid-cols-1 gap-8">
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
-                      <ImageWithFallback
+                      <ImageWithFallback alt="Zultys MX-SE for Allen Small Business"
                         src={ZULTYS_MXSE}
-                        alt="Zultys MX-SE for Allen Small Business"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
                     </div>
                     <div className="rounded-[2rem] overflow-hidden shadow-2xl bg-white p-10 border border-white/10 group">
-                      <ImageWithFallback
+                      <ImageWithFallback alt="Zultys ZIP 45G for Allen Teams"
                         src={ZULTYS_ZIP_45G_EASE}
-                        alt="Zultys ZIP 45G for Allen Teams"
                         className="w-full h-auto max-h-[250px] object-contain transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -398,7 +393,7 @@ export function Allen() {
                 ].map((tool, index) => (
                   <Card key={index} className="p-0 border border-gray-100 bg-white hover:shadow-xl transition-all duration-500 group rounded-[2rem] overflow-hidden">
                     <div className="aspect-video bg-gray-50 p-8 group-hover:bg-white transition-colors duration-500">
-                      <ImageWithFallback src={tool.image} alt={tool.title} className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                      <ImageWithFallback src={tool.image} alt="tool.title" className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     </div>
                     <div className="p-10">
                       <h3 className="text-2xl font-black text-charcoal mb-4">{tool.title}</h3>

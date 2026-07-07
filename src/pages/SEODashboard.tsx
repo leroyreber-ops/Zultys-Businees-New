@@ -5,10 +5,13 @@ import {
   ArrowRight, FileText, Plus, List, ShieldAlert, History, Link2, Info,
   MousePointerClick, Eye, Percent, BarChart3, TrendingUp, Search, ShieldCheck, 
   AlertCircle, Calendar, TrendingDown, Activity, Award, ArrowUpRight, FileCode,
-  MapPin, Flame, Sparkles, Check, BookOpen, X, HeartPulse, Clock, Mail
+  MapPin, Flame, Sparkles, Check, BookOpen, X, HeartPulse, Clock, Mail, Wrench
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import D3RankDistributionChart from '../components/D3RankDistributionChart';
+import { LocalRankTracker } from '../components/LocalRankTracker';
+import { useRankPolling } from '../hooks/useRankPolling';
+import { generateSeoSuggestion } from '../utils/imageScanner';
 
 interface LogEntry {
   type: 'sitemap' | 'indexing';
@@ -20,12 +23,32 @@ interface LogEntry {
 }
 
 export default function SEODashboard() {
+  const { rankings: polledRankings, notifications, lastUpdated: rankingsLastUpdated } = useRankPolling();
+
   const [status, setStatus] = useState<{ configured: boolean; clientEmail: string | null; message: string } | null>(null);
   const [history, setHistory] = useState<LogEntry[]>([]);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [submittingSitemap, setSubmittingSitemap] = useState(false);
   const [submittingRecrawl, setSubmittingRecrawl] = useState(false);
+
+  // AI Auto-Repair states
+  const [autoRepairEnabled, setAutoRepairEnabled] = useState(true);
+  const [autoRepairHistory, setAutoRepairHistory] = useState<any[]>([]);
+  const [loadingAutoRepairHistory, setLoadingAutoRepairHistory] = useState(true);
+  const [repairingKeyword, setRepairingKeyword] = useState<string | null>(null);
+
+  // GSC ranking issues states
+  const [rankingIssues, setRankingIssues] = useState<any[] | null>(null);
+  const [loadingRankingIssues, setLoadingRankingIssues] = useState(true);
+  const [fixingRankingIssueId, setFixingRankingIssueId] = useState<string | null>(null);
+  const [fixingAllRankingIssues, setFixingAllRankingIssues] = useState(false);
+
+  // Image alt tag auditor states
+  const [auditImages, setAuditImages] = useState<any[] | null>(null);
+  const [loadingAuditImages, setLoadingAuditImages] = useState(true);
+  const [fixingAltId, setFixingAltId] = useState<string | null>(null);
+  const [fixingAllAlts, setFixingAllAlts] = useState(false);
 
   // Form states
   const [siteUrl, setSiteUrl] = useState('https://dallasfortworthzultys.com');
@@ -169,6 +192,151 @@ export default function SEODashboard() {
   const [heatmapKeywordFilter, setHeatmapKeywordFilter] = useState<'all' | 'top3' | 'top4_10' | 'top11_plus'>('all');
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [selectedHeatmapKeyword, setSelectedHeatmapKeyword] = useState<any | null>(null);
+
+  // --- Auto-Inject Keyword Density Optimizer States ---
+  const [originalDensityText, setOriginalDensityText] = useState<string>(
+    "We provide premium office systems in Fort Worth. If you are looking for unified communications setup or expert technicians to install telephones, contact our office. Our services are tailored to maximize business voice connectivity and support modern VoIP setups across Dallas-Fort Worth."
+  );
+  const [targetDensityKeyword, setTargetDensityKeyword] = useState<string>("business phone system");
+  const [targetDensityLocation, setTargetDensityLocation] = useState<string>("Fort Worth");
+  const [analyzedParagraphs, setAnalyzedParagraphs] = useState<any[]>([]);
+  const [isDensityAnalyzing, setIsDensityAnalyzing] = useState<boolean>(false);
+
+  const calculateKeywordDensity = (pText: string, keyword: string) => {
+    const cleanP = pText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    const cleanKw = keyword.toLowerCase().trim();
+    if (!cleanP || !cleanKw) return 0;
+    
+    const words = cleanP.split(/\s+/).filter(Boolean);
+    if (words.length === 0) return 0;
+
+    let occurrences = 0;
+    const kwWords = cleanKw.split(/\s+/);
+    
+    for (let i = 0; i <= words.length - kwWords.length; i++) {
+      let match = true;
+      for (let j = 0; j < kwWords.length; j++) {
+        if (words[i + j] !== kwWords[j]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        occurrences++;
+        i += kwWords.length - 1;
+      }
+    }
+    
+    return (occurrences / words.length) * 100;
+  };
+
+  const analyzeDensity = () => {
+    setIsDensityAnalyzing(true);
+    setTimeout(() => {
+      const paragraphs = originalDensityText
+        .split(/\n\n+/)
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      const analyzed = paragraphs.map((p, idx) => {
+        const density = calculateKeywordDensity(p, targetDensityKeyword);
+        const wordCount = p.split(/\s+/).filter(Boolean).length;
+        return {
+          id: idx,
+          original: p,
+          wordCount,
+          density,
+          status: density < 1 ? 'low' : 'optimized',
+          optimized: null,
+          isOptimizing: false
+        };
+      });
+
+      setAnalyzedParagraphs(analyzed);
+      setIsDensityAnalyzing(false);
+      toast.success(`Successfully analyzed ${analyzed.length} content blocks!`);
+    }, 600);
+  };
+
+  const optimizeDensityParagraph = async (idx: number) => {
+    setAnalyzedParagraphs(prev => prev.map(p => p.id === idx ? { ...p, isOptimizing: true } : p));
+    const targetPara = analyzedParagraphs.find(p => p.id === idx);
+    if (!targetPara) return;
+
+    try {
+      const res = await fetch("/api/seo/auto-inject", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paragraph: targetPara.original,
+          keyword: targetDensityKeyword,
+          location: targetDensityLocation
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const newDensity = calculateKeywordDensity(data.optimizedText, targetDensityKeyword);
+        setAnalyzedParagraphs(prev => prev.map(p => p.id === idx ? {
+          ...p,
+          optimized: data.optimizedText,
+          density: newDensity,
+          status: 'optimized',
+          isOptimizing: false
+        } : p));
+        toast.success("Successfully injected local keywords!");
+      } else {
+        toast.error(`Auto-inject failed: ${data.error}`);
+        setAnalyzedParagraphs(prev => prev.map(p => p.id === idx ? { ...p, isOptimizing: false } : p));
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`);
+      setAnalyzedParagraphs(prev => prev.map(p => p.id === idx ? { ...p, isOptimizing: false } : p));
+    }
+  };
+
+  const optimizeAllLowDensityParagraphs = async () => {
+    const lowDensityParas = analyzedParagraphs.filter(p => p.status === 'low');
+    if (lowDensityParas.length === 0) {
+      toast.error("No low-density paragraphs found to optimize!");
+      return;
+    }
+
+    const toastId = toast.loading(`Optimizing ${lowDensityParas.length} low-density content blocks...`);
+    let completedCount = 0;
+
+    for (const p of lowDensityParas) {
+      setAnalyzedParagraphs(prev => prev.map(item => item.id === p.id ? { ...item, isOptimizing: true } : item));
+      try {
+        const res = await fetch("/api/seo/auto-inject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paragraph: p.original,
+            keyword: targetDensityKeyword,
+            location: targetDensityLocation
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const newDensity = calculateKeywordDensity(data.optimizedText, targetDensityKeyword);
+          setAnalyzedParagraphs(prev => prev.map(item => item.id === p.id ? {
+            ...item,
+            optimized: data.optimizedText,
+            density: newDensity,
+            status: 'optimized',
+            isOptimizing: false
+          } : item));
+          completedCount++;
+        } else {
+          setAnalyzedParagraphs(prev => prev.map(item => item.id === p.id ? { ...item, isOptimizing: false } : item));
+        }
+      } catch (err) {
+        setAnalyzedParagraphs(prev => prev.map(item => item.id === p.id ? { ...item, isOptimizing: false } : item));
+      }
+    }
+
+    toast.success(`Successfully optimized ${completedCount} content blocks!`, { id: toastId });
+  };
 
   useEffect(() => {
     setForecastReport(null);
@@ -334,6 +502,233 @@ export default function SEODashboard() {
       console.error('Failed to load low-hanging fruit keywords:', err);
     } finally {
       setLoadingFruit(false);
+    }
+  };
+
+  const loadRankingIssues = async () => {
+    setLoadingRankingIssues(true);
+    try {
+      const res = await fetch('/api/seo/ranking-issues');
+      const data = await res.json();
+      if (data.success) {
+        setRankingIssues(data.issues || []);
+      }
+    } catch (err) {
+      console.error('Failed to load ranking issues:', err);
+    } finally {
+      setLoadingRankingIssues(false);
+    }
+  };
+
+  const loadAutoRepairSettings = async () => {
+    try {
+      const res = await fetch('/api/seo/auto-repair-settings');
+      const data = await res.json();
+      if (data && typeof data.enabled === 'boolean') {
+        setAutoRepairEnabled(data.enabled);
+      }
+    } catch (err) {
+      console.error('Failed to load auto-repair settings:', err);
+    }
+  };
+
+  const loadAutoRepairHistory = async () => {
+    setLoadingAutoRepairHistory(true);
+    try {
+      const res = await fetch('/api/seo/auto-repair-history');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setAutoRepairHistory(data);
+      }
+    } catch (err) {
+      console.error('Failed to load auto-repair history:', err);
+    } finally {
+      setLoadingAutoRepairHistory(false);
+    }
+  };
+
+  const handleToggleAutoRepair = async () => {
+    const nextVal = !autoRepairEnabled;
+    const toastId = toast.loading(`${nextVal ? 'Enabling' : 'Disabling'} AI Auto-Repair Engine...`);
+    try {
+      const res = await fetch('/api/seo/auto-repair-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: nextVal })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAutoRepairEnabled(nextVal);
+        toast.success(`AI Auto-Repair Engine ${nextVal ? 'Activated & Monitoring' : 'Paused'}!`, { id: toastId });
+      } else {
+        toast.error(`Failed to update auto-repair settings: ${data.error}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`, { id: toastId });
+    }
+  };
+
+  const triggerAutoRepair = async (keyword: string, notifId?: string) => {
+    setRepairingKeyword(keyword);
+    const toastId = toast.loading(`[AI Auto-Repair] Rank slip alert detected! Auto-repairing page content for "${keyword}"...`);
+    try {
+      const res = await fetch('/api/seo/auto-repair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyword, notifId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`[AI Auto-Repair Success] Content for "${keyword}" refreshed & density re-calibrated!`, { id: toastId });
+        await loadAutoRepairHistory();
+        await loadRankingIssues();
+      } else {
+        toast.error(`[AI Auto-Repair Failed] ${data.error}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`[AI Auto-Repair Error] ${err.message}`, { id: toastId });
+    } finally {
+      setRepairingKeyword(null);
+    }
+  };
+
+  const handleFixRankingIssue = async (issue: any) => {
+    setFixingRankingIssueId(issue.id);
+    const toastId = toast.loading(`Programmatically applying SEO optimization for "${issue.keyword}"...`);
+    try {
+      const res = await fetch('/api/seo/fix-ranking-issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: issue.id,
+          keyword: issue.keyword,
+          issueType: issue.issueType,
+          route: issue.route
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Success: ${data.message}`, { id: toastId });
+        await loadRankingIssues();
+        await loadRankTrackerData();
+        await loadDashboardData();
+      } else {
+        toast.error(`Failed to apply fix: ${data.error}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`, { id: toastId });
+    } finally {
+      setFixingRankingIssueId(null);
+    }
+  };
+
+  const handleFixAllRankingIssues = async () => {
+    if (!rankingIssues || rankingIssues.filter(i => !i.fixed).length === 0) return;
+    setFixingAllRankingIssues(true);
+    const unfixedIssues = rankingIssues.filter(i => !i.fixed);
+    const toastId = toast.loading(`Executing batch auto-repair protocol on ${unfixedIssues.length} ranking issues...`);
+    
+    let successCount = 0;
+    try {
+      for (const issue of unfixedIssues) {
+        const res = await fetch('/api/seo/fix-ranking-issue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: issue.id,
+            keyword: issue.keyword,
+            issueType: issue.issueType,
+            route: issue.route
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          successCount++;
+        }
+      }
+      toast.success(`Unified SEO Booster: Successfully healed & optimized ${successCount} ranking nodes!`, { id: toastId });
+      await loadRankingIssues();
+      await loadRankTrackerData();
+      await loadDashboardData();
+    } catch (err: any) {
+      toast.error(`Batch fix completed with errors: ${err.message}`, { id: toastId });
+    } finally {
+      setFixingAllRankingIssues(false);
+    }
+  };
+
+  const loadAuditImages = async () => {
+    setLoadingAuditImages(true);
+    try {
+      const res = await fetch('/api/scan-images');
+      const data = await res.json();
+      if (data.success) {
+        setAuditImages(data.items || []);
+      }
+    } catch (err) {
+      console.error('Failed to load image audit items:', err);
+    } finally {
+      setLoadingAuditImages(false);
+    }
+  };
+
+  const handleFixAltTag = async (item: any) => {
+    setFixingAltId(item.id);
+    const toastId = toast.loading(`Generating & applying premium alt tag for "${item.src}"...`);
+    try {
+      // Fetch suggested alt tag from API
+      const suggestRes = await fetch('/api/suggest-alt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageName: item.pageName, src: item.src })
+      });
+      const suggestData = await suggestRes.json();
+      if (!suggestData.success) {
+        throw new Error(suggestData.message || 'Failed to suggest alt tag');
+      }
+      
+      const newAlt = suggestData.suggestion;
+      
+      // Submit updated alt tag to API
+      const updateRes = await fetch('/api/update-alt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filePath: item.filePath,
+          lineNumber: item.lineNumber,
+          newAlt
+        })
+      });
+      const updateData = await updateRes.json();
+      if (updateData.success) {
+        toast.success(`Healed: Applied alt="${newAlt}" on line ${item.lineNumber}`, { id: toastId });
+        await loadAuditImages();
+      } else {
+        toast.error(`Failed to apply fix: ${updateData.message}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`, { id: toastId });
+    } finally {
+      setFixingAltId(null);
+    }
+  };
+
+  const handleFixAllAltTags = async () => {
+    setFixingAllAlts(true);
+    const toastId = toast.loading('Running batch Image Alt Tag Audit & programmatically writing premium tags...');
+    try {
+      const res = await fetch('/api/fix-all-alts', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Successfully repaired & injected ${data.count} image alt-tag assets directly into codebase!`, { id: toastId });
+        await loadAuditImages();
+      } else {
+        toast.error(`Batch fix failed: ${data.message}`, { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`, { id: toastId });
+    } finally {
+      setFixingAllAlts(false);
     }
   };
 
@@ -756,7 +1151,32 @@ export default function SEODashboard() {
     loadHealthReport();
     loadLowHangingFruit();
     loadReportConfig();
+    loadRankingIssues();
+    loadAuditImages();
+    loadAutoRepairSettings();
+    loadAutoRepairHistory();
   }, []);
+
+  useEffect(() => {
+    // Whenever the background polling hook receives a fresh update, automatically refresh the dashboard widgets
+    if (rankingsLastUpdated) {
+      loadRankTrackerData();
+      loadRankingIssues();
+      loadAutoRepairHistory();
+    }
+  }, [rankingsLastUpdated]);
+
+  // Monitor rank alert notifications and automatically trigger repair on dropped keywords
+  useEffect(() => {
+    if (!autoRepairEnabled || !notifications || notifications.length === 0) return;
+    
+    const unreadDrops = notifications.filter(n => n.type === 'RANK_DROPPED' && !n.read);
+    if (unreadDrops.length > 0) {
+      unreadDrops.forEach(notif => {
+        triggerAutoRepair(notif.keyword, notif.id);
+      });
+    }
+  }, [notifications, autoRepairEnabled]);
 
   // Handle Sitemap submission
   const handleSitemapSubmit = async (e: React.FormEvent) => {
@@ -1114,6 +1534,168 @@ export default function SEODashboard() {
 
         </div>
 
+        {/* Owner SEO Image Indexing & Alt Tag Auditor */}
+        <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-3xs font-black uppercase tracking-widest mb-3 border border-emerald-100">
+                <ShieldCheck className="h-3 w-3 text-emerald-600" /> Source-Code Accessibility Shield
+              </div>
+              <h2 id="image-tag-auditor" className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <FileCode className="h-5.5 w-5.5 text-blue-600" /> Owner SEO Image Indexing & Alt Tag Auditor
+              </h2>
+              <p className="text-slate-500 text-xs mt-1 max-w-2xl leading-relaxed">
+                Scans source files dynamically to locate raw image tags, auto-suggest premium descriptive keywords, and write corrections directly into the code base.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <button
+                onClick={loadAuditImages}
+                disabled={loadingAuditImages}
+                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 transition rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-200 cursor-pointer text-slate-700 disabled:opacity-50"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loadingAuditImages ? 'animate-spin' : ''}`} /> Re-Scan Source Code
+              </button>
+              <button
+                onClick={handleFixAllAltTags}
+                disabled={fixingAllAlts || !auditImages || auditImages.filter(i => i.status === 'missing' || i.status === 'empty').length === 0}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-100 transition rounded-lg text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> 1-Click Fix All Image Alts ({auditImages ? auditImages.filter(i => i.status === 'missing' || i.status === 'empty').length : 0})
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Metrics & Score Ring */}
+          {auditImages && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 border border-slate-200 rounded-xl p-5">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                  <Globe className="h-6 w-6" />
+                </div>
+                <div>
+                  <span className="text-3xs text-slate-400 uppercase tracking-wider font-bold block">Total Images Found</span>
+                  <span className="text-xl font-bold text-slate-800">{auditImages.length} tags</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 border-y md:border-y-0 md:border-x border-slate-200 py-4 md:py-0 md:px-6">
+                <div className="p-3 bg-red-50 text-red-600 rounded-lg">
+                  <AlertCircle className="h-6 w-6" />
+                </div>
+                <div>
+                  <span className="text-3xs text-slate-400 uppercase tracking-wider font-bold block">Fix Pending</span>
+                  <span className="text-xl font-bold text-slate-800">
+                    {auditImages.filter(i => i.status === 'missing' || i.status === 'empty').length} assets
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="relative flex items-center justify-center">
+                  {/* Custom CSS/SVG Score Ring */}
+                  <svg className="w-14 h-14 shrink-0">
+                    <circle cx="28" cy="28" r="24" className="stroke-slate-200 fill-none" strokeWidth="4" />
+                    <circle 
+                      cx="28" 
+                      cy="28" 
+                      r="24" 
+                      className="stroke-emerald-500 fill-none transition-all duration-500" 
+                      strokeWidth="4" 
+                      strokeDasharray={`${2 * Math.PI * 24}`}
+                      strokeDashoffset={`${2 * Math.PI * 24 * (1 - (auditImages.length > 0 ? (auditImages.filter(i => i.status === 'valid').length / auditImages.length) : 1))}`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="absolute text-xs font-black text-slate-800">
+                    {auditImages.length > 0 ? Math.round((auditImages.filter(i => i.status === 'valid').length / auditImages.length) * 100) : 100}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-3xs text-slate-400 uppercase tracking-wider font-bold block">SEO Score</span>
+                  <span className="text-sm font-extrabold text-emerald-600 uppercase tracking-wide">
+                    {auditImages.filter(i => i.status === 'missing' || i.status === 'empty').length === 0 ? 'Optimal Accessibility' : 'Warning: Action Required'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {loadingAuditImages ? (
+            <div className="py-12 text-center text-slate-400 space-y-3">
+              <RefreshCw className="h-8 w-8 text-slate-400 animate-spin mx-auto" />
+              <p className="text-xs">Crawling through local .tsx templates in src/pages and src/components to analyze alt tags...</p>
+            </div>
+          ) : !auditImages || auditImages.length === 0 ? (
+            <div className="py-8 text-center text-slate-500 text-xs">
+              No images detected in source code. All assets pristine!
+            </div>
+          ) : (
+            <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 grid grid-cols-12 gap-4 text-3xs font-black uppercase text-slate-400 tracking-wider">
+                <span className="col-span-3">Source &amp; Line</span>
+                <span className="col-span-3">Image Path / Src</span>
+                <span className="col-span-3">Current Alt Tag</span>
+                <span className="col-span-3 text-right">Action</span>
+              </div>
+
+              <div className="divide-y divide-slate-100 max-h-[380px] overflow-y-auto">
+                {auditImages.map((item, idx) => (
+                  <div key={idx} className="px-4 py-3.5 grid grid-cols-12 gap-4 items-center text-xs hover:bg-slate-50/50 transition">
+                    <div className="col-span-3 space-y-1">
+                      <span className="font-bold text-slate-800 block truncate">{item.pageName}.tsx</span>
+                      <span className="text-3xs font-mono text-slate-400">Line {item.lineNumber} &bull; {item.filePath}</span>
+                    </div>
+
+                    <div className="col-span-3 truncate text-3xs font-mono text-slate-500" title={item.src}>
+                      {item.src}
+                    </div>
+
+                    <div className="col-span-3">
+                      {item.status === 'valid' ? (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-3xs font-medium w-fit">
+                          <Check className="h-3 w-3 shrink-0" /> {item.alt}
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-100 rounded text-3xs font-medium w-fit">
+                            <AlertTriangle className="h-3 w-3 shrink-0" /> {item.status === 'missing' ? 'Missing alt tag' : 'Empty alt tag'}
+                          </div>
+                          <span className="text-3xs text-blue-600 block leading-relaxed font-medium bg-blue-50/50 border border-blue-100/40 p-1.5 rounded">
+                            Suggested: "{generateSeoSuggestion(item.pageName, item.src)}"
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="col-span-3 text-right">
+                      {item.status !== 'valid' ? (
+                        <button
+                          onClick={() => handleFixAltTag(item)}
+                          disabled={fixingAltId !== null}
+                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-3xs font-black uppercase tracking-wider cursor-pointer disabled:opacity-50 inline-flex items-center gap-1"
+                        >
+                          {fixingAltId === item.id ? (
+                            <RefreshCw className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />
+                          )}
+                          Auto-Fix Tag
+                        </button>
+                      ) : (
+                        <span className="text-emerald-600 text-3xs font-black uppercase tracking-wider flex items-center justify-end gap-1">
+                          <CheckCircle className="h-3.5 w-3.5 text-emerald-500" /> Fully Indexed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* Daily SEO Health Check & Automated Healing Suite */}
         <section className="bg-slate-900 text-white rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">
           {/* Subtle background glow */}
@@ -1251,6 +1833,286 @@ export default function SEODashboard() {
               <div className="bg-slate-950/30 rounded-xl p-3 text-3xs text-slate-500 flex items-center justify-between">
                 <span>Last automated audit run completed: <strong>{new Date(healthReport.timestamp).toLocaleString()}</strong></span>
                 <span>Active Link Mapping Strategy: <strong>Levenshtein Heuristics + Custom Static Mapping Dictionary</strong></span>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Live GSC Ranking Issues & SERP Booster */}
+        <section className="bg-slate-900 text-white rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden space-y-6">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500/5 rounded-full blur-3xl -z-10" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl -z-10" />
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-rose-500/20 text-rose-300 rounded-full text-3xs font-black uppercase tracking-widest mb-3">
+                <TrendingUp className="h-3 w-3 text-rose-400" /> SERP Grounding Intelligence
+              </div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Award className="h-5.5 w-5.5 text-rose-400" /> GSC Ranking Issues & SERP Booster
+              </h2>
+              <p className="text-slate-400 text-xs mt-1 max-w-2xl leading-relaxed">
+                Our live SERP grounding tracker evaluates keywords for Search Console position decay, sub-optimal click-through-rates (CTR), and competitor outranking, providing one-click AI meta-overrides and localized content calibration.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={loadRankingIssues}
+                disabled={loadingRankingIssues}
+                className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 transition rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-700 cursor-pointer text-white disabled:opacity-50"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loadingRankingIssues ? 'animate-spin' : ''}`} /> Scan Ranking Issues
+              </button>
+              <button
+                onClick={handleFixAllRankingIssues}
+                disabled={fixingAllRankingIssues || !rankingIssues || rankingIssues.filter(i => !i.fixed).length === 0}
+                className="px-4 py-2 bg-rose-500 hover:bg-rose-400 disabled:bg-slate-800 disabled:text-slate-500 disabled:border-slate-800 transition rounded-lg text-xs font-black text-slate-950 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-md shadow-rose-500/10 hover:shadow-rose-500/25"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> 1-Click Repair All Rankings ({rankingIssues ? rankingIssues.filter(i => !i.fixed).length : 0})
+              </button>
+            </div>
+          </div>
+
+          {/* Automated SEO Auto-Repair Control Center */}
+          <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-6 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${autoRepairEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                  <h3 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                    <Wrench className="h-4 w-4 text-emerald-400" /> AI Auto-Repair Engine
+                  </h3>
+                </div>
+                <p className="text-slate-400 text-3xs">
+                  Real-time rank slippage monitoring. Automatically initiates Gemini content-refresh & keyword-density re-calibration on dropped queries.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-3xs text-slate-400 font-mono">
+                  Auto-Healing Status: <strong className={autoRepairEnabled ? "text-emerald-400" : "text-rose-400"}>{autoRepairEnabled ? "ACTIVE" : "PAUSED"}</strong>
+                </span>
+                <button
+                  onClick={handleToggleAutoRepair}
+                  className={`px-3 py-1.5 rounded-lg text-3xs font-bold uppercase tracking-wider cursor-pointer border transition ${
+                    autoRepairEnabled 
+                      ? "bg-slate-900 border-rose-800/60 hover:bg-rose-950/20 text-rose-400" 
+                      : "bg-emerald-600 border-emerald-500 hover:bg-emerald-500 text-slate-950"
+                  }`}
+                >
+                  {autoRepairEnabled ? "Pause Engine" : "Activate Engine"}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Quick Status / Telemetry Cards */}
+              <div className="lg:col-span-1 space-y-3">
+                <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-4xs uppercase tracking-wider text-slate-500 font-bold block">Keywords Restored</span>
+                    <span className="text-2xl font-black text-slate-100 font-mono">{autoRepairHistory.length}</span>
+                  </div>
+                  <div className="p-2.5 bg-emerald-500/10 rounded-lg text-emerald-400">
+                    <CheckCircle className="h-5 w-5" />
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <span className="text-4xs uppercase tracking-wider text-slate-500 font-bold block">Last Repaired Route</span>
+                    <span className="text-xs font-black text-slate-300 font-mono truncate max-w-[150px] block">
+                      {autoRepairHistory[0] ? autoRepairHistory[0].route : "N/A"}
+                    </span>
+                  </div>
+                  <div className="p-2.5 bg-blue-500/10 rounded-lg text-blue-400">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                </div>
+
+                {repairingKeyword && (
+                  <div className="bg-emerald-950/10 border border-emerald-800/30 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+                    <RefreshCw className="h-5 w-5 text-emerald-400 animate-spin flex-shrink-0" />
+                    <div className="space-y-0.5">
+                      <span className="text-4xs uppercase tracking-wider text-emerald-400 font-bold block">Active Auto-Repair</span>
+                      <span className="text-3xs text-slate-300 font-medium font-mono">Re-engineering content for "{repairingKeyword}"...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Live Auto-Healing Logs and Audits list */}
+              <div className="lg:col-span-2 bg-slate-900/40 border border-slate-800/60 rounded-xl p-4 space-y-3">
+                <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1 border-b border-slate-800 pb-2">
+                  <FileText className="h-3.5 w-3.5 text-slate-400" /> Automated Healed Pages Logs ({autoRepairHistory.length})
+                </h4>
+
+                {loadingAutoRepairHistory ? (
+                  <div className="py-6 text-center text-slate-500 text-3xs flex items-center justify-center gap-1.5">
+                    <RefreshCw className="h-3 w-3 animate-spin" /> Fetching healing history...
+                  </div>
+                ) : autoRepairHistory.length === 0 ? (
+                  <div className="py-10 text-center text-slate-500 text-3xs italic">
+                    No automated healing tasks executed yet. Real-time rank drops will trigger healings here.
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                    {autoRepairHistory.map((item, index) => (
+                      <div key={item.id || index} className="bg-slate-950/40 border border-slate-800 rounded-lg p-3 text-3xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-slate-500">{new Date(item.timestamp).toLocaleString()}</span>
+                          <span className="font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-mono uppercase text-[8px]">
+                            {item.densityIncrease}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-slate-400">Healed keyword:</span>
+                          <span className="bg-slate-800 text-slate-100 font-bold px-2 py-0.5 rounded-md">{item.keyword}</span>
+                          <span className="text-slate-400">on route:</span>
+                          <span className="font-mono font-bold text-blue-400">{item.route} ({item.fileName})</span>
+                        </div>
+                        <div className="border-t border-slate-800/40 pt-2 grid grid-cols-2 gap-3 text-[9px] text-slate-300">
+                          <div>
+                            <strong className="text-slate-400 text-[8px] block uppercase tracking-wider">Before Title:</strong>
+                            <span className="line-through text-slate-500 truncate block">{item.oldTitle}</span>
+                            <strong className="text-emerald-400 text-[8px] block uppercase tracking-wider mt-1">After Title:</strong>
+                            <span className="truncate block font-semibold">{item.newTitle}</span>
+                          </div>
+                          <div>
+                            <strong className="text-slate-400 text-[8px] block uppercase tracking-wider">Before Description:</strong>
+                            <span className="line-through text-slate-500 truncate block">{item.oldDescription}</span>
+                            <strong className="text-emerald-400 text-[8px] block uppercase tracking-wider mt-1">After Description:</strong>
+                            <span className="truncate block font-semibold">{item.newDescription}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {loadingRankingIssues ? (
+            <div className="py-12 text-center text-slate-400 space-y-3">
+              <RefreshCw className="h-8 w-8 text-slate-500 animate-spin mx-auto" />
+              <p className="text-xs">Analyzing monitored keywords against CTR benchmarks, competitor search volumes, and page-level keyword density...</p>
+            </div>
+          ) : !rankingIssues || rankingIssues.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 space-y-2">
+              <CheckCircle className="h-10 w-10 text-emerald-400 mx-auto" />
+              <h3 className="text-sm font-semibold text-white">All Rankings Pristine!</h3>
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                No keyword position slippage, competitor overreaches, or low CTR snippet anomalies detected. All search engine results page metrics are fully optimized!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
+              {/* Active Issues Column */}
+              <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
+                  <h3 className="text-xs font-black uppercase text-rose-400 tracking-wider flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4" /> Detected Search Performance Gaps ({rankingIssues.filter(i => !i.fixed).length})
+                  </h3>
+                  <span className="text-3xs bg-rose-500/10 text-rose-300 px-2 py-0.5 rounded font-mono font-bold">
+                    Target: Position Boosting
+                  </span>
+                </div>
+
+                {rankingIssues.filter(i => !i.fixed).length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 text-xs">
+                    ✔ All active ranking issues have been programmatically resolved!
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                    {rankingIssues.filter(i => !i.fixed).map((issue, idx) => (
+                      <div key={idx} className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs space-y-3 hover:border-slate-700/80 transition relative">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-200 bg-slate-800/60 px-2.5 py-1 rounded-lg border border-slate-700/30">
+                            {issue.keyword}
+                          </span>
+                          <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                            issue.severity === 'HIGH' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          }`}>
+                            {issue.severity} RISK
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-slate-300 text-xs mb-1">{issue.title}</h4>
+                          <p className="text-slate-400 text-3xs leading-relaxed">{issue.description}</p>
+                        </div>
+
+                        <div className="bg-rose-950/10 text-rose-300 p-2.5 rounded-lg border border-rose-900/20 text-3xs space-y-1">
+                          <span className="font-bold text-rose-400 block uppercase tracking-wider text-[9px]">Booster Recommendation:</span>
+                          <p>{issue.recommendation}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-4xs font-mono text-slate-500">Route: {issue.route}</span>
+                          <button
+                            onClick={() => handleFixRankingIssue(issue)}
+                            disabled={fixingRankingIssueId !== null}
+                            className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-3xs font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
+                          >
+                            {fixingRankingIssueId === issue.id ? (
+                              <RefreshCw className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-3 w-3 text-amber-300 animate-pulse" />
+                            )}
+                            Fix Ranking Issue
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Resolved / Optimized Log Column */}
+              <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
+                  <h3 className="text-xs font-black uppercase text-emerald-400 tracking-wider flex items-center gap-1.5">
+                    <CheckCircle className="h-4 w-4" /> Calibrated & Optimized Nodes ({rankingIssues.filter(i => i.fixed).length})
+                  </h3>
+                  <span className="text-3xs bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded font-mono font-bold">
+                    GSC Calibration Sync: Live
+                  </span>
+                </div>
+
+                {rankingIssues.filter(i => i.fixed).length === 0 ? (
+                  <div className="py-16 text-center text-slate-500 text-xs space-y-2">
+                    <Award className="h-8 w-8 text-slate-700 mx-auto" />
+                    <p>No ranking nodes have been calibrated yet. Run auto-boosters on the left column to immediately seed dynamic overrides.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                    {rankingIssues.filter(i => i.fixed).map((issue, idx) => (
+                      <div key={idx} className="bg-slate-900/50 border border-emerald-900/30 rounded-xl p-4 text-xs space-y-3 hover:border-emerald-800/40 transition">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-300 bg-emerald-950/20 px-2.5 py-1 rounded-lg border border-emerald-900/20">
+                            {issue.keyword}
+                          </span>
+                          <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
+                            <Check className="h-3 w-3" /> CALIBRATED
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-slate-300 text-xs">{issue.title}</h4>
+                          <p className="text-slate-400 text-3xs mt-1 font-semibold leading-normal">AI optimization meta tags and Schema entities successfully generated and written into your local overrides configuration file.</p>
+                        </div>
+
+                        <div className="bg-emerald-950/10 text-emerald-300 p-2.5 rounded-lg border border-emerald-900/20 text-3xs leading-normal">
+                          <span className="font-bold text-emerald-400 block uppercase tracking-wider text-[9px] mb-1 font-black">Applied Override Solution:</span>
+                          <p>Localized semantic copy density expanded, and custom Google Search crawler routing hooks established. Indexing priority accelerated.</p>
+                        </div>
+                        
+                        <div className="text-4xs font-mono text-slate-500">Route Match: {issue.route}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1842,8 +2704,201 @@ export default function SEODashboard() {
           )}
         </section>
 
+        {/* Auto-Inject Keyword Density Optimizer Suite */}
+        <section className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6" id="auto-inject-optimizer-suite">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-blue-600" />
+                </span>
+                <h2 className="text-lg font-extrabold tracking-tight text-slate-900">
+                  AI Auto-Inject Keyword Density Optimizer
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500">
+                Identify paragraphs with low focus-keyword density (&lt; 1%) and use Gemini AI to intelligently rewrite them with integrated location-based modifiers.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl font-mono">
+              <span>Threshold Standard:</span>
+              <span className="font-bold text-slate-700 bg-slate-200/60 px-1.5 py-0.5 rounded">&gt;= 1.0% Density</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Input Left panel */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="space-y-1">
+                <label className="text-3xs font-black uppercase text-slate-400 tracking-wider">Paste Original Copywriting</label>
+                <textarea
+                  value={originalDensityText}
+                  onChange={(e) => setOriginalDensityText(e.target.value)}
+                  placeholder="Paste your page's paragraphs or copywriting blocks here..."
+                  className="w-full h-44 bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition text-slate-700 font-medium placeholder-slate-400 resize-none leading-relaxed"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-3xs font-black uppercase text-slate-400 tracking-wider">Target Focus Keyword</label>
+                  <input
+                    type="text"
+                    value={targetDensityKeyword}
+                    onChange={(e) => setTargetDensityKeyword(e.target.value)}
+                    placeholder="e.g., business phone system"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition text-slate-700 font-bold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-3xs font-black uppercase text-slate-400 tracking-wider">Target DFW Location</label>
+                  <input
+                    type="text"
+                    value={targetDensityLocation}
+                    onChange={(e) => setTargetDensityLocation(e.target.value)}
+                    placeholder="e.g., Fort Worth"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition text-slate-700 font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={analyzeDensity}
+                  disabled={isDensityAnalyzing || !originalDensityText}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 transition disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase py-3 cursor-pointer select-none shadow-sm"
+                >
+                  {isDensityAnalyzing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <BarChart3 className="h-4 w-4" />}
+                  <span>Analyze Keyword Density</span>
+                </button>
+                {analyzedParagraphs.length > 0 && (
+                  <button
+                    onClick={optimizeAllLowDensityParagraphs}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 transition text-white rounded-xl text-xs font-black uppercase py-3 cursor-pointer select-none shadow-sm"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>Optimize Low Density ({analyzedParagraphs.filter(p => p.status === 'low').length})</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Results Right panel */}
+            <div className="lg:col-span-7 bg-slate-50 border border-slate-100 rounded-2xl p-5 min-h-[320px] flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <span className="text-3xs font-black uppercase text-slate-400 tracking-wider">Analyzed Content Blocks ({analyzedParagraphs.length})</span>
+                  {analyzedParagraphs.length > 0 && (
+                    <span className="text-4xs font-mono font-bold bg-slate-200/80 px-2 py-0.5 rounded text-slate-600">
+                      Overall Density Health: {((analyzedParagraphs.filter(p => p.status === 'optimized').length / analyzedParagraphs.length) * 100).toFixed(0)}% Good
+                    </span>
+                  )}
+                </div>
+
+                {analyzedParagraphs.length === 0 ? (
+                  <div className="py-16 text-center text-slate-400 space-y-3">
+                    <div className="bg-slate-200/50 p-3 rounded-full w-fit mx-auto">
+                      <Sparkles className="h-6 w-6 text-slate-400" />
+                    </div>
+                    <p className="text-xs leading-normal max-w-sm mx-auto">
+                      Paste your current text or paragraphs into the editor on the left and click <strong className="text-slate-700">"Analyze Keyword Density"</strong> to discover low-performing paragraphs and optimize them instantly.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[380px] overflow-y-auto pr-2 divide-y divide-slate-200/60">
+                    {analyzedParagraphs.map((p, idx) => (
+                      <div key={p.id} className={`pt-4 ${idx === 0 ? 'pt-0' : ''} space-y-2.5`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-3xs font-semibold">
+                          <span className="text-slate-400 uppercase font-bold font-mono">Paragraph Block #{idx + 1}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-500 font-mono bg-slate-200/50 px-2 py-0.5 rounded">
+                              {p.wordCount} words
+                            </span>
+                            <span className={`px-2 py-0.5 rounded font-mono ${p.status === 'low' ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'}`}>
+                              Density: {p.density.toFixed(1)}% ({p.status === 'low' ? 'Low' : 'Good'})
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium text-slate-700">
+                          {/* Original Text */}
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">Original Text:</span>
+                            <div className="bg-white border border-slate-100 p-3 rounded-xl leading-relaxed select-all">
+                              {p.original}
+                            </div>
+                          </div>
+
+                          {/* Optimized Text */}
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-bold text-blue-500 uppercase flex items-center gap-1">
+                              <Sparkles className="h-3 w-3" /> AI Optimized Text (Injected Keywords):
+                            </span>
+                            {p.isOptimizing ? (
+                              <div className="bg-blue-50/50 border border-blue-100 p-8 rounded-xl flex flex-col items-center justify-center text-center space-y-2">
+                                <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />
+                                <span className="text-3xs text-blue-600 font-bold uppercase tracking-wider">Injecting & Rewriting...</span>
+                              </div>
+                            ) : p.optimized ? (
+                              <div className="bg-emerald-50/30 border border-emerald-100 p-3 rounded-xl leading-relaxed text-slate-800 font-bold select-all relative group transition-all">
+                                <span>{p.optimized}</span>
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.optimized || '');
+                                    toast.success("Optimized paragraph copied!");
+                                  }}
+                                  className="absolute top-2 right-2 bg-white/90 border border-slate-200 p-1 rounded-md shadow-sm opacity-0 group-hover:opacity-100 hover:bg-slate-50 transition cursor-pointer"
+                                  title="Copy optimized paragraph"
+                                >
+                                  <Check className="h-3.5 w-3.5 text-slate-600" />
+                                </button>
+                              </div>
+                            ) : p.status === 'low' ? (
+                              <button
+                                onClick={() => optimizeDensityParagraph(p.id)}
+                                className="w-full py-6 bg-amber-50 hover:bg-amber-100 border border-dashed border-amber-300 rounded-xl text-amber-800 font-bold uppercase transition flex flex-col items-center justify-center gap-1 cursor-pointer"
+                              >
+                                <Sparkles className="h-4 w-4 text-amber-500 animate-bounce" />
+                                <span className="text-3xs tracking-wider">Auto-Inject Keyword Now</span>
+                              </button>
+                            ) : (
+                              <div className="bg-slate-100 border border-slate-200 p-3 rounded-xl leading-relaxed text-slate-400 italic text-3xs flex items-center justify-center py-6">
+                                <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mr-1.5" />
+                                No optimization needed. Focus keyword is already well-represented.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {analyzedParagraphs.length > 0 && (
+                <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-3xs font-semibold text-slate-400">
+                  <span className="flex items-center gap-1 text-blue-600">
+                    <Info className="h-3.5 w-3.5" /> Paragraphs with density &lt; 1% are automatically highlighted in amber.
+                  </span>
+                  <button
+                    onClick={() => {
+                      const allText = analyzedParagraphs.map(p => p.optimized || p.original).join("\n\n");
+                      navigator.clipboard.writeText(allText);
+                      toast.success("All optimized copy blocks copied to clipboard!");
+                    }}
+                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+                  >
+                    Copy Entire Optimized Copy
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Google Search Console - API Health, Performance Metrics, and Interactive URL Inspection */}
         <section className="space-y-6">
+
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -3615,48 +4670,9 @@ export default function SEODashboard() {
 
                 <div className="overflow-x-auto">
                   {analyticsTab === 'queries' ? (
-                    <table className="w-full border-collapse text-left text-xs text-slate-600">
-                      <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200 text-3xs tracking-wider">
-                        <tr>
-                          <th className="py-3 px-6">Keyword / Search Query</th>
-                          <th className="py-3 px-6 text-center">Clicks</th>
-                          <th className="py-3 px-6 text-center">Impressions</th>
-                          <th className="py-3 px-6 text-center">CTR</th>
-                          <th className="py-3 px-6 text-center">Avg. Position</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium">
-                        {filteredTopQueries.length > 0 ? (
-                          filteredTopQueries.map((row: any, index: number) => (
-                            <tr key={index} className="hover:bg-slate-50/50 transition">
-                              <td className="py-3 px-6 text-slate-800 font-bold select-all font-mono">
-                                {row.keys?.[0] || 'Unknown Query'}
-                              </td>
-                              <td className="py-3 px-6 text-center font-mono text-slate-900 font-bold">
-                                {row.clicks}
-                              </td>
-                              <td className="py-3 px-6 text-center font-mono text-slate-500">
-                                {row.impressions}
-                              </td>
-                              <td className="py-3 px-6 text-center font-mono text-slate-500">
-                                {new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(row.ctr || 0)}
-                              </td>
-                              <td className="py-3 px-6 text-center font-mono font-bold">
-                                <span className={`inline-block px-1.5 py-0.5 rounded text-4xs font-extrabold ${row.position <= 3 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
-                                  #{row.position?.toFixed(1)}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={5} className="py-8 text-center text-slate-400">
-                              {gscSearchQuery ? `No matching search queries found for "${gscSearchQuery}"` : "No query metrics data available."}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                    <div className="p-4 bg-slate-50/30">
+                      <LocalRankTracker />
+                    </div>
                   ) : (
                     <table className="w-full border-collapse text-left text-xs text-slate-600">
                       <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200 text-3xs tracking-wider">

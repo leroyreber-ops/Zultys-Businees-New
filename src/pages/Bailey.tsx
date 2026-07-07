@@ -225,9 +225,8 @@ export function Bailey() {
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-zultys-green/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Bailey Zultys Business Phone Systems and VoIP Experts"
                       src={OFFICE_COMMUNICATION}
-                      alt="Bailey Zultys Business Phone Systems and VoIP Experts"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -248,9 +247,8 @@ export function Bailey() {
                 <div className="order-2 lg:order-1 relative group">
                   <div className="absolute -inset-4 bg-zultys-green/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 bg-white p-10">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Zultys Unified Communications for Bailey Business"
                       src={ZULTYS_ZAC_MOBILE_COMBO}
-                      alt="Zultys Unified Communications for Bailey Business"
                       className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -307,9 +305,8 @@ export function Bailey() {
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-zultys-gold/10 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                   <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-                    <ImageWithFallback
+                    <ImageWithFallback alt="Zultys Cloud Phone Systems Bailey"
                       src={ZULTYS_CLOUD_SERVICES}
-                      alt="Zultys Cloud Phone Systems Bailey"
                       className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                     />

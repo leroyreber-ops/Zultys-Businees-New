@@ -18,9 +18,8 @@ export function Hero({ title, subtitle, icon: Icon, iconLabel, buttonText, onBut
   return (
     <section className="relative min-h-[60vh] flex flex-col justify-center bg-slate-950 overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <ImageWithFallback 
+        <ImageWithFallback  alt="Hero Background"
           src={ZULTYS_FORT_WORTH_BG}
-          alt="Hero Background"
           className="w-full h-full object-cover"
         />
         {/* Subtle dark tint to ensure white text is legible on any background */}
