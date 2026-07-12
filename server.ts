@@ -27,6 +27,9 @@ import { applyFixes } from "./src/seo/seoFix";
 import { GoogleGenAI, Type } from "@google/genai";
 
 let aiClient: GoogleGenAI | null = null;
+let searchGroundingDisabledUntil = 0;
+let geminiDisabledUntil = 0;
+
 function getGeminiClient(): GoogleGenAI {
   if (!aiClient) {
     const key = process.env.GEMINI_API_KEY;
@@ -2036,7 +2039,10 @@ The JSON schema:
       let analysis = "";
       let googleSearchUsed = false;
 
-      if (process.env.GEMINI_API_KEY) {
+      const useGemini = !!process.env.GEMINI_API_KEY && Date.now() > geminiDisabledUntil;
+      let useSearchGrounding = useGemini && Date.now() > searchGroundingDisabledUntil;
+
+      if (useGemini) {
         try {
           const ai = getGeminiClient();
           const prompt = `Search Google for the query: "${keyword}". Identify the organic search ranking position (from 1 to 100) of the website "dallasfortworthzultys.com" (or any subpages on that domain).
@@ -2053,21 +2059,37 @@ The JSON schema:
           Provide a highly detailed "analysis" summarizing the findings, explaining why dallasfortworthzultys.com ranks where it does for this keyword, and giving 1-2 constructive SEO recommendations.`;
 
           let response;
-          try {
-            response = await ai.models.generateContent({
-              model: "gemini-3.5-flash",
-              contents: prompt,
-              config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: "application/json",
+          if (useSearchGrounding) {
+            try {
+              response = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: prompt,
+                config: {
+                  tools: [{ googleSearch: {} }],
+                  responseMimeType: "application/json",
+                }
+              });
+              googleSearchUsed = true;
+            } catch (groundingErr: any) {
+              const errStr = String(groundingErr?.message || groundingErr || "");
+              console.warn("[Rank Polling] Gemini Search Grounding failed or quota exceeded. Retrying without search tool...", errStr);
+              if (errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.toLowerCase().includes("exhausted")) {
+                searchGroundingDisabledUntil = Date.now() + 15 * 60 * 1000;
+                console.warn("[Rank Polling] Search grounding cooled down for 15 minutes.");
               }
-            });
-            googleSearchUsed = true;
-          } catch (groundingErr: any) {
-            console.warn("[Rank Polling] Gemini Search Grounding failed or quota exceeded (429). Retrying without search tool...", groundingErr.message || groundingErr);
+              response = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: prompt + "\n\nNote: Google Search Grounding is currently unavailable or quota-limited. Please use your internal knowledge of typical Dallas-Fort Worth regional telecom rankings or simulate highly realistic positions.",
+                config: {
+                  responseMimeType: "application/json",
+                }
+              });
+              googleSearchUsed = false;
+            }
+          } else {
             response = await ai.models.generateContent({
               model: "gemini-3.5-flash",
-              contents: prompt + "\n\nNote: Google Search Grounding is currently unavailable or quota-limited. Please use your internal knowledge of typical Dallas-Fort Worth regional telecom rankings or simulate highly realistic positions.",
+              contents: prompt + "\n\nNote: Google Search Grounding is currently cooling down. Please use your internal knowledge of typical Dallas-Fort Worth regional telecom rankings or simulate highly realistic positions.",
               config: {
                 responseMimeType: "application/json",
               }
@@ -2083,7 +2105,12 @@ The JSON schema:
             analysis = parsed.analysis || "";
           }
         } catch (err: any) {
-          console.warn("Gemini real-time rank verification failed, falling back to simulator:", err.message || err);
+          const errStr = String(err?.message || err || "");
+          console.warn("Gemini real-time rank verification failed, falling back to simulator:", errStr);
+          if (errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.toLowerCase().includes("exhausted")) {
+            geminiDisabledUntil = Date.now() + 5 * 60 * 1000;
+            console.warn("[Rank Polling] Gemini API cooling down for 5 minutes.");
+          }
         }
       }
 
@@ -2199,30 +2226,65 @@ The JSON schema:
         let analysis = "";
         let googleSearchUsed = false;
 
-        if (process.env.GEMINI_API_KEY) {
+        let useGeminiLoop = !!process.env.GEMINI_API_KEY && Date.now() > geminiDisabledUntil;
+        let useSearchGroundingLoop = useGeminiLoop && Date.now() > searchGroundingDisabledUntil;
+
+        if (useGeminiLoop) {
           try {
             const ai = getGeminiClient();
             const prompt = `Search Google for the query: "${keyword}". Identify dallasfortworthzultys.com ranking position (1-100). Return JSON: {"position": number|null, "found": boolean, "competitors": [{"domain": string, "rank": number, "title": string}], "analysis": string, "googleSearchUsed": boolean}`;
             
-            const response = await ai.models.generateContent({
-              model: "gemini-3.5-flash",
-              contents: prompt,
-              config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: "application/json",
+            let response;
+            if (useSearchGroundingLoop) {
+              try {
+                response = await ai.models.generateContent({
+                  model: "gemini-3.5-flash",
+                  contents: prompt,
+                  config: {
+                    tools: [{ googleSearch: {} }],
+                    responseMimeType: "application/json",
+                  }
+                });
+                googleSearchUsed = true;
+              } catch (groundingErr: any) {
+                const errStr = String(groundingErr?.message || groundingErr || "");
+                if (errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.toLowerCase().includes("exhausted")) {
+                  searchGroundingDisabledUntil = Date.now() + 15 * 60 * 1000;
+                  useSearchGroundingLoop = false;
+                }
+                response = await ai.models.generateContent({
+                  model: "gemini-3.5-flash",
+                  contents: prompt + "\n\nNote: Google Search Grounding is currently unavailable. Use typical DFW regional rankings or simulate realistic positions.",
+                  config: {
+                    responseMimeType: "application/json",
+                  }
+                });
+                googleSearchUsed = false;
               }
-            });
+            } else {
+              response = await ai.models.generateContent({
+                model: "gemini-3.5-flash",
+                contents: prompt + "\n\nNote: Google Search Grounding is currently cooling down. Use typical DFW regional rankings or simulate realistic positions.",
+                config: {
+                  responseMimeType: "application/json",
+                }
+              });
+              googleSearchUsed = false;
+            }
 
-            if (response.text) {
+            if (response && response.text) {
               const parsed = JSON.parse(response.text.trim());
               position = typeof parsed.position === "number" ? parsed.position : null;
               found = !!parsed.found;
               competitors = parsed.competitors || [];
               analysis = parsed.analysis || "";
-              googleSearchUsed = true;
             }
-          } catch (err) {
-            // Silently swallow and fall back to simulator below
+          } catch (err: any) {
+            const errStr = String(err?.message || err || "");
+            if (errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.toLowerCase().includes("exhausted")) {
+              geminiDisabledUntil = Date.now() + 5 * 60 * 1000;
+              useGeminiLoop = false;
+            }
           }
         }
 

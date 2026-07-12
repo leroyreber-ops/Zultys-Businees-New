@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import CitationDistributionMap from '../components/CitationDistributionMap';
+import { CitationsTable } from '../components/CitationsTable';
 
 interface BusinessProfile {
   name: string;
@@ -113,6 +114,7 @@ export default function CitationHealth() {
   const [fixingKey, setFixingKey] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [inspectingScreenshot, setInspectingScreenshot] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   // Master Auto-Fix Automation states
   const [masterAutoFixActive, setMasterAutoFixActive] = useState(false);
@@ -995,203 +997,236 @@ export default function CitationHealth() {
 
           {/* RIGHT COLUMN: DIRECTORY SOURCE ENGINE & LOCAL AUDITS */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-5">
-              
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div className="space-y-1">
-                  <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-                    <Sparkles className="h-4 w-4 text-blue-500" /> Directory Source Engine &amp; Live Audits
-                  </h2>
-                  <p className="text-[10px] text-slate-500">
-                    Opportunities ordered by Domain Authority, Relevance, and Acceptability.
-                  </p>
-                </div>
-
-                {/* Filter Tabs */}
-                <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
-                  {(['all', 'mismatch', 'missing', 'consistent'] as const).map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md transition cursor-pointer ${
-                        activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      {tab === 'mismatch' ? 'Issues' : tab}
-                    </button>
-                  ))}
-                </div>
+            {/* View Mode Toolbar */}
+            <div className="flex items-center justify-between bg-slate-100 border border-slate-200 p-1.5 rounded-xl">
+              <span className="text-[10px] font-black uppercase text-slate-500 pl-2 tracking-wider">Citations Display Engine</span>
+              <div className="flex gap-1 bg-white border border-slate-200/50 p-0.5 rounded-lg shadow-3xs">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md transition cursor-pointer flex items-center gap-1 ${
+                    viewMode === 'table' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Database Table View
+                </button>
+                <button
+                  onClick={() => setViewMode('cards')}
+                  className={`px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-md transition cursor-pointer flex items-center gap-1 ${
+                    viewMode === 'cards' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Interactive Cards View
+                </button>
               </div>
+            </div>
 
-              {/* Opportunities List */}
-              <div className="space-y-4">
-                {filteredDirectories.map((dir) => {
-                  const hasMismatch = dir.audit.status === 'mismatch';
-                  const isMissing = dir.audit.status === 'missing';
-                  const isConflict = dir.audit.status === 'duplicate_conflict';
-                  const isConsistent = dir.audit.status === 'consistent';
+            {viewMode === 'table' ? (
+              <CitationsTable 
+                directories={directories}
+                onAutoFix={handleAutoFix}
+                onTriggerSubmission={handleTriggerSubmission}
+                fixingKey={fixingKey}
+                submittingKey={submittingKey}
+              />
+            ) : (
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-5">
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                  <div className="space-y-1">
+                    <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4 text-blue-500" /> Directory Source Engine &amp; Live Audits
+                    </h2>
+                    <p className="text-[10px] text-slate-500">
+                      Opportunities ordered by Domain Authority, Relevance, and Acceptability.
+                    </p>
+                  </div>
 
-                  return (
-                    <div 
-                      key={dir.key}
-                      id={`directory-card-${dir.key}`}
-                      className={`border rounded-xl p-4 transition-all duration-300 ${
-                        hasMismatch ? 'bg-rose-50/20 border-rose-200' :
-                        isConflict ? 'bg-amber-50/20 border-amber-200' :
-                        isMissing ? 'bg-slate-50/50 border-slate-200' :
-                        'bg-white border-slate-100 hover:border-slate-200'
-                      }`}
-                    >
-                      {/* Directory Header Row */}
-                      <div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-slate-800 text-sm">{dir.name}</h3>
-                            <span className="text-[10px] text-slate-500 font-mono">({dir.domain})</span>
-                            <span className="text-4xs uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded border bg-slate-100 border-slate-200 text-slate-500">
-                              {dir.integrationType}
-                            </span>
-                          </div>
-                          
-                          {/* Metrics Row */}
-                          <div className="flex items-center gap-4 text-[10px] text-slate-400 font-semibold">
-                            <span className="flex items-center gap-1">Domain Authority: <strong className="text-slate-600 font-mono">{dir.authority}</strong></span>
-                            <span className="flex items-center gap-1">Relevance: <strong className="text-slate-600 font-mono">{dir.relevance}%</strong></span>
-                            <span className="flex items-center gap-1">Likelihood: <strong className="text-slate-600 font-mono">{dir.likelihood}%</strong></span>
-                          </div>
-                        </div>
+                  {/* Filter Tabs */}
+                  <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+                    {(['all', 'mismatch', 'missing', 'consistent'] as const).map(tab => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md transition cursor-pointer ${
+                          activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        {tab === 'mismatch' ? 'Issues' : tab}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                        {/* Status Badge */}
-                        <div className="flex items-center gap-1.5">
-                          {isConsistent && (
-                            <span className="bg-emerald-100 border border-emerald-200 text-emerald-700 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                              <CheckCircle className="h-3.5 w-3.5" /> Fully Consistent
-                            </span>
-                          )}
-                          {hasMismatch && (
-                            <span className="bg-rose-100 border border-rose-200 text-rose-700 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                              <AlertTriangle className="h-3.5 w-3.5" /> NAP Discrepancy
-                            </span>
-                          )}
-                          {isConflict && (
-                            <span className="bg-amber-100 border border-amber-200 text-amber-700 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                              <ShieldAlert className="h-3.5 w-3.5" /> Duplicate Conflict
-                            </span>
-                          )}
-                          {isMissing && (
-                            <span className="bg-slate-200 border border-slate-300 text-slate-600 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
-                              <PlusCircle className="h-3.5 w-3.5" /> Not Found
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                {/* Opportunities List */}
+                <div className="space-y-4">
+                  {filteredDirectories.map((dir) => {
+                    const hasMismatch = dir.audit.status === 'mismatch';
+                    const isMissing = dir.audit.status === 'missing';
+                    const isConflict = dir.audit.status === 'duplicate_conflict';
+                    const isConsistent = dir.audit.status === 'consistent';
 
-                      {/* Directory Audit Comparison */}
-                      {!isMissing && (
-                        <div className="py-3 text-[11px] grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-600 border-b border-slate-100">
+                    return (
+                      <div 
+                        key={dir.key}
+                        id={`directory-card-${dir.key}`}
+                        className={`border rounded-xl p-4 transition-all duration-300 ${
+                          hasMismatch ? 'bg-rose-50/20 border-rose-200' :
+                          isConflict ? 'bg-amber-50/20 border-amber-200' :
+                          isMissing ? 'bg-slate-50/50 border-slate-200' :
+                          'bg-white border-slate-100 hover:border-slate-200'
+                        }`}
+                      >
+                        {/* Directory Header Row */}
+                        <div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-3">
                           <div className="space-y-1">
-                            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Listing Data found online</span>
-                            <div className="bg-slate-100/60 p-2.5 rounded-lg space-y-1 border border-slate-200/40">
-                              <p className={`truncate ${dir.audit.mismatchFields.includes('name') ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}`}>
-                                <strong className="font-semibold text-slate-500">Name:</strong> {dir.audit.foundName}
-                              </p>
-                              <p className={`truncate ${dir.audit.mismatchFields.includes('street') ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                                <strong className="font-semibold text-slate-500">Add:</strong> {dir.audit.foundAddress}
-                              </p>
-                              <p className={`truncate ${dir.audit.mismatchFields.includes('phone') ? 'line-through text-slate-400' : 'text-slate-700'}`}>
-                                <strong className="font-semibold text-slate-500">Phone:</strong> {dir.audit.foundPhone}
-                              </p>
-                              <p className={`truncate ${dir.audit.mismatchFields.includes('website') ? 'line-through text-slate-400' : 'text-slate-700 font-mono text-[10px]'}`}>
-                                <strong className="font-semibold text-slate-500">Web:</strong> {dir.audit.foundWebsite}
-                              </p>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-slate-800 text-sm">{dir.name}</h3>
+                              <span className="text-[10px] text-slate-500 font-mono">({dir.domain})</span>
+                              <span className="text-4xs uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded border bg-slate-100 border-slate-200 text-slate-500">
+                                {dir.integrationType}
+                              </span>
+                            </div>
+                            
+                            {/* Metrics Row */}
+                            <div className="flex items-center gap-4 text-[10px] text-slate-400 font-semibold">
+                              <span className="flex items-center gap-1">Domain Authority: <strong className="text-slate-600 font-mono">{dir.authority}</strong></span>
+                              <span className="flex items-center gap-1">Relevance: <strong className="text-slate-600 font-mono">{dir.relevance}%</strong></span>
+                              <span className="flex items-center gap-1">Likelihood: <strong className="text-slate-600 font-mono">{dir.likelihood}%</strong></span>
                             </div>
                           </div>
 
-                          <div className="space-y-1 flex flex-col justify-between">
-                            <div>
-                              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Conflict / Issue Analysis</span>
-                              <div className="p-1 space-y-1 text-slate-500 mt-1">
-                                {isConsistent ? (
-                                  <p className="text-emerald-600 font-semibold flex items-center gap-1 text-[10px]">
-                                    <Check className="h-3.5 w-3.5" /> Ready for Local Maps indexing.
-                                  </p>
-                                ) : isConflict ? (
-                                  <p className="text-amber-700 text-[10px] leading-tight flex items-start gap-1">
-                                    <ShieldAlert className="h-3.5 w-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
-                                    <span>Another office registered with this phone. Suppress to prevent indexing collision.</span>
-                                  </p>
-                                ) : (
-                                  <div className="space-y-1 text-[10px]">
-                                    <p className="text-rose-700 font-bold">Mismatches: {dir.audit.mismatchFields.join(', ')}</p>
-                                    <p className="leading-tight text-slate-500">We detected conflicting contact elements that will decrease Google's Local SEO confidence score.</p>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {dir.listingUrl && (
-                              <a 
-                                href={dir.listingUrl} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="text-slate-500 hover:text-slate-800 text-[10px] font-semibold flex items-center gap-1 mt-2 self-start"
-                              >
-                                <ExternalLink className="h-3 w-3" /> View original listing
-                              </a>
+                          {/* Status Badge */}
+                          <div className="flex items-center gap-1.5">
+                            {isConsistent && (
+                              <span className="bg-emerald-100 border border-emerald-200 text-emerald-700 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
+                                <CheckCircle className="h-3.5 w-3.5" /> Fully Consistent
+                              </span>
+                            )}
+                            {hasMismatch && (
+                              <span className="bg-rose-100 border border-rose-200 text-rose-700 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
+                                <AlertTriangle className="h-3.5 w-3.5" /> NAP Discrepancy
+                              </span>
+                            )}
+                            {isConflict && (
+                              <span className="bg-amber-100 border border-amber-200 text-amber-700 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
+                                <ShieldAlert className="h-3.5 w-3.5" /> Duplicate Conflict
+                              </span>
+                            )}
+                            {isMissing && (
+                              <span className="bg-slate-200 border border-slate-300 text-slate-600 text-4xs font-black uppercase tracking-wider px-2 py-1 rounded-md flex items-center gap-1">
+                                <PlusCircle className="h-3.5 w-3.5" /> Not Found
+                              </span>
                             )}
                           </div>
                         </div>
-                      )}
 
-                      {/* Interactive Submission Controls */}
-                      <div className="pt-3 flex items-center justify-between gap-4 flex-wrap">
-                        <div className="text-[10px] text-slate-400 font-mono">
-                          {!isMissing && (
-                            <span>Listing Consistency Match Rate: <strong className="text-slate-700">{dir.audit.consistencyScore}%</strong></span>
-                          )}
-                          {isMissing && (
-                            <span>New local SEO citation build opportunity.</span>
-                          )}
+                        {/* Directory Audit Comparison */}
+                        {!isMissing && (
+                          <div className="py-3 text-[11px] grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-600 border-b border-slate-100">
+                            <div className="space-y-1">
+                              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Listing Data found online</span>
+                              <div className="bg-slate-100/60 p-2.5 rounded-lg space-y-1 border border-slate-200/40">
+                                <p className={`truncate ${dir.audit.mismatchFields.includes('name') ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}`}>
+                                  <strong className="font-semibold text-slate-500">Name:</strong> {dir.audit.foundName}
+                                </p>
+                                <p className={`truncate ${dir.audit.mismatchFields.includes('street') ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                                  <strong className="font-semibold text-slate-500">Add:</strong> {dir.audit.foundAddress}
+                                </p>
+                                <p className={`truncate ${dir.audit.mismatchFields.includes('phone') ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                                  <strong className="font-semibold text-slate-500">Phone:</strong> {dir.audit.foundPhone}
+                                </p>
+                                <p className={`truncate ${dir.audit.mismatchFields.includes('website') ? 'line-through text-slate-400' : 'text-slate-700 font-mono text-[10px]'}`}>
+                                  <strong className="font-semibold text-slate-500">Web:</strong> {dir.audit.foundWebsite}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-1 flex flex-col justify-between">
+                              <div>
+                                <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Conflict / Issue Analysis</span>
+                                <div className="p-1 space-y-1 text-slate-500 mt-1">
+                                  {isConsistent ? (
+                                    <p className="text-emerald-600 font-semibold flex items-center gap-1 text-[10px]">
+                                      <Check className="h-3.5 w-3.5" /> Ready for Local Maps indexing.
+                                    </p>
+                                  ) : isConflict ? (
+                                    <p className="text-amber-700 text-[10px] leading-tight flex items-start gap-1">
+                                      <ShieldAlert className="h-3.5 w-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                                      <span>Another office registered with this phone. Suppress to prevent indexing collision.</span>
+                                    </p>
+                                  ) : (
+                                    <div className="space-y-1 text-[10px]">
+                                      <p className="text-rose-700 font-bold">Mismatches: {dir.audit.mismatchFields.join(', ')}</p>
+                                      <p className="leading-tight text-slate-500">We detected conflicting contact elements that will decrease Google's Local SEO confidence score.</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {dir.listingUrl && (
+                                <a 
+                                  href={dir.listingUrl} 
+                                  target="_blank" 
+                                  rel="noreferrer" 
+                                  className="text-slate-500 hover:text-slate-800 text-[10px] font-semibold flex items-center gap-1 mt-2 self-start"
+                                >
+                                  <ExternalLink className="h-3 w-3" /> View original listing
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Interactive Submission Controls */}
+                        <div className="pt-3 flex items-center justify-between gap-4 flex-wrap">
+                          <div className="text-[10px] text-slate-400 font-mono">
+                            {!isMissing && (
+                              <span>Listing Consistency Match Rate: <strong className="text-slate-700">{dir.audit.consistencyScore}%</strong></span>
+                            )}
+                            {isMissing && (
+                              <span>New local SEO citation build opportunity.</span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {(hasMismatch || isConflict) && (
+                              <button
+                                onClick={() => handleAutoFix(dir.key)}
+                                disabled={fixingKey === dir.key}
+                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider cursor-pointer active:scale-95 transition flex items-center gap-1 disabled:opacity-50"
+                              >
+                                <Wrench className={`h-3 w-3 ${fixingKey === dir.key ? 'animate-spin' : ''}`} />
+                                {fixingKey === dir.key ? 'Aligning...' : 'Auto-Fix NAP Mismatch'}
+                              </button>
+                            )}
+                            {isMissing && (
+                              <button
+                                onClick={() => handleTriggerSubmission(dir.key)}
+                                disabled={submittingKey === dir.key}
+                                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider cursor-pointer active:scale-95 transition flex items-center gap-1 disabled:opacity-50"
+                              >
+                                <PlusCircle className="h-3 w-3" />
+                                {submittingKey === dir.key ? 'Submitting...' : 'Pave & Submit Citation'}
+                              </button>
+                            )}
+                            {isConsistent && (
+                              <button
+                                disabled
+                                className="px-3 py-1.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                              >
+                                <Check className="h-3 w-3 text-emerald-500" /> Synced
+                              </button>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          {(hasMismatch || isConflict) && (
-                            <button
-                              onClick={() => handleAutoFix(dir.key)}
-                              disabled={fixingKey === dir.key}
-                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider cursor-pointer active:scale-95 transition flex items-center gap-1 disabled:opacity-50"
-                            >
-                              <Wrench className={`h-3 w-3 ${fixingKey === dir.key ? 'animate-spin' : ''}`} />
-                              {fixingKey === dir.key ? 'Aligning...' : 'Auto-Fix NAP Mismatch'}
-                            </button>
-                          )}
-                          {isMissing && (
-                            <button
-                              onClick={() => handleTriggerSubmission(dir.key)}
-                              disabled={submittingKey === dir.key}
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider cursor-pointer active:scale-95 transition flex items-center gap-1 disabled:opacity-50"
-                            >
-                              <PlusCircle className="h-3 w-3" />
-                              {submittingKey === dir.key ? 'Submitting...' : 'Pave & Submit Citation'}
-                            </button>
-                          )}
-                          {isConsistent && (
-                            <button
-                              disabled
-                              className="px-3 py-1.5 bg-slate-100 text-slate-400 border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
-                            >
-                              <Check className="h-3 w-3 text-emerald-500" /> Synced
-                            </button>
-                          )}
-                        </div>
                       </div>
+                    );
+                  })}
+                </div>
 
-                    </div>
-                  );
-                })}
               </div>
-
-            </div>
+            )}
           </div>
 
         </div>

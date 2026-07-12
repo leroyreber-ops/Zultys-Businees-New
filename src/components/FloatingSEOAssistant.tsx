@@ -38,6 +38,21 @@ interface RankNotification {
 }
 
 export function FloatingSEOAssistant() {
+  // Check if we are in local/dev/preview environment or on /seo-admin
+  const isDevOrAdmin = 
+    typeof window !== 'undefined' && (
+      (import.meta as any).env?.DEV || 
+      window.location.hostname === 'localhost' || 
+      window.location.hostname.includes('127.0.0.1') || 
+      window.location.hostname.includes('.run.app') || 
+      window.location.hostname.includes('netlify.app') || 
+      window.location.pathname === '/seo-admin'
+    );
+
+  if (!isDevOrAdmin) {
+    return null;
+  }
+
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'checker' | 'autoinject' | 'healer' | 'notifications'>('checker');
   const [position, setPosition] = useState({ x: 0, y: 0 });
