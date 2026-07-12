@@ -317,10 +317,15 @@ export function getCityNameFromPath(path: string): string {
   ];
   
   let citySlug = cleanPath;
-  for (const suffix of suffixes) {
-    if (citySlug.endsWith(suffix)) {
-      citySlug = citySlug.slice(0, -suffix.length);
-      break;
+  let suffixMatched = true;
+  while (suffixMatched) {
+    suffixMatched = false;
+    for (const suffix of suffixes) {
+      if (citySlug.endsWith(suffix)) {
+        citySlug = citySlug.slice(0, -suffix.length);
+        suffixMatched = true;
+        break;
+      }
     }
   }
   

@@ -25,7 +25,72 @@ export interface ExtractedFAQ {
 interface FAQPageSchemaProps {
   path?: string;
   headless?: boolean; // If true, only injects schema. If false, renders dashboard visualizer.
+  customFaqs?: Array<{ question: string; answer: string }>;
 }
+
+/**
+ * Pre-compiled high-quality FAQs for top landing pages to ensure immediate SEO value.
+ */
+const PRESET_FAQS: Record<string, Array<{ question: string; answer: string }>> = {
+  "/": [
+    {
+      question: "Who is the top authorized Zultys dealer in Dallas-Fort Worth?",
+      answer: "DFW Business Communications is the #1 authorized Zultys dealer and partner in Dallas-Fort Worth, providing expert phone system installation, sales, custom programming, and 24/7 certified local DFW support."
+    },
+    {
+      question: "What products and business phone systems does Zultys offer?",
+      answer: "Zultys offers robust enterprise Unified Communications including the MX250 and MX30 IP-PBX systems, ZAC (Zultys Advanced Communicator) desktop and mobile apps, integrated cloud/VoIP systems, call center capabilities, and secure SIP IP phones."
+    },
+    {
+      question: "Can I keep my existing Dallas-Fort Worth business phone numbers?",
+      answer: "Yes, we handle the entire number porting process. We coordinate directly with your current DFW carriers to transfer all your local and toll-free numbers over to the Zultys system with absolutely zero downtime."
+    }
+  ],
+  "/fort-worth-zultys-business-phone-systems": [
+    {
+      question: "Why should Fort Worth businesses choose a Zultys IP-PBX system?",
+      answer: "Zultys IP-PBX systems are highly reliable, scale from 5 to over 10,000 users, and combine voice, video, secure chat, and mobile integration into one seamless, redundant platform suited for Fort Worth offices."
+    },
+    {
+      question: "What is the typical setup timeline for a Fort Worth Zultys deployment?",
+      answer: "Most on-premise or cloud Zultys deployments take 2 to 4 weeks. This includes certified on-site network testing, hardware configuration, local number porting, and customized staff training."
+    },
+    {
+      question: "How does Zultys handle internet outages or power failures in Fort Worth?",
+      answer: "With Zultys, redundancy is built-in. If your physical office internet fails, incoming calls automatically failover to mobile apps or backup lines, while cloud systems continue to handle voicemail and auto-attendant functions uninterrupted."
+    }
+  ],
+  "/dallas-zultys-phones": [
+    {
+      question: "What are the benefits of Zultys Cloud VoIP for Dallas businesses?",
+      answer: "Zultys Cloud VoIP offers enterprise-grade unified communications without expensive on-premise hardware. It features high-definition voice, remote team synchronization via mobile extensions, and simple per-user pricing."
+    },
+    {
+      question: "Is training provided during the phone system installation in Dallas?",
+      answer: "Absolutely. Our certified Dallas-Fort Worth Zultys engineers provide complete, personalized, hands-on on-site training for your front-desk operators, standard employees, and IT administrators."
+    }
+  ],
+  "/zultys-pricing": [
+    {
+      question: "How much does a Zultys business phone system cost in DFW?",
+      answer: "Pricing depends on your deployment style (Cloud hosted vs. On-Premise appliance) and user count. DFW Business Communications guarantees the best local pricing with deep partner-volume discounts."
+    },
+    {
+      question: "Are there contract-free options for Zultys Cloud?",
+      answer: "Yes, we offer flexible contract lengths including month-to-month and multi-year options that lock in the lowest rates for your organization."
+    }
+  ],
+  "/products": [
+    {
+      question: "What IP phone models does Zultys offer?",
+      answer: "Zultys offers the premium ZIP Series IP phones, including the color-screen ZIP 49G, the gigabit ZIP 47G, and the standard ZIP 45G, designed to integrate seamlessly with MX-SE, MX30, and MX250 PBX systems."
+    },
+    {
+      question: "What is Zultys Advanced Communicator (ZAC)?",
+      answer: "ZAC is the ultimate client interface for Zultys. It unifies voice, video, secure instant messaging, corporate presence, screen sharing, and contact center controls in a single lightweight desktop or mobile app."
+    }
+  ]
+};
 
 /**
  * Checks if a heading text resembles a FAQ question.
@@ -53,14 +118,41 @@ function cleanQAString(text: string): string {
     .trim();
 }
 
-export function FAQPageSchema({ path, headless = true }: FAQPageSchemaProps) {
+export function FAQPageSchema({ path, headless = true, customFaqs }: FAQPageSchemaProps) {
   const [faqs, setFaqs] = useState<ExtractedFAQ[]>([]);
   const [isCopied, setIsCopied] = useState(false);
   const [activeQuestion, setActiveQuestion] = useState<number | null>(null);
   const [scanToggle, setScanToggle] = useState(false);
 
-  // Perform client-side DOM extraction
+  // Perform client-side DOM extraction or resolve from customFaqs / preset lists
   const performDOMExtraction = () => {
+    // 1. If customFaqs are provided as a prop, prioritize them
+    if (customFaqs && customFaqs.length > 0) {
+      setFaqs(customFaqs.map(faq => ({
+        question: faq.question,
+        answer: faq.answer,
+        sourceElement: "PROP",
+        confidence: "high"
+      })));
+      return;
+    }
+
+    // 2. Otherwise check if there is a preset FAQ configuration for the active path
+    const currentPath = path || (typeof window !== 'undefined' ? window.location.pathname : "/");
+    const normalizedPath = currentPath.toLowerCase().replace(/\/$/, "") || "/";
+    const preset = PRESET_FAQS[normalizedPath] || PRESET_FAQS[normalizedPath + "/"];
+
+    if (preset && preset.length > 0) {
+      setFaqs(preset.map(faq => ({
+        question: faq.question,
+        answer: faq.answer,
+        sourceElement: "PRESET",
+        confidence: "high"
+      })));
+      return;
+    }
+
+    // 3. Fallback to client-side DOM extraction
     if (typeof window === 'undefined') return;
 
     try {
@@ -146,7 +238,7 @@ export function FAQPageSchema({ path, headless = true }: FAQPageSchemaProps) {
     }
   };
 
-  // Run extraction whenever path changes, or after DOM settled
+  // Run extraction whenever path changes, customFaqs changes, or after DOM settled
   useEffect(() => {
     // Run after a short delay to allow page hydration/component rendering to complete
     const timer = setTimeout(() => {
@@ -154,7 +246,7 @@ export function FAQPageSchema({ path, headless = true }: FAQPageSchemaProps) {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [path, scanToggle]);
+  }, [path, scanToggle, customFaqs]);
 
   // Inject or update JSON-LD FAQ schema in document head
   useEffect(() => {
