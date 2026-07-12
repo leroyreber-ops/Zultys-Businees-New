@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { isGoogleConfigured, notifyGoogleUrlChange, submitSitemapToGoogle, logIndexingActivity } from "./googleIndexer.js";
 import { SitemapIndexProvider } from "./SitemapIndexProvider.js";
+import { GoogleIndexingAdminService } from "./googleIndexingAdminService.js";
 
 /**
  * Interface representing a route's SEO configuration.
@@ -280,6 +281,9 @@ ${xmlEntries}
 export function isCityOrProductRoute(route: string): boolean {
   const normalized = route.toLowerCase();
   
+  // Blog page check using GoogleIndexingAdminService
+  const isBlog = GoogleIndexingAdminService.isCityOrBlogRoute(route);
+
   // City page check
   const isCity = 
     normalized.includes("-tx-zultys") || 
@@ -288,7 +292,8 @@ export function isCityOrProductRoute(route: string): boolean {
     normalized === "/fort-worth" ||
     normalized === "/dfw" ||
     normalized.includes("dallas") ||
-    normalized.includes("fort-worth");
+    normalized.includes("fort-worth") ||
+    isBlog;
     
   // Product page check
   const isProduct = 

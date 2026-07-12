@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { generateRobotsTxt } from "./seoHelpers.js";
 
 // Self-contained known cities list for Dallas-Fort Worth metroplex area to prevent circular component dependencies
 export const KNOWN_CITIES = [
@@ -36,49 +37,16 @@ export class SitemapIndexProvider {
    * to ensure there is a valid Sitemap directive pointing to the generated sitemap.xml.
    */
   static updateRobotsTxt(siteUrl: string = "https://dallasfortworthzultys.com"): void {
-    const sitemapUrl = `${siteUrl.replace(/\/$/, "")}/sitemap.xml`;
-    const robotsLine = `Sitemap: ${sitemapUrl}`;
+    const robotsTxtContent = generateRobotsTxt(siteUrl);
 
-    const updateFile = (filePath: string) => {
+    const writeRobotsTxtFile = (filePath: string) => {
       try {
-        let content = "";
-        if (fs.existsSync(filePath)) {
-          content = fs.readFileSync(filePath, "utf8");
-        } else {
-          // Default robots.txt configuration
-          content = `User-agent: *\nAllow: /\nDisallow: /seo-dashboard\nDisallow: /citation-health\nDisallow: /admin/\n`;
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
         }
-
-        const lines = content.split("\n");
-        const hasSitemapLine = lines.some(line => line.trim().toLowerCase().startsWith("sitemap:"));
-
-        if (!hasSitemapLine) {
-          if (content && !content.endsWith("\n")) {
-            content += "\n";
-          }
-          content += `${robotsLine}\n`;
-          fs.writeFileSync(filePath, content, "utf8");
-          console.log(`[SitemapIndexProvider] Appended Sitemap link to ${filePath}`);
-        } else {
-          // Verify and replace correct sitemap location if it differs
-          let updated = false;
-          const newLines = lines.map(line => {
-            if (line.trim().toLowerCase().startsWith("sitemap:")) {
-              if (line.trim() !== robotsLine) {
-                updated = true;
-                return robotsLine;
-              }
-            }
-            return line;
-          });
-
-          if (updated) {
-            fs.writeFileSync(newLines.join("\n"), "utf8");
-            console.log(`[SitemapIndexProvider] Corrected sitemap link in ${filePath}`);
-          } else {
-            console.log(`[SitemapIndexProvider] robots.txt is perfectly aligned at ${filePath}`);
-          }
-        }
+        fs.writeFileSync(filePath, robotsTxtContent, "utf8");
+        console.log(`[SitemapIndexProvider] Successfully wrote robots.txt at ${filePath}`);
       } catch (err: any) {
         console.error(`[SitemapIndexProvider] Error writing robots.txt at ${filePath}:`, err.message || err);
       }
@@ -86,12 +54,12 @@ export class SitemapIndexProvider {
 
     // Update public/robots.txt
     const publicPath = path.join(process.cwd(), "public", "robots.txt");
-    updateFile(publicPath);
+    writeRobotsTxtFile(publicPath);
 
     // Update dist/robots.txt if exists
     const distPath = path.join(process.cwd(), "dist", "robots.txt");
     if (fs.existsSync(path.dirname(distPath))) {
-      updateFile(distPath);
+      writeRobotsTxtFile(distPath);
     }
   }
 

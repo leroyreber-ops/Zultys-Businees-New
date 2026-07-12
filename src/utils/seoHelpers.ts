@@ -752,3 +752,27 @@ export function generateEliteMetadata(path: string): { title: string; descriptio
   };
 }
 
+/**
+ * Generates standard robots.txt content with clear crawling directives and sitemap reference.
+ * Disallows /admin/ and /seo-dashboard paths for all crawlers to protect management portals.
+ */
+export function generateRobotsTxt(siteUrl: string = "https://dallasfortworthzultys.com"): string {
+  const cleanSiteUrl = siteUrl.replace(/\/$/, "");
+  return `# ===================================================
+# ROBOTS.TXT FOR DALLAS FORT WORTH ZULTYS VoIP
+# Optimized for maximum organic crawl efficiency
+# ===================================================
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /seo-dashboard
+Disallow: /citation-health
+Disallow: /seo-admin
+
+# Sitemap link to facilitate rapid URL discovery and indexation
+Sitemap: ${cleanSiteUrl}/sitemap.xml
+`;
+}
+
+

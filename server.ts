@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import { scanImagesInProject, generateSeoSuggestion, updateAltTagInFile } from "./src/utils/imageScanner";
 import { buildSitemapXml, watchAndGenerateSitemap, extractRoutesFromApp, getRouteSEO } from "./src/utils/sitemapGenerator";
-import { generateEliteMetadata } from "./src/utils/seoHelpers";
+import { generateEliteMetadata, generateRobotsTxt } from "./src/utils/seoHelpers";
 import {
   isGoogleConfigured,
   getIndexingHistory,
@@ -19,6 +19,7 @@ import {
   fetchSearchConsoleCityHeatmapData
 } from "./src/utils/googleIndexer";
 import { triggerGoogleIndexing, mapFilePathToRoute } from "./src/utils/indexing";
+import { GoogleIndexingAdminService } from "./src/utils/googleIndexingAdminService";
 import { runHealthCheckAudit, applyAutomatedFixes } from "./src/utils/healthScanner";
 import { extractLowHangingFruitFromQueries, DEMO_LOW_HANGING_FRUIT } from "./src/utils/lowHangingFruit";
 import { scanInternalLinks, injectInternalLink } from "./src/utils/internalLinkAuditor";
@@ -90,6 +91,95 @@ function isValidRoute(urlPath: string): boolean {
   return validRoutes.has(norm);
 }
 
+const serverCityCoordinates: Record<string, { lat: number; lng: number; zip: string }> = {
+  'Dallas': { lat: 32.7767, lng: -96.7970, zip: '75201' },
+  'Fort Worth': { lat: 32.7555, lng: -97.3308, zip: '76102' },
+  'Arlington': { lat: 32.7357, lng: -97.1081, zip: '76010' },
+  'Plano': { lat: 33.0198, lng: -96.6989, zip: '75074' },
+  'Garland': { lat: 32.9126, lng: -96.6389, zip: '75040' },
+  'Irving': { lat: 32.8140, lng: -96.9489, zip: '75060' },
+  'Grand Prairie': { lat: 32.7460, lng: -96.9978, zip: '75050' },
+  'McKinney': { lat: 33.1972, lng: -96.6398, zip: '75069' },
+  'Frisco': { lat: 33.1507, lng: -96.8236, zip: '75034' },
+  'Carrollton': { lat: 32.9746, lng: -96.8903, zip: '75006' },
+  'Denton': { lat: 33.2148, lng: -97.1331, zip: '76201' },
+  'Richardson': { lat: 32.9483, lng: -96.7299, zip: '75080' }
+};
+
+function getServerCityName(path: string): string {
+  const normalized = path.replace(/^\//, '').toLowerCase();
+  if (!normalized || normalized === 'index.html' || normalized === '') {
+    return 'Dallas-Fort Worth';
+  }
+  
+  const customCities: Record<string, string> = {
+    'balch-springs': 'Balch Springs',
+    'blue-mound': 'Blue Mound',
+    'blue-ridge': 'Blue Ridge',
+    'caddo-mills': 'Caddo Mills',
+    'cedar-hill': 'Cedar Hill',
+    'dalworthington-gardens': 'Dalworthington Gardens',
+    'dodd-city': 'Dodd City',
+    'edgecliff-village': 'Edgecliff Village',
+    'flower-mound': 'Flower Mound',
+    'forest-hill': 'Forest Hill',
+    'glen-rose': 'Glen Rose',
+    'glenn-heights': 'Glenn Heights',
+    'grand-prairie': 'Grand Prairie',
+    'haltom-city': 'Haltom City',
+    'honey-grove': 'Honey Grove',
+    'hudson-oaks': 'Hudson Oaks',
+    'lake-worth': 'Lake Worth',
+    'little-elm': 'Little Elm',
+    'north-richland-hills': 'North Richland Hills',
+    'pilot-point': 'Pilot Point',
+    'red-oak': 'Red Oak',
+    'richland-hills': 'Richland Hills',
+    'river-oaks': 'River Oaks',
+    'royse-city': 'Royse City',
+    'sansom-park': 'Sansom Park',
+    'the-colony': 'The Colony',
+    'tom-bean': 'Tom Bean',
+    'trophy-club': 'Trophy Club',
+    'van-alstyne': 'Van Alstyne',
+    'westover-hills': 'Westover Hills',
+    'westworth-village': 'Westworth Village',
+    'white-settlement': 'White Settlement',
+    'willow-park': 'Willow Park',
+    'wolfe-city': 'Wolfe City'
+  };
+
+  for (const [key, value] of Object.entries(customCities)) {
+    if (normalized.includes(key)) {
+      return value;
+    }
+  }
+
+  const cleanPath = normalized
+    .replace(/-tx-zultys-phone-systems.*/, '')
+    .replace(/-zultys-phone-systems.*/, '')
+    .replace(/-business-voip.*/, '')
+    .replace(/-voip-solutions.*/, '')
+    .replace(/-tx-zultys-voip.*/, '')
+    .replace(/-tx-zultys-dealer.*/, '')
+    .replace(/-zultys-dealer.*/, '')
+    .replace(/-ip-pbx.*/, '')
+    .replace(/-ip-phones.*/, '')
+    .replace(/-zultys-systems.*/, '')
+    .replace(/-zultys.*/, '')
+    .replace(/-voip.*/, '')
+    .replace(/-phone-systems.*/, '')
+    .replace(/-phones.*/, '')
+    .replace(/-systems.*/, '')
+    .replace(/-dealer.*/, '')
+    .replace(/-solutions.*/, '')
+    .replace(/-business-phones.*/, '')
+    .replace(/-business-communications.*/, '')
+    .replace(/-voip-provider.*/, '');
+
+  return cleanPath.charAt(0).toUpperCase() + cleanPath.slice(1);
+}
+
 function injectSEOMetadata(html: string, urlPath: string): string {
   // Normalize to look up metadata correctly
   let normPath = urlPath.split('?')[0].split('#')[0];
@@ -124,7 +214,261 @@ function injectSEOMetadata(html: string, urlPath: string): string {
 
   const ogImage = `${siteUrl}/og-image.jpg`; // default high-impact banner
 
-  // 4. Build our clean, single set of SEO head tags
+  // 4. Generate dynamic JSON-LD structured schemas
+  const schemas: any[] = [];
+
+  // Organization Schema
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': 'https://dallasfortworthzultys.com/#organization',
+    name: 'DFW Business Communications',
+    url: 'https://dallasfortworthzultys.com',
+    logo: 'https://dallasfortworthzultys.com/zultys-logo.png',
+    description: 'Authorized Zultys dealer, partner, and VoIP service provider serving Dallas, Fort Worth, and the entire DFW Metroplex.',
+    email: 'info@dallasfortworthzultys.com',
+    telephone: '817-231-2962',
+    sameAs: [
+      'https://www.facebook.com/zultys',
+      'https://www.linkedin.com/company/zultys-inc-'
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+1-817-231-2962',
+      contactType: 'sales and support',
+      areaServed: 'US',
+      availableLanguage: 'en'
+    }
+  };
+  schemas.push(organizationSchema);
+
+  // WebSite Schema
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': 'https://dallasfortworthzultys.com/#website',
+    url: 'https://dallasfortworthzultys.com',
+    name: 'DFW Business Communications - Zultys VoIP DFW',
+    publisher: {
+      '@id': 'https://dallasfortworthzultys.com/#organization'
+    }
+  };
+  schemas.push(websiteSchema);
+
+  // BreadcrumbList Schema
+  const isHome = normPath === '/' || normPath === '';
+  const cityName = getServerCityName(normPath);
+  const breadcrumbElements = [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://dallasfortworthzultys.com/'
+    }
+  ];
+
+  if (!isHome) {
+    let pageName = cityName;
+    if (normPath.includes('/products')) pageName = 'Zultys Products';
+    else if (normPath.includes('/solutions')) pageName = 'VoIP Solutions';
+    else if (normPath.includes('/about')) pageName = 'About Us';
+    else if (normPath.includes('/contact')) pageName = 'Contact';
+    else if (normPath.includes('/blog')) pageName = 'Expert VoIP Blog';
+    else if (normPath.includes('/zultys-faq')) pageName = 'Zultys FAQ';
+    else if (normPath.includes('/hipaa-compliant-voip')) pageName = 'HIPAA VoIP';
+    else if (normPath.includes('/zultys-pricing')) pageName = 'Pricing Plans';
+    else if (normPath.includes('/free-voip-site-audit')) pageName = 'Free Audit';
+    else if (normPath.includes('/case-studies')) pageName = 'Case Studies';
+    else if (normPath.includes('/voip-glossary')) pageName = 'VoIP Glossary';
+    
+    breadcrumbElements.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: pageName,
+      item: canonicalUrl
+    });
+  }
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    '@id': `${canonicalUrl}#breadcrumb`,
+    itemListElement: breadcrumbElements
+  };
+  schemas.push(breadcrumbSchema);
+
+  // LocalBusiness Schema (Homepage or City Page)
+  const isCityPage = cityName !== 'Dallas-Fort Worth' || isHome;
+  if (isCityPage) {
+    const coords = serverCityCoordinates[cityName] || { lat: 32.7555, lng: -97.3308, zip: '76102' };
+    const localBusinessSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'ProfessionalService',
+      '@id': `${canonicalUrl}#localbusiness`,
+      name: `Zultys DFW - DFW Business Communications - ${cityName}`,
+      url: canonicalUrl,
+      logo: 'https://dallasfortworthzultys.com/zultys-logo.png',
+      image: ogImage,
+      telephone: '817-231-2962',
+      email: 'info@dallasfortworthzultys.com',
+      priceRange: '$$',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Local DFW Mobile Dispatch',
+        addressLocality: cityName === 'Dallas-Fort Worth' ? 'Fort Worth' : cityName,
+        addressRegion: 'TX',
+        postalCode: coords.zip,
+        addressCountry: 'US'
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: coords.lat,
+        longitude: coords.lng
+      },
+      openingHoursSpecification: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday'
+        ],
+        opens: '08:00',
+        closes: '17:00'
+      },
+      sameAs: [
+        'https://www.facebook.com/zultys',
+        'https://www.linkedin.com/company/zultys-inc-'
+      ],
+      areaServed: [
+        {
+          '@type': 'City',
+          name: cityName,
+          sameAs: `https://en.wikipedia.org/wiki/${cityName.replace(/\s+/g, '_')},_Texas`
+        }
+      ],
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '5.0',
+        reviewCount: '48'
+      },
+      provider: {
+        '@type': 'Organization',
+        name: 'DFW Business Communications',
+        url: 'https://dallasfortworthzultys.com'
+      }
+    };
+    schemas.push(localBusinessSchema);
+
+    // Service Schema for City Pages
+    if (cityName !== 'Dallas-Fort Worth') {
+      const serviceSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        '@id': `${canonicalUrl}#service`,
+        name: `Business VoIP & Zultys Phone Systems in ${cityName}`,
+        description: `Enterprise-grade Zultys business phone systems, cloud hosted VoIP, IP-PBX installation, and 24/7 certified engineering support for companies in ${cityName}, Texas.`,
+        serviceType: 'TelecommunicationsService',
+        provider: {
+          '@id': 'https://dallasfortworthzultys.com/#organization'
+        },
+        areaServed: {
+          '@type': 'City',
+          name: cityName,
+          sameAs: `https://en.wikipedia.org/wiki/${cityName.replace(/\s+/g, '_')},_Texas`
+        }
+      };
+      schemas.push(serviceSchema);
+    }
+
+    // FAQPage Schema
+    const isFinancialServices = normPath.toLowerCase().includes('financial-services');
+    const hasPageFAQ = cityName !== 'Dallas-Fort Worth' || isFinancialServices;
+    if (hasPageFAQ) {
+      const subjectName = cityName !== 'Dallas-Fort Worth' ? cityName : 'Financial Services';
+      const faqSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        '@id': `${canonicalUrl}#faq`,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `Can we keep our existing ${subjectName} phone numbers when migrating to Zultys?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Absolutely! We manage the entire number porting process, coordinating with your current carrier to ensure a seamless transition of all your direct dials, main lines, and toll-free numbers with zero downtime on migration day.`
+            }
+          },
+          {
+            '@type': 'Question',
+            name: 'What is the difference between Zultys Cloud and Zultys On-Premise?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Zultys Cloud is hosted in our secure, redundant data centers, offering low upfront costs, automatic software updates, and simple scalability. Zultys On-Premise utilizes a dedicated hardware appliance at your ${subjectName} office, providing maximum control and local network survivability independent of internet connectivity.`
+            }
+          },
+          {
+            '@type': 'Question',
+            name: `Does Zultys support remote and mobile workers in ${subjectName}?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Yes, remote work is a core feature of the Zultys platform. Through the MXmobile app and secure softphone technology, employees can access their full office extensions, chat, and video tools from home or while traveling, with no complex VPN configuration required.'
+            }
+          },
+          {
+            '@type': 'Question',
+            name: 'How does DFW Business Communications provide local support?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Unlike nationwide providers who rely on remote call centers, we are based locally in the DFW Metroplex. We provide on-site installation, face-to-face staff training, and rapid on-site dispatch of certified technicians if physical support is ever needed at your ${subjectName} facility.`
+            }
+          }
+        ]
+      };
+      schemas.push(faqSchema);
+    }
+  }
+
+  // BlogPosting Schema
+  const isBlog = normPath.startsWith('/blog') || normPath.includes('blog-') || normPath.includes('-blog');
+  if (isBlog) {
+    const blogPostSchema = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "@id": `${canonicalUrl}#blogpost`,
+      "headline": title,
+      "description": description,
+      "image": ogImage,
+      "author": {
+        "@type": "Organization",
+        "name": "DFW Business Communications",
+        "url": "https://dallasfortworthzultys.com"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "@id": "https://dallasfortworthzultys.com/#organization",
+        "name": "DFW Business Communications",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://dallasfortworthzultys.com/zultys-logo.png"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": canonicalUrl
+      },
+      "inLanguage": "en-US"
+    };
+    schemas.push(blogPostSchema);
+  }
+
+  // Generate the formatted JSON-LD tags
+  const jsonLdScripts = schemas.map(schema => {
+    return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+  }).join('\n    ');
+
+  // 5. Build our clean, single set of SEO head tags
   const seoHeadTags = [
     `<!-- Dynamic SEO Injection -->`,
     `<title>${title}</title>`,
@@ -151,10 +495,12 @@ function injectSEOMetadata(html: string, urlPath: string): string {
     `<meta name="twitter:title" content="${title}" />`,
     `<meta name="twitter:description" content="${description}" />`,
     `<meta name="twitter:image" content="${ogImage}" />`,
+    `<!-- Dynamic Server JSON-LD Schemas -->`,
+    jsonLdScripts,
     `<!-- End Dynamic SEO Injection -->`
   ].join('\n    ');
 
-  // 5. Clean up the existing template by removing existing title, description, canonical, robots, og, twitter tags
+  // 6. Clean up the existing template by removing existing title, description, canonical, robots, og, twitter, and ld+json tags
   let cleanedHtml = html;
   
   // Remove existing <title>...</title>
@@ -174,7 +520,10 @@ function injectSEOMetadata(html: string, urlPath: string): string {
   cleanedHtml = cleanedHtml.replace(/<meta\s+(name|property)="og:[\s\S]*?\/?>/gi, '');
   cleanedHtml = cleanedHtml.replace(/<meta\s+(name|property)="twitter:[\s\S]*?\/?>/gi, '');
 
-  // 6. Inject our clean set right after <head>
+  // Clean any pre-existing ld+json blocks to prevent validation errors or duplicate data
+  cleanedHtml = cleanedHtml.replace(/<script\s+type="application\/ld\+json"[\s\S]*?<\/script>/gi, '');
+
+  // 7. Inject our clean set right after <head>
   cleanedHtml = cleanedHtml.replace(/<head>/i, `<head>\n    ${seoHeadTags}`);
 
   return cleanedHtml;
@@ -3104,8 +3453,55 @@ export function ${componentName}() {
         path: `/${urlPath}`
       });
 
+      // Automatically trigger Google Indexing Admin Service for the newly published city/landing page
+      try {
+        console.log(`[SEO Server] Auto-triggering Google Indexing for newly created landing page: /${urlPath}`);
+        GoogleIndexingAdminService.pingForPublishedRoute(`/${urlPath}`)
+          .then(result => console.log(`[SEO Server] Auto-indexing triggered. Result success: ${result.success}, message: ${result.message}`))
+          .catch(err => console.error(`[SEO Server] Auto-indexing failed:`, err));
+      } catch (err) {
+        console.error(`[SEO Server] Error running auto-indexing trigger:`, err);
+      }
+
     } catch (error: any) {
       console.error("Failed to generate dynamic landing page:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // ===================================================
+  // GOOGLE INDEXING ADMIN SERVICE ENDPOINTS
+  // ===================================================
+
+  // GET all registered city and blog routes for indexing
+  app.get("/api/admin/indexing/routes", (req, res) => {
+    try {
+      const routes = GoogleIndexingAdminService.getRegisteredCityAndBlogRoutes();
+      res.json({
+        success: true,
+        routes: routes.map(r => ({
+          route: r,
+          url: `https://dallasfortworthzultys.com${r}`,
+          isCity: !r.toLowerCase().startsWith('/blog'),
+          isBlog: r.toLowerCase().startsWith('/blog')
+        }))
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // POST manually/automatically trigger Google Indexing API ping for a published city or blog route
+  app.post("/api/admin/indexing/ping", async (req, res) => {
+    try {
+      const { route } = req.body;
+      if (!route) {
+        return res.status(400).json({ success: false, error: "Missing route parameter" });
+      }
+
+      const result = await GoogleIndexingAdminService.pingForPublishedRoute(route);
+      res.json(result);
+    } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
     }
   });
@@ -3973,14 +4369,9 @@ export function ${componentName}() {
   // Dynamic robots.txt to link to sitemap and direct crawl bots appropriately
   app.get("/robots.txt", (req, res) => {
     try {
-      const publicRobotsPath = path.join(process.cwd(), "public", "robots.txt");
-      if (fs.existsSync(publicRobotsPath)) {
-        res.header("Content-Type", "text/plain");
-        res.sendFile(publicRobotsPath);
-      } else {
-        res.header("Content-Type", "text/plain");
-        res.send(`User-agent: *\nAllow: /\nDisallow: /seo-dashboard\nDisallow: /citation-health\nDisallow: /admin/\n\nSitemap: https://dallasfortworthzultys.com/sitemap.xml\n`);
-      }
+      res.header("Content-Type", "text/plain");
+      const content = generateRobotsTxt();
+      res.send(content);
     } catch (err) {
       console.error("Error serving robots.txt dynamically:", err);
       res.status(500).send("Internal Server Error serving robots.txt");
