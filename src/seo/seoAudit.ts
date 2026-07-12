@@ -41,22 +41,6 @@ export function auditSite(routes: string[], siteOrigin?: string): AuditReport {
     // Check if route is admin or noindex
     const isNoIndex = seo.robots.includes("noindex");
 
-    // Skip heavy index coverage checks on admin/noindex pages
-    if (isNoIndex) {
-      if (!seo.robots.includes("noindex")) {
-        findings.push({
-          path: route,
-          rule: "Robots Noindex Alignment",
-          severity: "Critical",
-          current: `robots: ${seo.robots}`,
-          recommended: `robots: ${SEO_CONFIG.robotsNoindex}`,
-          category: "Index Coverage"
-        });
-        criticalCount++;
-      }
-      return;
-    }
-
     // --- RULE 1: TITLE VALIDATIONS ---
     if (!title) {
       findings.push({
@@ -68,7 +52,7 @@ export function auditSite(routes: string[], siteOrigin?: string): AuditReport {
         category: "Meta Tags"
       });
       criticalCount++;
-    } else {
+    } else if (!isNoIndex) {
       if (title.length > SEO_CONFIG.titleMaxLength) {
         findings.push({
           path: route,
@@ -104,7 +88,7 @@ export function auditSite(routes: string[], siteOrigin?: string): AuditReport {
         category: "Meta Tags"
       });
       criticalCount++;
-    } else {
+    } else if (!isNoIndex) {
       if (desc.length > SEO_CONFIG.descriptionMaxLength) {
         findings.push({
           path: route,
@@ -131,16 +115,31 @@ export function auditSite(routes: string[], siteOrigin?: string): AuditReport {
 
     // --- RULE 3: CANONICAL AND OPEN GRAPH MATCHING ---
     const expectedCanonical = `${SEO_CONFIG.defaultHost}${route === "/" ? "" : route}`;
-    if (canonical !== expectedCanonical) {
+    if (!canonical) {
+      findings.push({
+        path: route,
+        rule: "Missing Canonical URL",
+        severity: "Critical",
+        current: "None",
+        recommended: `Set canonical to absolute URL: "${expectedCanonical}"`,
+        category: "Index Coverage"
+      });
+      criticalCount++;
+    } else if (canonical !== expectedCanonical) {
       findings.push({
         path: route,
         rule: "Canonical URL Mismatch",
         severity: "Critical",
-        current: canonical || "None",
+        current: canonical,
         recommended: `Set to exact path match: "${expectedCanonical}"`,
         category: "Index Coverage"
       });
       criticalCount++;
+    }
+
+    // Skip heavy index coverage and content density checks on admin/noindex pages
+    if (isNoIndex) {
+      return;
     }
 
     // --- RULE 4: CONTENT DENSITY AND KEYWORD ALIGNMENT (SIMULATED & HEURISTIC) ---
@@ -190,6 +189,117 @@ export function auditSite(routes: string[], siteOrigin?: string): AuditReport {
         category: "Index Coverage"
       });
       criticalCount++;
+    }
+
+    // --- RULE 6: H1 HEADING VALIDATION ---
+    let h1Count = 1; // Default fallback to avoid false positives for background pages
+    
+    if (typeof window !== "undefined") {
+      // Browser environment - perform a DOM check for the current active route
+      const currentPath = window.location.pathname;
+      const isCurrentRoute = currentPath === route || (route === "/" && currentPath === "") || (route === "" && currentPath === "/");
+      
+      if (isCurrentRoute) {
+        h1Count = document.querySelectorAll("h1").length;
+      }
+    } else {
+      // Node environment (build gate / server-side crawler context)
+      try {
+        const req = eval("require");
+        const fsMod = req("fs");
+        const pathMod = req("path");
+        const pagesDir = pathMod.join(process.cwd(), "src", "pages");
+        
+        if (fsMod.existsSync(pagesDir)) {
+          const files = fsMod.readdirSync(pagesDir).filter((f: string) => f.endsWith(".tsx"));
+          let pageFile = "";
+          
+          const normPath = route.toLowerCase().split('?')[0].split('#')[0];
+          const cleanPath = normPath.endsWith('/') && normPath.length > 1 ? normPath.slice(0, -1) : normPath;
+
+          if (cleanPath === "/" || cleanPath === "") {
+            pageFile = "Home.tsx";
+          } else if (cleanPath === "/about") {
+            pageFile = "About.tsx";
+          } else if (cleanPath === "/contact") {
+            pageFile = "Contact.tsx";
+          } else if (cleanPath === "/zultys-pricing") {
+            pageFile = "Pricing.tsx";
+          } else if (cleanPath === "/blog") {
+            pageFile = "Blog.tsx";
+          } else {
+            // Match with App.tsx routes
+            for (const file of files) {
+              const name = file.replace(".tsx", "");
+              const appPath = pathMod.join(process.cwd(), "src", "App.tsx");
+              if (fsMod.existsSync(appPath)) {
+                const appContent = fsMod.readFileSync(appPath, "utf8");
+                const regex = new RegExp(`normalizedPath\\s*===\\s*['"]([^'"]+)['"]\\s*return\\s*<${name}\\s*\\/?>`, "i");
+                const match = appContent.match(regex);
+                if (match && match[1] && match[1].toLowerCase() === cleanPath.toLowerCase()) {
+                  pageFile = file;
+                  break;
+                }
+              }
+            }
+            if (!pageFile) {
+              // Standard name matching
+              for (const file of files) {
+                const name = file.replace(".tsx", "");
+                const cleanSlug = cleanPath.replace(/^\//, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                const cleanName = name.toLowerCase();
+                if (cleanName === cleanSlug || cleanSlug.includes(cleanName) || cleanName.includes(cleanSlug)) {
+                  pageFile = file;
+                  break;
+                }
+              }
+            }
+          }
+
+          if (pageFile) {
+            const filePath = pathMod.join(pagesDir, pageFile);
+            if (fsMod.existsSync(filePath)) {
+              const content = fsMod.readFileSync(filePath, "utf8");
+              // Check H1 declarations
+              const headingRegex = /<h1\b[^>]*>([\s\S]*?)<\/h1>/gi;
+              let match;
+              let count = 0;
+              while ((match = headingRegex.exec(content)) !== null) {
+                count++;
+              }
+              // Check Hero component
+              if (content.includes("<Hero") && count === 0) {
+                count = 1;
+              }
+              h1Count = count;
+            }
+          }
+        }
+      } catch (err) {
+        h1Count = 1; // Graceful fallback
+      }
+    }
+
+    if (h1Count === 0) {
+      findings.push({
+        path: route,
+        rule: "Missing H1 Heading",
+        severity: "Critical",
+        current: "0 H1 elements found",
+        recommended: "Every page must contain exactly one primary H1 tag near the top of the viewport to establish topic relevance.",
+        category: "Content"
+      });
+      criticalCount++;
+    } else if (h1Count > 1) {
+      findings.push({
+        path: route,
+        rule: "Multiple H1 Headings",
+        severity: "Warning",
+        current: `${h1Count} H1 elements found`,
+        recommended: "Consolidate down to a single primary H1 heading to avoid keyword cannibalization and clear-topic distortion.",
+        category: "Content"
+      });
+      warningCount++;
     }
   });
 

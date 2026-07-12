@@ -1,7 +1,14 @@
+# ===================================================
+# ROBOTS.TXT FOR DALLAS FORT WORTH ZULTYS VoIP
+# Optimized for maximum organic crawl efficiency
+# ===================================================
+
 User-agent: *
 Allow: /
+Disallow: /admin/
 Disallow: /seo-dashboard
 Disallow: /citation-health
-Disallow: /admin/
+Disallow: /seo-admin
 
+# Sitemap link to facilitate rapid URL discovery and indexation
 Sitemap: https://dallasfortworthzultys.com/sitemap.xml

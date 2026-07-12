@@ -1866,31 +1866,48 @@ export default function SEODashboard() {
                     <p className="text-slate-500 text-xs py-8 text-center">✔ All active pages follow a strict heading hierarchy.</p>
                   ) : (
                     <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
-                      {healthReport.headingViolations.map((item, idx) => (
-                        <div key={idx} className="bg-slate-900 border border-slate-800 rounded-lg p-3 text-xs space-y-2 hover:border-slate-700 transition animate-fade-in">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-200">{item.pageName} Page</span>
-                            <span className="text-3xs font-mono text-slate-500">{item.route}</span>
-                          </div>
-                          <div className="space-y-1.5">
-                            {item.issues.map((issue: any, issueIdx: number) => (
-                              <div key={issueIdx} className="text-3xs bg-rose-950/20 border border-rose-900/30 p-2 rounded">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <span className={`px-1 rounded text-3xs font-bold uppercase ${
-                                    issue.severity === 'critical' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-300'
-                                  }`}>
-                                    {issue.severity}
+                      {healthReport.headingViolations.map((item, idx) => {
+                        const isMissingH1 = item.issues.some((issue: any) => issue.type === "missing-h1" || issue.type === "missing_h1" || issue.message.toLowerCase().includes("missing primary header") || issue.message.toLowerCase().includes("missing h1"));
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`bg-slate-900 border rounded-lg p-3 text-xs space-y-2 hover:border-slate-700 transition animate-fade-in ${
+                              isMissingH1 
+                                ? "border-rose-500/60 shadow-lg shadow-rose-950/20 ring-1 ring-rose-500/20" 
+                                : "border-slate-800"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-slate-200">{item.pageName} Page</span>
+                              <div className="flex items-center gap-1.5">
+                                {isMissingH1 && (
+                                  <span className="text-3xs bg-red-500/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded uppercase font-black tracking-wider animate-pulse">
+                                    Missing H1
                                   </span>
-                                  <span className="text-slate-300 font-medium">{issue.message}</span>
-                                </div>
-                                <div className="text-slate-400 mt-1 pl-1 border-l border-rose-500/25">
-                                  <strong className="text-slate-300 font-mono">Fix Suggestion:</strong> {issue.suggestedFix}
-                                </div>
+                                )}
+                                <span className="text-3xs font-mono text-slate-500">{item.route}</span>
                               </div>
-                            ))}
+                            </div>
+                            <div className="space-y-1.5">
+                              {item.issues.map((issue: any, issueIdx: number) => (
+                                <div key={issueIdx} className="text-3xs bg-rose-950/20 border border-rose-900/30 p-2 rounded">
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <span className={`px-1 rounded text-3xs font-bold uppercase ${
+                                      issue.severity === 'critical' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-300'
+                                    }`}>
+                                      {issue.severity}
+                                    </span>
+                                    <span className="text-slate-300 font-medium">{issue.message}</span>
+                                  </div>
+                                  <div className="text-slate-400 mt-1 pl-1 border-l border-rose-500/25">
+                                    <strong className="text-slate-300 font-mono">Fix Suggestion:</strong> {issue.suggestedFix}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
