@@ -311,6 +311,7 @@ ${urlEntries}
       title: 'Service Areas',
       icon: Map,
       links: [
+        { name: 'Collin County VoIP Systems (Regional Hub)', path: '/collin-county-voip-systems' },
         { name: 'Dallas Zultys Support', path: '/dallas-zultys-phones' },
         { name: 'Fort Worth Zultys Systems', path: '/fort-worth-zultys-systems' },
         { name: 'Arlington IP PBX', path: '/arlington-ip-pbx' },

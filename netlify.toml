@@ -1,3 +1,7 @@
+[[edge_functions]]
+  path = "/*"
+  function = "spa-404"
+
 [[redirects]]
   from = "/sitemap.html"
   to = "/sitemap.html"

@@ -4,7 +4,7 @@ import { Phone, Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { QuotePopup } from './QuotePopup';
 import { useQuote } from '../context/QuoteContext';
-import { Breadcrumbs } from './Breadcrumbs';
+import { BreadcrumbComponent } from './BreadcrumbComponent';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -74,6 +74,8 @@ export function Header() {
         { name: 'Zultys MX Series', href: '/fort-worth-zultys-mx-series' },
         { name: 'Zultys MX-SE', href: '/fort-worth-zultys-mx-se' },
         { name: 'Cloud Services', href: '/fort-worth-zultys-cloud-services' },
+        { name: 'On-Premise VoIP Systems', href: '/fort-worth-zultys-on-premise' },
+        { name: 'Hybrid VoIP Systems', href: '/fort-worth-zultys-hybrid' },
         { name: 'MXmobile', href: '/fort-worth-zultys-mxmobile' },
       ],
     },
@@ -119,6 +121,16 @@ export function Header() {
         { name: 'Small Business (1-20)', href: '/fort-worth-zultys-phone-system-small-business' },
         { name: 'Multi-Location', href: '/fort-worth-zultys-multi-location' },
         { name: 'Enterprise (100+)', href: '/fort-worth-zultys-enterprise' },
+      ],
+    },
+    {
+      title: 'Services & Support',
+      items: [
+        { name: 'VoIP Installation', href: '/fort-worth-zultys-installation' },
+        { name: 'Zultys Training', href: '/fort-worth-zultys-training' },
+        { name: 'Technical Support', href: '/zultys-support' },
+        { name: 'Compare Competitors', href: '/zultys-vs-competitors' },
+        { name: 'VoIP Security', href: '/voip-security-encryption' },
       ],
     },
   ];
@@ -258,7 +270,7 @@ export function Header() {
               </button>
 
               {solutionsDropdownOpen && (
-                <div className="absolute left-0 top-full mt-2 w-[550px] bg-white rounded-xl shadow-2xl border border-gray-100 p-8 grid grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute left-0 top-full mt-2 w-[800px] bg-white rounded-xl shadow-2xl border border-gray-100 p-8 grid grid-cols-3 gap-8 animate-in fade-in slide-in-from-top-2 duration-200">
                   {solutionCategories.map((category, idx) => (
                     <div key={idx}>
                       <h3 className="font-bold text-charcoal mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
@@ -449,7 +461,7 @@ export function Header() {
         </div>
       )}
     </header>
-    <Breadcrumbs />
+    <BreadcrumbComponent />
     </>
   );
 }

@@ -200,21 +200,25 @@ export function Solutions() {
       title: 'Cloud PBX Solutions',
       icon: Cloud,
       description: 'Eliminate on-site hardware with our secure cloud-hosted Zultys platform. Perfect for businesses valuing simplicity and minimal upfront investment.',
+      link: '/fort-worth-zultys-cloud-services',
     },
     {
       title: 'On-Premise Systems',
       icon: Server,
       description: 'Complete control over your communication infrastructure with on-site Zultys MX servers. Ideal for businesses with strict compliance or security needs.',
+      link: '/fort-worth-zultys-on-premise',
     },
     {
       title: 'Hybrid Deployments',
       icon: Zap,
       description: 'The best of both worlds—combine on-premise reliability with cloud flexibility for multi-location businesses.',
+      link: '/fort-worth-zultys-hybrid',
     },
     {
       title: 'Contact Center',
       icon: Headphones,
       description: 'Advanced call routing, real-time monitoring, and detailed analytics for customer service and sales teams.',
+      link: '/fort-worth-zultys-contact-center',
     },
   ];
 
@@ -345,14 +349,20 @@ export function Solutions() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {technologySolutions.map((solution, index) => (
-                <div key={index} className="text-center p-10 bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100">
-                  <div className="flex justify-center mb-8">
-                    <div className="p-5 bg-gray-50 rounded-2xl group-hover:bg-zultys-green/10 transition-colors duration-500">
-                      <solution.icon className="h-10 w-10 text-charcoal group-hover:text-zultys-green transition-colors duration-500" />
+                <div key={index} className="text-center p-10 bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 group border border-gray-100 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-center mb-8">
+                      <div className="p-5 bg-gray-50 rounded-2xl group-hover:bg-zultys-green/10 transition-colors duration-500">
+                        <solution.icon className="h-10 w-10 text-charcoal group-hover:text-zultys-green transition-colors duration-500" />
+                      </div>
                     </div>
+                    <h3 className="text-2xl font-black text-charcoal mb-4">{solution.title}</h3>
+                    <p className="text-gray-500 leading-relaxed mb-6">{solution.description}</p>
                   </div>
-                  <h3 className="text-2xl font-black text-charcoal mb-4">{solution.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{solution.description}</p>
+                  <Link to={solution.link} className="inline-flex items-center justify-center text-sm font-black text-zultys-green hover:text-zultys-green/80 transition-colors mt-auto gap-1">
+                    Explore Solution
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
                 </div>
               ))}
             </div>

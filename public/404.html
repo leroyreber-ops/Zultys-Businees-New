@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>404 – Page Not Found</title>
+    <meta name="robots" content="noindex, follow" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <!-- Google Tag Manager / Gtag Fallback -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9Y9V6XWNZ2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-9Y9V6XWNZ2');
+      // Fire page_not_found event
+      gtag('event', 'page_not_found', {
+        page_location: location.href,
+        referrer: document.referrer || 'direct'
+      });
+    </script>
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+    
+    <!-- Top thin status bar -->
+    <div class="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-blue-600"></div>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center max-w-xl mx-auto">
+      
+      <!-- 404 Badge -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold uppercase tracking-wider rounded-full mb-6">
+        Error 404 • Page Not Found
+      </div>
+
+      <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
+        Looking for a Zultys Solution?
+      </h1>
+      
+      <p class="text-sm md:text-base text-slate-400 leading-relaxed mb-10">
+        The link you followed may be outdated or incorrect. Let us guide you back to our core telecom services, systems, and local support resources.
+      </p>
+
+      <!-- Main Navigation Hub -->
+      <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-12">
+        <a href="/" class="p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 rounded-xl transition-all group">
+          <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors flex items-center justify-between">
+            Home & Overview
+            <span class="text-xs text-slate-600 group-hover:translate-x-1 transition-transform">→</span>
+          </h4>
+          <p class="text-xs text-slate-500 mt-1">Authorized Zultys Dealer DFW</p>
+        </a>
+
+        <a href="/products" class="p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 rounded-xl transition-all group">
+          <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors flex items-center justify-between">
+            Zultys IP Phones
+            <span class="text-xs text-slate-600 group-hover:translate-x-1 transition-transform">→</span>
+          </h4>
+          <p class="text-xs text-slate-500 mt-1">Cloud VoIP & IP-PBX systems</p>
+        </a>
+
+        <a href="/solutions" class="p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 rounded-xl transition-all group">
+          <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors flex items-center justify-between">
+            Enterprise Solutions
+            <span class="text-xs text-slate-600 group-hover:translate-x-1 transition-transform">→</span>
+          </h4>
+          <p class="text-xs text-slate-500 mt-1">Unified Communications solutions</p>
+        </a>
+
+        <a href="/contact" class="p-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 rounded-xl transition-all group">
+          <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors flex items-center justify-between">
+            Request Quote & Audit
+            <span class="text-xs text-slate-600 group-hover:translate-x-1 transition-transform">→</span>
+          </h4>
+          <p class="text-xs text-slate-500 mt-1">Local 24/7 Support & consultation</p>
+        </a>
+      </div>
+
+      <!-- Action Button -->
+      <a href="/" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-950/40">
+        Go to Homepage
+      </a>
+
+    </main>
+
+    <!-- Footer corporate block -->
+    <footer class="py-6 border-t border-slate-900 text-center text-xs text-slate-600">
+      <p>© 2026 Dallas Fort Worth Zultys Partner. All rights reserved.</p>
+    </footer>
+
+  </body>
+</html>

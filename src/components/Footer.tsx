@@ -13,8 +13,8 @@ export function Footer() {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-zultys-gold/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-        {/* Three-Column Grid */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 pb-12 border-b border-white/10">
+        {/* Four-Column Grid */}
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4 pb-12 border-b border-white/10">
           
           {/* Column 1: About Zultys DFW */}
           <div className="space-y-6">
@@ -61,47 +61,57 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Quick Links */}
+          {/* Column 2: Deployment & Services */}
           <div className="space-y-6">
             <h3 className="text-lg font-black text-white uppercase tracking-wider border-l-4 border-zultys-green pl-3">
-              Quick Links
+              VoIP Solutions
             </h3>
-            
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm font-medium">
-              <div className="space-y-3">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Solutions</div>
-                <ul className="space-y-2">
-                  <li><Link to="/products" className="text-slate-400 hover:text-zultys-green transition-colors">Products & VoIP</Link></li>
-                  <li><Link to="/solutions" className="text-slate-400 hover:text-zultys-green transition-colors">Business Solutions</Link></li>
-                  <li><Link to="/zultys-pricing" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Pricing</Link></li>
-                  <li><Link to="/hipaa-compliant-voip" className="text-slate-400 hover:text-zultys-green transition-colors">HIPAA VoIP</Link></li>
-                </ul>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Resources</div>
-                <ul className="space-y-2">
-                  <li><Link to="/zultys-faq" className="text-slate-400 hover:text-zultys-green transition-colors">Help & FAQ</Link></li>
-                  <li><Link to="/case-studies" className="text-slate-400 hover:text-zultys-green transition-colors">Case Studies</Link></li>
-                  <li><Link to="/blog" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Blog</Link></li>
-                  <li><Link to="/sitemap.html" className="text-slate-400 hover:text-zultys-green transition-colors">HTML Sitemap</Link></li>
-                </ul>
-              </div>
-            </div>
+            <ul className="space-y-2.5 text-sm font-medium">
+              <li><Link to="/products" className="text-slate-400 hover:text-zultys-green transition-colors">Products & VoIP Phones</Link></li>
+              <li><Link to="/solutions" className="text-slate-400 hover:text-zultys-green transition-colors">Business Solutions</Link></li>
+              <li><Link to="/zultys-pricing" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Pricing Hub</Link></li>
+              <li><Link to="/hipaa-compliant-voip" className="text-slate-400 hover:text-zultys-green transition-colors">HIPAA VoIP Systems</Link></li>
+              <li><Link to="/fort-worth-zultys-on-premise" className="text-slate-400 hover:text-zultys-green transition-colors">On-Premise VoIP</Link></li>
+              <li><Link to="/fort-worth-zultys-hybrid" className="text-slate-400 hover:text-zultys-green transition-colors">Hybrid VoIP Systems</Link></li>
+              <li><Link to="/fort-worth-zultys-installation" className="text-slate-400 hover:text-zultys-green transition-colors">VoIP Installation</Link></li>
+              <li><Link to="/zultys-support" className="text-slate-400 hover:text-zultys-green transition-colors">Technical Support</Link></li>
+              <li><Link to="/fort-worth-zultys-training" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Training</Link></li>
+            </ul>
+          </div>
 
-            <div className="pt-4 border-t border-white/5 flex flex-wrap gap-3">
+          {/* Column 3: Resources & Company */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-black text-white uppercase tracking-wider border-l-4 border-zultys-green pl-3">
+              Resources & Info
+            </h3>
+            <ul className="space-y-2.5 text-sm font-medium">
+              <li><Link to="/zultys-faq" className="text-slate-400 hover:text-zultys-green transition-colors">Help & FAQ Portal</Link></li>
+              <li><Link to="/case-studies" className="text-slate-400 hover:text-zultys-green transition-colors">Case Studies</Link></li>
+              <li><Link to="/blog" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Blog</Link></li>
+              <li><Link to="/zultys-vs-competitors" className="text-slate-400 hover:text-zultys-green transition-colors">Compare Competitors</Link></li>
+              <li><Link to="/voip-security-encryption" className="text-slate-400 hover:text-zultys-green transition-colors">VoIP Security Guide</Link></li>
+              <li><Link to="/voip-glossary" className="text-slate-400 hover:text-zultys-green transition-colors">VoIP Terms Glossary</Link></li>
+              <li><Link to="/zultys-user-guides" className="text-slate-400 hover:text-zultys-green transition-colors">User Guides & Manuals</Link></li>
+              <li><Link to="/zultys-migration-guide-dfw" className="text-slate-400 hover:text-zultys-green transition-colors">Zultys Migration Guide</Link></li>
+              <li><Link to="/zultys-crm-integration-guide" className="text-slate-400 hover:text-zultys-green transition-colors">CRM Integration Guide</Link></li>
+              <li><Link to="/our-team" className="text-slate-400 hover:text-zultys-green transition-colors">Our DFW Team</Link></li>
+              <li><Link to="/certifications-awards" className="text-slate-400 hover:text-zultys-green transition-colors">Awards & Certifications</Link></li>
+              <li><Link to="/sitemap.html" className="text-slate-400 hover:text-zultys-green transition-colors">HTML Sitemap</Link></li>
+            </ul>
+
+            <div className="pt-4 border-t border-white/5 flex flex-wrap gap-2">
               <Link 
                 to="/free-voip-site-audit" 
-                className="text-xs font-bold bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-lg border border-white/10 transition-colors inline-flex items-center gap-1.5"
+                className="text-[11px] font-bold bg-white/5 hover:bg-white/10 text-white px-2.5 py-1.5 rounded-lg border border-white/10 transition-colors inline-flex items-center gap-1"
               >
                 <Cpu className="h-3 w-3 text-zultys-green" />
-                Free Site Audit
+                Free Audit
               </Link>
               <a 
                 href="/sitemap.xml" 
                 target="_blank" 
                 rel="noreferrer"
-                className="text-xs font-bold bg-white/5 hover:bg-white/10 text-white px-3 py-1.5 rounded-lg border border-white/10 transition-colors inline-flex items-center gap-1.5"
+                className="text-[11px] font-bold bg-white/5 hover:bg-white/10 text-white px-2.5 py-1.5 rounded-lg border border-white/10 transition-colors inline-flex items-center gap-1"
               >
                 <FileText className="h-3 w-3 text-zultys-gold" />
                 XML Sitemap

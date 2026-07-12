@@ -641,30 +641,38 @@ export function generateEliteRawMetadata(path: string): { title: string; descrip
 
 /**
  * Helper to dynamically append/prefix focus keywords to document titles
- * based on slug/category, matching Google search expectations perfectly.
+ * based on slug/category, keeping them strictly under 60 characters for SEO.
  */
 function enhanceTitleWithFocusKeywords(title: string, path: string): string {
   const lp = path.toLowerCase();
-  
-  // Clean off existing site suffixes if any to avoid trailing duplicates
+
+  // If path is root, return a highly optimized home page title under 60 characters
+  if (lp === '/' || lp === '/index.html' || lp === '') {
+    return 'Zultys Partner Dallas-Fort Worth | Business Phone Systems';
+  }
+
   let cleanTitle = title
     .replace(/\s*\|\s*DFW Zultys Dealer/gi, '')
     .replace(/\s*\|\s*Dallas-Fort Worth/gi, '')
     .replace(/\s*\|\s*Dallas Fort Worth Zultys/gi, '')
-    .replace(/\s*\|\s*DFW Telecom/gi, '');
+    .replace(/\s*\|\s*DFW Telecom/gi, '')
+    .replace(/\s*\|\s*Cloud VoIP & IP PBX/gi, '')
+    .replace(/\s*\|\s*VoIP & IP PBX Solutions/gi, '')
+    .replace(/\s*\|\s*DFW Zultys Blog/gi, '')
+    .trim();
+
+  let enhanced = cleanTitle;
 
   // 1. Dallas specific paths
-  if (lp.includes('dallas')) {
-    return `VoIP Phone System Dallas | ${cleanTitle} - Zultys Business Communications`;
+  if (lp.includes('dallas') && !lp.includes('fort-worth')) {
+    enhanced = `Zultys Phone Systems Dallas | VoIP Provider`;
   }
-  
   // 2. Fort Worth specific paths
-  if (lp.includes('fort-worth')) {
-    return `Business Phone System Fort Worth | ${cleanTitle} - Fort Worth Zultys Dealer`;
+  else if (lp.includes('fort-worth') && !lp.includes('dallas')) {
+    enhanced = `Zultys Phone Systems Fort Worth | Local Support`;
   }
-  
   // 3. Products/IP Phone paths
-  if (
+  else if (
     lp.includes('phone') || 
     lp.includes('product') || 
     lp.includes('zip-') || 
@@ -676,16 +684,18 @@ function enhanceTitleWithFocusKeywords(title: string, path: string): string {
     lp.includes('mxmobile') || 
     lp.includes('mxconference')
   ) {
-    return `${cleanTitle} | Zultys Phone System - Unified Communications for Business`;
+    if (cleanTitle.length > 35) {
+      enhanced = `${cleanTitle.split('|')[0].trim()} | Zultys Phones`;
+    } else {
+      enhanced = `${cleanTitle} | Zultys VoIP Phones`;
+    }
   }
-  
   // 4. Cloud specific paths
-  if (lp.includes('cloud')) {
-    return `Cloud Phone System for Business | ${cleanTitle} - Zultys Communications`;
+  else if (lp.includes('cloud')) {
+    enhanced = `Zultys Cloud Phone System | Hosted Business VoIP`;
   }
-  
-  // 5. Solution/vertical paths (healthcare, education, real-estate, legal, financial)
-  if (
+  // 5. Solution/vertical paths
+  else if (
     lp.includes('healthcare') ||
     lp.includes('education') ||
     lp.includes('professional-services') ||
@@ -701,29 +711,36 @@ function enhanceTitleWithFocusKeywords(title: string, path: string): string {
     lp.includes('non-profit') ||
     lp.includes('solutions')
   ) {
-    return `${cleanTitle} | Unified Communications Provider & Office Phone System`;
+    const serviceName = cleanTitle.replace(/^Zultys VoIP Solutions for\s+/gi, '').split('|')[0].trim();
+    enhanced = `Zultys VoIP for ${serviceName} | DFW Phone Systems`;
   }
-  
   // 6. Compare/VS paths
-  if (lp.includes('-vs-') || lp.includes('compare')) {
-    return `Best Business Phone Systems | ${cleanTitle} - VoIP Provider for Business`;
+  else if (lp.includes('-vs-') || lp.includes('compare')) {
+    const vsName = cleanTitle.replace(/^Best Business Phone Systems\s*\|\s*/gi, '').split('|')[0].trim();
+    enhanced = `${vsName} | DFW Business VoIP Comparison`;
   }
-  
   // 7. General City Page fallback
-  const cityName = getCityNameFromPath(lp);
-  if (cityName && cityName !== 'Dallas-Fort Worth') {
-    const hash = cityName.length % 3;
-    if (hash === 0) {
-      return `${cityName} Business Phone System | ${cleanTitle} - Zultys Business Communications`;
-    } else if (hash === 1) {
-      return `${cityName} VoIP Phone System | ${cleanTitle} - Fort Worth Zultys Dealer`;
+  else {
+    const cityName = getCityNameFromPath(lp);
+    if (cityName && cityName !== 'Dallas-Fort Worth') {
+      enhanced = `Zultys Phone Systems ${cityName} TX | VoIP & Cloud PBX`;
     } else {
-      return `${cityName} Business Phone Service | ${cleanTitle} - Zultys Unified Communications`;
+      enhanced = `${cleanTitle} | DFW Zultys Partner`;
     }
   }
-  
-  // Default fallback
-  return `${cleanTitle} | Zultys Business Communications`;
+
+  // Double check length. If still over 60 characters, aggressively truncate and add clean branding.
+  if (enhanced.length > 60) {
+    const parts = enhanced.split('|');
+    const primaryPart = parts[0].trim();
+    if (primaryPart.length <= 50) {
+      enhanced = `${primaryPart} | Zultys DFW`;
+    } else {
+      enhanced = primaryPart.slice(0, 57) + '...';
+    }
+  }
+
+  return enhanced;
 }
 
 export function generateEliteMetadata(path: string): { title: string; description: string; keywords: string } {

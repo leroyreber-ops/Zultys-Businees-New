@@ -228,11 +228,19 @@ const Telephone = lazy(() => import('./pages/Telephone').then(m => ({ default: m
 const Ivanhoe = lazy(() => import('./pages/Ivanhoe').then(m => ({ default: m.Ivanhoe })));
 const Gober = lazy(() => import('./pages/Gober').then(m => ({ default: m.Gober })));
 const SEODashboard = lazy(() => import('./pages/SEODashboard'));
+const CitationHealth = lazy(() => import('./pages/CitationHealth'));
+const SEOAdmin = lazy(() => import('./pages/SEOAdmin').then(m => ({ default: m.SEOAdmin })));
+const CaseStudyHealthcare = lazy(() => import('./pages/CaseStudyHealthcare').then(m => ({ default: m.CaseStudyHealthcare })));
+const ZultysVsDfwLocalTelecoms = lazy(() => import('./pages/ZultysVsDfwLocalTelecoms').then(m => ({ default: m.ZultysVsDfwLocalTelecoms })));
+const CollinCountyVoip = lazy(() => import('./pages/CollinCountyVoip').then(m => ({ default: m.CollinCountyVoip })));
 import { Toaster } from 'sonner';
 import { QuoteProvider } from './context/QuoteContext';
 import { QuotePopupWrapper } from './components/QuotePopupWrapper';
 import { FloatingTextCTA } from './components/FloatingTextCTA';
 import { LocalBusinessSchema } from './components/LocalBusinessSchema';
+import { ServiceSchema } from './components/ServiceSchema';
+import { WebSiteSchema } from './components/WebSiteSchema';
+import { FAQPageSchema } from './components/FAQPageSchema';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { FloatingSEOAssistant } from './components/FloatingSEOAssistant';
 import { generateEliteMetadata } from './utils/seoHelpers';
@@ -500,7 +508,6 @@ export default function App() {
       robotsMeta.setAttribute('name', 'robots');
       document.head.appendChild(robotsMeta);
     }
-    robotsMeta.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
 
     let googlebotMeta = document.querySelector('meta[name="googlebot"]');
     if (!googlebotMeta) {
@@ -508,7 +515,21 @@ export default function App() {
       googlebotMeta.setAttribute('name', 'googlebot');
       document.head.appendChild(googlebotMeta);
     }
-    googlebotMeta.setAttribute('content', 'index, follow');
+
+    const isNoIndexPage = 
+      normalized === '/seo-dashboard' || 
+      normalized === '/admin/search-console' || 
+      normalized === '/citation-health' || 
+      normalized === '/admin/citations' ||
+      normalized.startsWith('/admin/');
+
+    if (isNoIndexPage) {
+      robotsMeta.setAttribute('content', 'noindex, nofollow');
+      googlebotMeta.setAttribute('content', 'noindex, nofollow');
+    } else {
+      robotsMeta.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+      googlebotMeta.setAttribute('content', 'index, follow');
+    }
 
     return () => {
       clearTimeout(timer);
@@ -535,6 +556,7 @@ export default function App() {
     if (normalizedPath === '/blog/how-to-optimize-your-office-network-for-voip-performance') return <BlogNetworkOptimization />;
     
     if (normalizedPath === '/zultys-vs-competitors' || normalizedPath === '/zultys-vs-competition') return <ZultysVsCompetitors />;
+    if (normalizedPath === '/zultys-vs-dfw-local-telecoms') return <ZultysVsDfwLocalTelecoms />;
     if (normalizedPath === '/zultys-vs-ringcentral') return <ZultysVsRingCentral />;
     if (normalizedPath === '/zultys-vs-8x8') return <ZultysVs8x8 />;
     if (normalizedPath === '/zultys-vs-microsoft-teams') return <ZultysVsTeams />;
@@ -544,6 +566,8 @@ export default function App() {
     if (normalizedPath === '/zultys-pricing') return <Pricing />;
     if (normalizedPath === '/free-voip-site-audit') return <FreeAudit />;
     if (normalizedPath === '/case-studies') return <CaseStudies />;
+    if (normalizedPath === '/case-studies/healthcare-zultys-migration-dallas') return <CaseStudyHealthcare />;
+    if (normalizedPath === '/collin-county-voip-systems') return <CollinCountyVoip />;
     if (normalizedPath === '/voip-glossary') return <VoIPGlossary />;
     if (normalizedPath === '/our-team') return <OurTeam />;
     if (normalizedPath === '/certifications-awards') return <CertificationsAwards />;
@@ -756,6 +780,8 @@ export default function App() {
     if (normalizedPath === '/fort-worth-zultys-enterprise') return <Enterprise />;
     if (normalizedPath === '/sitemap.html' || normalizedPath === '/sitemap') return <Sitemap />;
     if (normalizedPath === '/seo-dashboard' || normalizedPath === '/admin/search-console') return <SEODashboard />;
+    if (normalizedPath === '/citation-health' || normalizedPath === '/admin/citations') return <CitationHealth />;
+    if (normalizedPath === '/seo-admin') return <SEOAdmin />;
     
     // Legacy/Other paths
     if (normalizedPath === '/zultys-support') return <Support />;
@@ -834,6 +860,9 @@ export default function App() {
   return (
     <QuoteProvider>
       <LocalBusinessSchema path={currentPath} />
+      <ServiceSchema path={currentPath} />
+      <WebSiteSchema path={currentPath} />
+      <FAQPageSchema path={currentPath} headless={true} />
       <Suspense fallback={getSuspenseFallback(currentPath)}>
         {renderPage()}
       </Suspense>

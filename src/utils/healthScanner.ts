@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { extractRoutesFromApp } from "./sitemapGenerator";
+import { scanAccessibilityAndSEO } from "./accessibilityAndSEOAuditor";
 
 export interface BrokenLinkIssue {
   type: "broken-link";
@@ -25,6 +26,18 @@ export interface HealthCheckReport {
   success: boolean;
   brokenLinks: BrokenLinkIssue[];
   missingDescriptions: MissingDescriptionIssue[];
+  headingViolations?: Array<{
+    filePath: string;
+    pageName: string;
+    route: string;
+    issues: Array<{
+      type: string;
+      severity: string;
+      message: string;
+      suggestedFix: string;
+    }>;
+    score: number;
+  }>;
   totalIssues: number;
   fixedCount: number;
 }
@@ -235,12 +248,25 @@ export function runHealthCheckAudit(): HealthCheckReport {
     }
   }
 
+  // 3. Scan pages for heading structure violations
+  const accessibilityReports = scanAccessibilityAndSEO();
+  const headingViolations = accessibilityReports
+    .filter(r => r.issues && r.issues.length > 0)
+    .map(r => ({
+      filePath: r.filePath,
+      pageName: r.pageName,
+      route: r.route,
+      issues: r.issues,
+      score: r.score
+    }));
+
   return {
     timestamp,
     success: true,
     brokenLinks,
     missingDescriptions,
-    totalIssues: brokenLinks.length + missingDescriptions.length,
+    headingViolations,
+    totalIssues: brokenLinks.length + missingDescriptions.length + headingViolations.length,
     fixedCount: 0
   };
 }

@@ -84,6 +84,7 @@ export function ZultysVsCompetitors() {
   }, []);
 
   const competitors = [
+    { name: 'DFW Local Telecoms', path: '/zultys-vs-dfw-local-telecoms', icon: Users, desc: 'Why Zultys beats generic, hyper-local North Texas resellers and carriers.' },
     { name: 'RingCentral', path: '/zultys-vs-ringcentral', icon: Cloud, desc: 'Why Zultys offers better local support and lower TCO than the cloud giant.' },
     { name: '8x8', path: '/zultys-vs-8x8', icon: BarChart3, desc: 'Comparing call quality and feature sets for DFW enterprises.' },
     { name: 'Microsoft Teams', path: '/zultys-vs-microsoft-teams', icon: MessageSquare, desc: 'Why a dedicated VoIP system beats a generic collaboration tool.' },

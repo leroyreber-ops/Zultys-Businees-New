@@ -16,7 +16,7 @@ export const ZULTYS_ZIP_49G = 'https://images.dallasfortworthzultys.com/fort-wor
 export const ZULTYS_IP_PHONES_BG = 'https://images.dallasfortworthzultys.com/fort-worth-zultys-ip-phones-bg.jpg';
 export const ZULTYS_LOGO = 'https://images.dallasfortworthzultys.com/fort-worth-zultys-logo.jpg';
 export const ZULTYS_CLOUD_SERVICES = 'https://images.dallasfortworthzultys.com/Zultys-Cloud-Services.jpg';
-export const ZULTYS_FORT_WORTH_BG = 'https://images.dallasfortworthzultys.com/zultys-fort-worth.jpg';
+export const ZULTYS_FORT_WORTH_BG = 'https://images.unsplash.com/photo-1549918864-48ac978761a4?auto=format&fit=crop&w=1200&h=800&q=80';
 export const ZULTYS_MX_MOBILE_ZAC = 'https://images.dallasfortworthzultys.com/zultys-mx-mobile-zac';
 export const ZULTYS_MX_MOBILE = 'https://images.dallasfortworthzultys.com/zultys-mx-mobile.jpg';
 export const ZULTYS_MXSE = 'https://images.dallasfortworthzultys.com/Zultys-MX-SE.jpg';

@@ -31,7 +31,8 @@ const successStories = [
     challenge: 'Fragmented communication across 4 clinics led to missed patient calls and inefficient staff coordination.',
     solution: 'Implemented a centralized Zultys MX250 system with MXmobile for all doctors and staff.',
     result: '30% reduction in missed calls and seamless HIPAA-compliant communication between locations.',
-    icon: Stethoscope
+    icon: Stethoscope,
+    path: '/case-studies/healthcare-zultys-migration-dallas'
   },
   {
     industry: 'Legal',
@@ -170,6 +171,13 @@ export function CaseStudies() {
                         <h4 className="text-sm font-black text-zultys-green uppercase tracking-widest mb-2">The Result</h4>
                         <p className="text-slate-900 font-bold leading-relaxed">{story.result}</p>
                       </div>
+                      {story.path && (
+                        <div className="pt-4 border-t border-slate-100 mt-6">
+                          <Link to={story.path} className="inline-flex items-center gap-2 text-zultys-green hover:text-slate-900 font-black text-sm uppercase tracking-wider group/link transition-colors">
+                            Read Detailed Success Story & VoIP Metrics <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>

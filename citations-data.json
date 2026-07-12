@@ -1,0 +1,350 @@
+{
+  "profile": {
+    "name": "DFW Zultys VoIP & Business Phone Systems",
+    "street": "1314 S Main St, Suite 100",
+    "city": "Dallas",
+    "state": "TX",
+    "zip": "75201",
+    "phone": "(214) 555-0199",
+    "website": "https://dallasfortworthzultys.com",
+    "hours": {
+      "Monday": "08:00 AM - 05:00 PM",
+      "Tuesday": "08:00 AM - 05:00 PM",
+      "Wednesday": "08:00 AM - 05:00 PM",
+      "Thursday": "08:00 AM - 05:00 PM",
+      "Friday": "08:00 AM - 05:00 PM",
+      "Saturday": "Closed",
+      "Sunday": "Closed"
+    },
+    "category": "Telecommunications & Business VoIP",
+    "serviceArea": "Dallas-Fort Worth Metroplex (Dallas, Fort Worth, Plano, Arlington, Frisco, Irving)",
+    "socials": {
+      "facebook": "https://facebook.com/dfwzultys",
+      "linkedin": "https://linkedin.com/company/dfw-zultys-voip",
+      "twitter": "https://twitter.com/dfwzultys"
+    }
+  },
+  "directories": [
+    {
+      "key": "yelp",
+      "name": "Yelp",
+      "domain": "yelp.com",
+      "authority": 93,
+      "relevance": 95,
+      "likelihood": 85,
+      "integrationType": "Form Automation",
+      "listingUrl": "https://www.yelp.com/biz/dfw-zultys-voip-dallas",
+      "audit": {
+        "status": "mismatch",
+        "foundName": "DFW Zultys Phone Systems",
+        "foundAddress": "1314 Main St",
+        "foundPhone": "(214) 555-0100",
+        "foundWebsite": "https://dallasfortworthzultys.com",
+        "mismatchFields": ["name", "street", "phone"],
+        "consistencyScore": 60
+      }
+    },
+    {
+      "key": "yellowpages",
+      "name": "YellowPages",
+      "domain": "yellowpages.com",
+      "authority": 85,
+      "relevance": 90,
+      "likelihood": 90,
+      "integrationType": "API",
+      "listingUrl": "https://www.yellowpages.com/dallas-tx/mip/dfw-zultys-voip-5510292",
+      "audit": {
+        "status": "mismatch",
+        "foundName": "DFW Zultys VoIP & Business Phone Systems",
+        "foundAddress": "1314 S Main St Suite A",
+        "foundPhone": "(214) 555-0199",
+        "foundWebsite": "http://dfwzultys.com",
+        "mismatchFields": ["street", "website"],
+        "consistencyScore": 80
+      }
+    },
+    {
+      "key": "gmb",
+      "name": "Google Business Profile",
+      "domain": "google.com/business",
+      "authority": 100,
+      "relevance": 100,
+      "likelihood": 95,
+      "integrationType": "API",
+      "listingUrl": "https://google.com/maps/place/DFW+Zultys+VoIP+and+Phone+Systems",
+      "audit": {
+        "status": "consistent",
+        "foundName": "DFW Zultys VoIP & Business Phone Systems",
+        "foundAddress": "1314 S Main St, Suite 100",
+        "foundPhone": "(214) 555-0199",
+        "foundWebsite": "https://dallasfortworthzultys.com",
+        "mismatchFields": [],
+        "consistencyScore": 100
+      }
+    },
+    {
+      "key": "bing",
+      "name": "Bing Places",
+      "domain": "bingplaces.com",
+      "authority": 94,
+      "relevance": 92,
+      "likelihood": 88,
+      "integrationType": "API",
+      "listingUrl": "https://bing.com/maps?q=DFW+Zultys+VoIP",
+      "audit": {
+        "status": "consistent",
+        "foundName": "DFW Zultys VoIP & Business Phone Systems",
+        "foundAddress": "1314 S Main St, Suite 100",
+        "foundPhone": "(214) 555-0199",
+        "foundWebsite": "https://dallasfortworthzultys.com",
+        "mismatchFields": [],
+        "consistencyScore": 100
+      }
+    },
+    {
+      "key": "foursquare",
+      "name": "Foursquare",
+      "domain": "foursquare.com",
+      "authority": 89,
+      "relevance": 82,
+      "likelihood": 85,
+      "integrationType": "Form Automation",
+      "listingUrl": null,
+      "audit": {
+        "status": "missing",
+        "foundName": null,
+        "foundAddress": null,
+        "foundPhone": null,
+        "foundWebsite": null,
+        "mismatchFields": [],
+        "consistencyScore": 0
+      }
+    },
+    {
+      "key": "clutch",
+      "name": "Clutch.co",
+      "domain": "clutch.co",
+      "authority": 88,
+      "relevance": 85,
+      "likelihood": 70,
+      "integrationType": "Manual Task",
+      "listingUrl": null,
+      "audit": {
+        "status": "missing",
+        "foundName": null,
+        "foundAddress": null,
+        "foundPhone": null,
+        "foundWebsite": null,
+        "mismatchFields": [],
+        "consistencyScore": 0
+      }
+    },
+    {
+      "key": "tripadvisor",
+      "name": "TripAdvisor",
+      "domain": "tripadvisor.com",
+      "authority": 93,
+      "relevance": 20,
+      "likelihood": 10,
+      "integrationType": "Form Automation",
+      "listingUrl": null,
+      "audit": {
+        "status": "duplicate_conflict",
+        "foundName": "DFW Zultys Partner (Duplicate Office)",
+        "foundAddress": "1314 S Main St, Ste 100",
+        "foundPhone": "(214) 555-0199",
+        "foundWebsite": "https://dallasfortworthzultys.com",
+        "mismatchFields": ["name"],
+        "consistencyScore": 90
+      }
+    }
+  ],
+  "submissions": [
+    {
+      "id": "sub_1",
+      "directoryKey": "gmb",
+      "directoryName": "Google Business Profile",
+      "status": "VERIFIED",
+      "integrationUsed": "API",
+      "timestamp": "2026-06-15T10:00:00Z",
+      "resultCode": "API_SUCCESS_200",
+      "screenshot": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&auto=format&fit=crop&q=60",
+      "verificationMethod": "Automated Phone Call",
+      "verificationStatus": "COMPLETED",
+      "retrySchedule": null,
+      "errorLog": null
+    },
+    {
+      "id": "sub_2",
+      "directoryKey": "bing",
+      "directoryName": "Bing Places",
+      "status": "VERIFIED",
+      "integrationUsed": "API",
+      "timestamp": "2026-06-16T14:30:00Z",
+      "resultCode": "API_SUCCESS_200",
+      "screenshot": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&auto=format&fit=crop&q=60",
+      "verificationMethod": "Email Verification Code",
+      "verificationStatus": "COMPLETED",
+      "retrySchedule": null,
+      "errorLog": null
+    },
+    {
+      "id": "sub_3",
+      "directoryKey": "yelp",
+      "directoryName": "Yelp",
+      "status": "SUBMITTED",
+      "integrationUsed": "Form Automation",
+      "timestamp": "2026-07-06T09:15:00Z",
+      "resultCode": "FORM_SUBMITTED_SUCCESS",
+      "screenshot": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&auto=format&fit=crop&q=60",
+      "verificationMethod": "Manual Admin Panel Link",
+      "verificationStatus": "COMPLETED",
+      "retrySchedule": null,
+      "errorLog": null
+    },
+    {
+      "id": "sub_4",
+      "directoryKey": "yellowpages",
+      "directoryName": "YellowPages",
+      "status": "SUBMITTED",
+      "integrationUsed": "API",
+      "timestamp": "2026-07-06T11:40:00Z",
+      "resultCode": "API_POST_ACCEPTED",
+      "screenshot": null,
+      "verificationMethod": "Instant Verification Partner",
+      "verificationStatus": "COMPLETED",
+      "retrySchedule": null,
+      "errorLog": null
+    }
+  ],
+  "verificationQueue": [
+    {
+      "id": "v_1",
+      "directoryKey": "foursquare",
+      "directoryName": "Foursquare",
+      "status": "PAUSED_PENDING_HUMAN",
+      "timestamp": "2026-07-07T04:00:00Z",
+      "otpSent": "Email PIN sent to leroyrichardreber@gmail.com",
+      "codeRequired": true,
+      "message": "Foursquare requires manual input of the 6-digit email confirmation PIN sent to you."
+    }
+  ],
+  "history": [
+    {
+      "id": "h_1",
+      "timestamp": "2026-07-06T09:15:00Z",
+      "action": "Form Submission Executed",
+      "details": "Submitted master profile to Yelp. Waiting for indexing."
+    },
+    {
+      "id": "h_2",
+      "timestamp": "2026-07-06T11:40:00Z",
+      "action": "API Citation Updated",
+      "details": "Successfully updated YellowPages business listing via partner API sync."
+    },
+    {
+      "id": "h_3",
+      "timestamp": "2026-07-07T04:00:00Z",
+      "action": "Verification Code Requested",
+      "details": "Foursquare form submission halted: Waiting for 6-digit confirmation PIN from customer."
+    }
+  ],
+  "attempts": [
+    {
+      "id": "att_1",
+      "directoryKey": "gmb",
+      "directoryName": "Google Business Profile",
+      "status": "SUCCESS",
+      "errorCode": "API_SUCCESS_200",
+      "timestamp": "2026-06-15T10:00:00Z",
+      "isRetry": false,
+      "retryNumber": 0,
+      "message": "Instant API synchronizer established authoritative listing successfully.",
+      "scheduledRetryTime": null
+    },
+    {
+      "id": "att_2",
+      "directoryKey": "bing",
+      "directoryName": "Bing Places",
+      "status": "SUCCESS",
+      "errorCode": "API_SUCCESS_200",
+      "timestamp": "2026-06-16T14:30:00Z",
+      "isRetry": false,
+      "retryNumber": 0,
+      "message": "Bing Places partner channel synchronization completed successfully.",
+      "scheduledRetryTime": null
+    },
+    {
+      "id": "att_3",
+      "directoryKey": "yelp",
+      "directoryName": "Yelp",
+      "status": "FAILED",
+      "errorCode": "FORM_SELECTOR_TIMEOUT_504",
+      "timestamp": "2026-07-06T09:10:00Z",
+      "isRetry": false,
+      "retryNumber": 0,
+      "message": "Form automation pipeline timed out waiting for Yelp verification modal selector.",
+      "scheduledRetryTime": "2026-07-06T09:15:00Z"
+    },
+    {
+      "id": "att_4",
+      "directoryKey": "yelp",
+      "directoryName": "Yelp",
+      "status": "SUCCESS",
+      "errorCode": "FORM_SUBMITTED_SUCCESS",
+      "timestamp": "2026-07-06T09:15:00Z",
+      "isRetry": true,
+      "retryNumber": 1,
+      "message": "Retried Yelp form submission successfully aligned master profile.",
+      "scheduledRetryTime": null
+    },
+    {
+      "id": "att_5",
+      "directoryKey": "yellowpages",
+      "directoryName": "YellowPages",
+      "status": "FAILED",
+      "errorCode": "API_RATE_LIMIT_429",
+      "timestamp": "2026-07-06T11:30:00Z",
+      "isRetry": false,
+      "retryNumber": 0,
+      "message": "YellowPages partner gateway returned HTTP 429: Rate Limit Exceeded.",
+      "scheduledRetryTime": "2026-07-06T11:40:00Z"
+    },
+    {
+      "id": "att_6",
+      "directoryKey": "yellowpages",
+      "directoryName": "YellowPages",
+      "status": "SUCCESS",
+      "errorCode": "API_POST_ACCEPTED",
+      "timestamp": "2026-07-06T11:40:00Z",
+      "isRetry": true,
+      "retryNumber": 1,
+      "message": "Retried YellowPages API synchronizer. Request successfully accepted and queued.",
+      "scheduledRetryTime": null
+    },
+    {
+      "id": "att_7",
+      "directoryKey": "tripadvisor",
+      "directoryName": "TripAdvisor",
+      "status": "FAILED",
+      "errorCode": "DUPLICATE_CONFLICT_409",
+      "timestamp": "2026-07-07T02:00:00Z",
+      "isRetry": false,
+      "retryNumber": 0,
+      "message": "TripAdvisor returned conflict: Duplicate listing registered for phone number. Automatic retries disabled.",
+      "scheduledRetryTime": null
+    },
+    {
+      "id": "att_8",
+      "directoryKey": "clutch",
+      "directoryName": "Clutch.co",
+      "status": "FAILED",
+      "errorCode": "CAPTCHA_CHALLENGE_REQUIRED_401",
+      "timestamp": "2026-07-07T05:00:00Z",
+      "isRetry": false,
+      "retryNumber": 0,
+      "message": "Clutch.co form automation encountered an active CAPTCHA block. Automated retry enqueued for human fulfillment.",
+      "scheduledRetryTime": "2026-07-07T09:00:00Z"
+    }
+  ]
+}

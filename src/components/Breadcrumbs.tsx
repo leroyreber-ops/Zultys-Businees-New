@@ -1,8 +1,8 @@
-import React from 'react';
-import { HashLink as Link, useLocation } from './HashLink';
+import React, { useState, useEffect } from 'react';
+import { HashLink as Link } from './HashLink';
 import { Home, ChevronRight } from 'lucide-react';
 
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string;
   href?: string;
 }
@@ -31,17 +31,19 @@ function formatCityName(slug: string): string {
     '-tx'
   ];
   
-  let name = slug.replace(/^\//, ''); // remove leading slash
+  let name = slug.replace(/^\//, '').toLowerCase(); // remove leading slash & lower
   
-  for (const suffix of suffixes) {
-    if (name.endsWith(suffix)) {
-      name = name.slice(0, -suffix.length);
-      break;
+  // Keep stripping suffixes in any order until no more matches are found
+  let stripped = true;
+  while (stripped) {
+    stripped = false;
+    for (const suffix of suffixes) {
+      if (name.endsWith(suffix)) {
+        name = name.slice(0, -suffix.length);
+        stripped = true;
+        break;
+      }
     }
-  }
-  
-  if (name.endsWith('-tx')) {
-    name = name.slice(0, -3);
   }
 
   // Replace hyphens with spaces
@@ -51,8 +53,65 @@ function formatCityName(slug: string): string {
   return name
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .trim();
+}
+
+// Format titles beautifully with proper uppercase for business abbreviations
+function formatTitle(slug: string): string {
+  const UPPERCASE_WORDS = new Set(['voip', 'ip', 'pbx', 'dfw', 'hipaa', 'zac', 'mx', 'mxmobile', 'mxconference', 'att', 'crm', 'faq', 'gsc', 'seo', 'api']);
+  const CUSTOM_MAP: Record<string, string> = {
+    'att-business': 'AT&T Business',
+    'microsoft-teams': 'Teams',
+    'gotoconnect': 'GoToConnect',
+    'mx-se': 'MX-SE',
+    'mxmobile': 'MXmobile',
+    'mxconference': 'MXconference',
+    'zac': 'ZAC',
+    'zip': 'ZIP',
+    'healthcare-zultys-migration-dallas': 'Healthcare Migration',
+    'why-zultys-is-the-best-choice-for-dfw-small-businesses': 'Best Choice for DFW Small Businesses',
+    'on-premise-vs-cloud-which-zultys-deployment-is-right-for-you': 'On-Premise vs Cloud',
+    'how-to-optimize-your-office-network-for-voip-performance': 'Optimize Office Network'
+  };
+
+  const cleanSlug = slug.replace(/^\//, '');
+  if (CUSTOM_MAP[cleanSlug]) return CUSTOM_MAP[cleanSlug];
+
+  return cleanSlug
+    .split('-')
+    .map(word => {
+      const lower = word.toLowerCase();
+      if (UPPERCASE_WORDS.has(lower)) {
+        if (lower === 'att') return 'AT&T';
+        return lower.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
     .join(' ');
 }
+
+const competitorNames: Record<string, string> = {
+  'competitors': 'Competitors',
+  'competition': 'Competitors',
+  'ringcentral': 'RingCentral',
+  '8x8': '8x8',
+  'microsoft-teams': 'Teams',
+  'vonage': 'Vonage',
+  'avaya': 'Avaya',
+  'cisco-webex': 'Cisco Webex',
+  'mitel': 'Mitel',
+  'zoom-phone': 'Zoom Phone',
+  'gotoconnect': 'GoToConnect',
+  'nextiva': 'Nextiva',
+  'dialpad': 'Dialpad',
+  'intermedia': 'Intermedia',
+  'comcast-business': 'Comcast Business',
+  'spectrum-business': 'Spectrum Business',
+  'att-business': 'AT&T Business',
+  'ooma-office': 'Ooma Office',
+  'dfw-local-telecoms': 'DFW Local Telecoms'
+};
 
 const exactMatches: Record<string, BreadcrumbItem[]> = {
   '/products': [{ label: 'Products' }],
@@ -64,10 +123,15 @@ const exactMatches: Record<string, BreadcrumbItem[]> = {
   '/sitemap': [{ label: 'Sitemap' }],
   '/zultys-faq': [{ label: 'Support', href: '/zultys-support' }, { label: 'FAQ' }],
   '/zultys-user-guides': [{ label: 'Support', href: '/zultys-support' }, { label: 'User Guides' }],
+  '/zultys-migration-guide-dfw': [{ label: 'Support', href: '/zultys-support' }, { label: 'Migration Guide' }],
+  '/zultys-crm-integration-guide': [{ label: 'Support', href: '/zultys-support' }, { label: 'CRM Integration Guide' }],
   '/zultys-support': [{ label: 'Support' }],
+  '/dallas-zultys-phones': [{ label: 'Products', href: '/products' }, { label: 'Hardware' }],
   '/zultys-pricing': [{ label: 'Pricing' }],
   '/free-voip-site-audit': [{ label: 'Free VoIP Site Audit' }],
   '/case-studies': [{ label: 'Case Studies' }],
+  '/case-studies/healthcare-zultys-migration-dallas': [{ label: 'Case Studies', href: '/case-studies' }, { label: 'Healthcare Migration' }],
+  '/collin-county-voip-systems': [{ label: 'Service Areas', href: '/sitemap' }, { label: 'Collin County' }],
   '/voip-glossary': [{ label: 'VoIP Glossary' }],
   '/our-team': [{ label: 'About Us', href: '/about' }, { label: 'Our Team' }],
   '/certifications-awards': [{ label: 'About Us', href: '/about' }, { label: 'Certifications & Awards' }],
@@ -77,6 +141,7 @@ const exactMatches: Record<string, BreadcrumbItem[]> = {
   // Comparative pages
   '/zultys-vs-competitors': [{ label: 'Comparisons', href: '/zultys-vs-competitors' }, { label: 'Zultys vs Competitors' }],
   '/zultys-vs-competition': [{ label: 'Comparisons', href: '/zultys-vs-competitors' }, { label: 'Zultys vs Competitors' }],
+  '/zultys-vs-dfw-local-telecoms': [{ label: 'Comparisons', href: '/zultys-vs-competitors' }, { label: 'Zultys vs DFW Local Telecoms' }],
   '/zultys-vs-ringcentral': [{ label: 'Comparisons', href: '/zultys-vs-competitors' }, { label: 'Zultys vs RingCentral' }],
   '/zultys-vs-8x8': [{ label: 'Comparisons', href: '/zultys-vs-competitors' }, { label: 'Zultys vs 8x8' }],
   '/zultys-vs-microsoft-teams': [{ label: 'Comparisons', href: '/zultys-vs-competitors' }, { label: 'Zultys vs Teams' }],
@@ -349,7 +414,7 @@ const KNOWN_CITIES = new Set([
   'Nevada', 'Josephine', 'Bailey', 'Randolph', 'Telephone', 'Ivanhoe', 'Gober'
 ]);
 
-function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
+export function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const cleanPathname = pathname.toLowerCase().replace(/\/$/, '');
 
   // Home page or empty path -> No breadcrumbs
@@ -362,16 +427,31 @@ function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return exactMatches[cleanPathname];
   }
 
+  // Dynamic Comparison Pages
+  if (cleanPathname.startsWith('/zultys-vs-')) {
+    const compSlug = cleanPathname.substring('/zultys-vs-'.length);
+    const displayLabel = competitorNames[compSlug] || formatTitle(compSlug);
+    return [
+      { label: 'Comparisons', href: '/zultys-vs-competitors' },
+      { label: `Zultys vs ${displayLabel}` }
+    ];
+  }
+
   // Handle blog posts dynamically (e.g. /blog/post-slug)
   if (cleanPathname.startsWith('/blog/')) {
     const postSlug = cleanPathname.substring('/blog/'.length);
-    const postTitle = postSlug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
     return [
       { label: 'Blog', href: '/blog' },
-      { label: postTitle }
+      { label: formatTitle(postSlug) }
+    ];
+  }
+
+  // Handle case studies dynamically
+  if (cleanPathname.startsWith('/case-studies/')) {
+    const caseSlug = cleanPathname.substring('/case-studies/'.length);
+    return [
+      { label: 'Case Studies', href: '/case-studies' },
+      { label: formatTitle(caseSlug) }
     ];
   }
 
@@ -384,6 +464,84 @@ function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
     ];
   }
 
+  // Dynamic Products check
+  if (cleanPathname.includes('-zip-') || cleanPathname.includes('-z-') || cleanPathname.includes('-z23') || cleanPathname.includes('mx-series') || cleanPathname.includes('mx-se') || cleanPathname.includes('gateways')) {
+    let title = '';
+    if (cleanPathname.includes('49g')) title = 'ZIP 49G';
+    else if (cleanPathname.includes('47g')) title = 'ZIP 47G';
+    else if (cleanPathname.includes('45g')) title = 'ZIP 45G';
+    else if (cleanPathname.includes('43g')) title = 'ZIP 43G';
+    else if (cleanPathname.includes('23ge') || cleanPathname.includes('23g')) title = 'Z 23GE';
+    else if (cleanPathname.includes('22g')) title = 'Z 22G';
+    else if (cleanPathname.includes('21i')) title = 'Z 21i';
+    else if (cleanPathname.includes('gateways')) title = 'Gateways';
+    else if (cleanPathname.includes('mx-series')) title = 'MX Series';
+    else if (cleanPathname.includes('mx-se')) title = 'MX-SE';
+    else title = formatTitle(cleanPathname.split('-').pop() || '');
+
+    return [
+      { label: 'Products', href: '/products' },
+      { label: 'Hardware', href: '/dallas-zultys-phones' },
+      { label: title }
+    ];
+  }
+
+  // Dynamic Software check
+  if (cleanPathname.includes('-zac') || cleanPathname.includes('-mxmobile') || cleanPathname.includes('-mxconference') || cleanPathname.includes('-mobile-zac')) {
+    let title = 'Software';
+    if (cleanPathname.includes('zac')) title = 'ZAC';
+    if (cleanPathname.includes('mxmobile')) title = 'MXmobile';
+    if (cleanPathname.includes('mxconference')) title = 'MXconference';
+    if (cleanPathname.includes('mobile-zac')) title = 'Mobile ZAC';
+
+    return [
+      { label: 'Products', href: '/products' },
+      { label: 'Software' },
+      { label: title }
+    ];
+  }
+
+  // Dynamic Solutions / Industries check
+  if (cleanPathname.includes('healthcare')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Healthcare' }];
+  }
+  if (cleanPathname.includes('education')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Education' }];
+  }
+  if (cleanPathname.includes('professional-services')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Professional Services' }];
+  }
+  if (cleanPathname.includes('real-estate')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Real Estate' }];
+  }
+  if (cleanPathname.includes('retail')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Retail & Automotive' }];
+  }
+  if (cleanPathname.includes('legal-firms')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Legal Firms' }];
+  }
+  if (cleanPathname.includes('financial-services')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Financial Services' }];
+  }
+  if (cleanPathname.includes('manufacturing-logistics')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Manufacturing & Logistics' }];
+  }
+  if (cleanPathname.includes('hospitality')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Hospitality' }];
+  }
+  if (cleanPathname.includes('non-profit')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Industry', href: '/solutions' }, { label: 'Non-Profits' }];
+  }
+  if (cleanPathname.includes('small-business')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Business Solutions', href: '/solutions' }, { label: 'Small Business' }];
+  }
+  if (cleanPathname.includes('enterprise')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Business Solutions', href: '/solutions' }, { label: 'Enterprise' }];
+  }
+  if (cleanPathname.includes('multi-location')) {
+    return [{ label: 'Solutions', href: '/solutions' }, { label: 'Business Solutions', href: '/solutions' }, { label: 'Multi-Location' }];
+  }
+
   // General multi-segment path fallback (e.g. /solutions/industry)
   const segments = cleanPathname.split('/').filter(Boolean);
   if (segments.length > 1) {
@@ -393,14 +551,8 @@ function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
       currentHref += `/${segment}`;
-      
-      const label = segment
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-        
       breadcrumbItems.push({
-        label,
+        label: formatTitle(segment),
         href: i === segments.length - 1 ? undefined : currentHref
       });
     }
@@ -408,14 +560,22 @@ function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
   }
 
   // Default fallback if we can't figure it out perfectly
-  const words = cleanPathname.substring(1).split('-');
-  const fallbackLabel = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  return [{ label: fallbackLabel }];
+  return [{ label: formatTitle(cleanPathname) }];
 }
 
 export function Breadcrumbs() {
-  const location = useLocation();
-  const segments = getBreadcrumbs(location.pathname);
+  const [pathname, setPathname] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setPathname(window.location.pathname);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const segments = getBreadcrumbs(pathname);
 
   if (segments.length === 0) {
     return null;
@@ -429,7 +589,7 @@ export function Breadcrumbs() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     'itemListElement': fullList.map((item, index) => {
-      const url = item.href ? `${domain}${item.href}` : `${domain}${location.pathname}`;
+      const url = item.href ? `${domain}${item.href}` : `${domain}${pathname}`;
       return {
         '@type': 'ListItem',
         'position': index + 1,
@@ -448,6 +608,7 @@ export function Breadcrumbs() {
       {/* JSON-LD Schema injection for rich search result snippets */}
       <script 
         type="application/ld+json" 
+        id="breadcrumb-jsonld"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} 
       />
 

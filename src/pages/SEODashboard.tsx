@@ -10,6 +10,9 @@ import {
 import { Toaster, toast } from 'sonner';
 import D3RankDistributionChart from '../components/D3RankDistributionChart';
 import { LocalRankTracker } from '../components/LocalRankTracker';
+import { InternalLinkAuditor } from '../components/InternalLinkAuditor';
+import { AccessibilityAndSEOAuditor } from '../components/AccessibilityAndSEOAuditor';
+import { FAQPageSchema } from '../components/FAQPageSchema';
 import { useRankPolling } from '../hooks/useRankPolling';
 import { generateSeoSuggestion } from '../utils/imageScanner';
 
@@ -107,6 +110,18 @@ export default function SEODashboard() {
       pageName: string;
       suggestedFix: string;
       fixed: boolean;
+    }>;
+    headingViolations?: Array<{
+      filePath: string;
+      pageName: string;
+      route: string;
+      score: number;
+      issues: Array<{
+        type: string;
+        severity: string;
+        message: string;
+        suggestedFix: string;
+      }>;
     }>;
     totalIssues: number;
     fixedCount: number;
@@ -1365,6 +1380,13 @@ export default function SEODashboard() {
             </p>
           </div>
           <div className="flex gap-3">
+            <a
+              href="/citation-health"
+              className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white transition text-sm font-black uppercase tracking-wider rounded-lg shadow-md hover:shadow-indigo-500/20 cursor-pointer active:scale-95"
+            >
+              <MapPin className="h-4 w-4 text-indigo-200" />
+              Local Citation Health
+            </a>
             <button
               onClick={handleFixAll}
               disabled={fixingAll}
@@ -1746,7 +1768,7 @@ export default function SEODashboard() {
             </div>
           ) : (
             <div className="mt-6 space-y-6 animate-fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* Missing Meta Descriptions Column */}
                 <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 space-y-4">
@@ -1829,6 +1851,50 @@ export default function SEODashboard() {
                   )}
                 </div>
 
+                {/* Heading Structure Violations Column */}
+                <div className="bg-slate-950/50 border border-slate-800/80 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black uppercase text-rose-400 tracking-wider flex items-center gap-1.5">
+                      <ShieldAlert className="h-4 w-4" /> Heading Violations ({healthReport.headingViolations?.length || 0})
+                    </h3>
+                    <span className="text-3xs bg-rose-500/10 text-rose-300 px-2 py-0.5 rounded font-mono font-bold">
+                      Impact: Medium-High (SEO)
+                    </span>
+                  </div>
+
+                  {!healthReport.headingViolations || healthReport.headingViolations.length === 0 ? (
+                    <p className="text-slate-500 text-xs py-8 text-center">✔ All active pages follow a strict heading hierarchy.</p>
+                  ) : (
+                    <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+                      {healthReport.headingViolations.map((item, idx) => (
+                        <div key={idx} className="bg-slate-900 border border-slate-800 rounded-lg p-3 text-xs space-y-2 hover:border-slate-700 transition animate-fade-in">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-200">{item.pageName} Page</span>
+                            <span className="text-3xs font-mono text-slate-500">{item.route}</span>
+                          </div>
+                          <div className="space-y-1.5">
+                            {item.issues.map((issue: any, issueIdx: number) => (
+                              <div key={issueIdx} className="text-3xs bg-rose-950/20 border border-rose-900/30 p-2 rounded">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <span className={`px-1 rounded text-3xs font-bold uppercase ${
+                                    issue.severity === 'critical' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-300'
+                                  }`}>
+                                    {issue.severity}
+                                  </span>
+                                  <span className="text-slate-300 font-medium">{issue.message}</span>
+                                </div>
+                                <div className="text-slate-400 mt-1 pl-1 border-l border-rose-500/25">
+                                  <strong className="text-slate-300 font-mono">Fix Suggestion:</strong> {issue.suggestedFix}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
               </div>
               <div className="bg-slate-950/30 rounded-xl p-3 text-3xs text-slate-500 flex items-center justify-between">
                 <span>Last automated audit run completed: <strong>{new Date(healthReport.timestamp).toLocaleString()}</strong></span>
@@ -1836,6 +1902,21 @@ export default function SEODashboard() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* Internal Link Auditor Section */}
+        <section className="bg-slate-900 text-white rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">
+          <InternalLinkAuditor />
+        </section>
+
+        {/* Accessibility & Heading Hierarchy Auditor Section */}
+        <section className="bg-slate-900 text-white rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">
+          <AccessibilityAndSEOAuditor />
+        </section>
+
+        {/* Dynamic FAQPage JSON-LD Schema Auditor Section */}
+        <section className="bg-slate-900 text-white rounded-2xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">
+          <FAQPageSchema headless={false} />
         </section>
 
         {/* Live GSC Ranking Issues & SERP Booster */}

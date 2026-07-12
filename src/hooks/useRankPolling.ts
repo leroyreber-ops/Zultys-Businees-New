@@ -110,6 +110,9 @@ export function useRankPolling(pollIntervalMs = 15000) {
     if (!silent) updateGlobalLoading(true);
     try {
       const res = await fetch('/api/seo/verified-ranks');
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       if (data && data.rankings) {
         updateGlobalStore({
@@ -119,7 +122,13 @@ export function useRankPolling(pollIntervalMs = 15000) {
         });
       }
     } catch (err) {
-      console.error('[Rank Polling Hook] Background fetch failed:', err);
+      if (silent) {
+        // Silent background polls can fail during local rebuilds / server restarts.
+        // Log as a subtle debug/info warning rather than flooding the console with error stacks.
+        console.warn('[Rank Polling Hook] Background sync temporarily unavailable (server is likely restarting/building).');
+      } else {
+        console.error('[Rank Polling Hook] Active fetch failed:', err);
+      }
     } finally {
       if (!silent) updateGlobalLoading(false);
     }

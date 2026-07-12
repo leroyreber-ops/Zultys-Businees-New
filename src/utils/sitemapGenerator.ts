@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { isGoogleConfigured, notifyGoogleUrlChange, submitSitemapToGoogle, logIndexingActivity } from "./googleIndexer.js";
+import { SitemapIndexProvider } from "./SitemapIndexProvider.js";
 
 /**
  * Interface representing a route's SEO configuration.
@@ -153,6 +154,14 @@ export function extractRoutesFromApp(): string[] {
       }
     }
 
+    // Merge dynamic city routes to guarantee Google search discovery
+    const dynamicCityRoutes = SitemapIndexProvider.getDynamicCityRoutes();
+    dynamicCityRoutes.forEach((route) => {
+      if (!routes.has(route)) {
+        routes.add(route);
+      }
+    });
+
     // Always ensure the home route is present at the top
     const sortedRoutes = Array.from(routes).sort();
     if (!sortedRoutes.includes("/")) {
@@ -197,6 +206,9 @@ export function generateSitemapFiles(): void {
     // Check if new city or product pages require programmatic Google Indexing Auto-Pings
     const routes = extractRoutesFromApp();
     checkAndTriggerAutoPing(routes);
+
+    // Automatically update robots.txt file to link to the generated XML sitemap
+    SitemapIndexProvider.updateRobotsTxt();
   } catch (err) {
     console.error("❌ [Sitemap] Failed to generate sitemap files:", err);
   }
@@ -237,6 +249,16 @@ export function buildSitemapXml(): string {
   const lastmod = new Date().toISOString().split("T")[0];
 
   const xmlEntries = routes
+    .filter((route) => {
+      const normalized = route.toLowerCase();
+      return !(
+        normalized === "/seo-dashboard" ||
+        normalized === "/citation-health" ||
+        normalized === "/admin/search-console" ||
+        normalized === "/admin/citations" ||
+        normalized.startsWith("/admin/")
+      );
+    })
     .map((route) => {
       const seo = getRouteSEO(route);
       return `  <url>

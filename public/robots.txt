@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /seo-dashboard
+Disallow: /citation-health
+Disallow: /admin/
+
 Sitemap: https://dallasfortworthzultys.com/sitemap.xml
