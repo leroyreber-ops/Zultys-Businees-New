@@ -29,8 +29,14 @@ export default async (request: Request, context: Context) => {
   const isValid = VALID_PATHS.includes(normalizedPath);
 
   if (isValid) {
-    // Valid route: let Netlify serve index.html (SPA shell) with a status 200
-    return;
+    // For the homepage, let Netlify serve the default pre-rendered /index.html
+    if (normalizedPath === "/") {
+      return;
+    }
+    // For valid inner pages, rewrite to their statically pre-rendered subfolder index.html
+    // E.g., /fort-worth-zultys-business-phone-systems -> /fort-worth-zultys-business-phone-systems/index.html
+    const rewritePath = normalizedPath + "/index.html";
+    return context.rewrite(rewritePath);
   } else {
     // Invalid route: serve the custom 404.html with status 404 and X-Robots-Tag: noindex
     try {

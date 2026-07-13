@@ -4448,17 +4448,25 @@ export function ${componentName}() {
       }
 
       try {
-        const template = getIndexHtml();
         const valid = isValidRoute(pathOnly);
         const statusCode = valid ? 200 : 404;
         
-        const injectedHtml = injectSEOMetadata(template, pathOnly);
+        // Check if there is a pre-rendered folder-specific index.html file
+        const cleanRoute = pathOnly.startsWith("/") ? pathOnly.slice(1) : pathOnly;
+        const preRenderedFilePath = path.join(distPath, cleanRoute, "index.html");
+        
+        let htmlContent: string;
+        if (valid && fs.existsSync(preRenderedFilePath)) {
+          htmlContent = fs.readFileSync(preRenderedFilePath, "utf8");
+        } else {
+          htmlContent = injectSEOMetadata(getIndexHtml(), pathOnly);
+        }
         
         if (!valid) {
           console.warn(`[SEO Soft 404] Route not found: ${pathOnly} (Returning HTTP 404)`);
         }
         
-        res.status(statusCode).set({ "Content-Type": "text/html" }).send(injectedHtml);
+        res.status(statusCode).set({ "Content-Type": "text/html" }).send(htmlContent);
       } catch (err) {
         console.error("Error serving production route:", err);
         res.status(500).send("Internal Server Error");
