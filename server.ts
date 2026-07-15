@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import { scanImagesInProject, generateSeoSuggestion, updateAltTagInFile } from "./src/utils/imageScanner";
 import { buildSitemapXml, watchAndGenerateSitemap, extractRoutesFromApp, getRouteSEO } from "./src/utils/sitemapGenerator";
-import { generateEliteMetadata, generateRobotsTxt } from "./src/utils/seoHelpers";
+import { generateEliteMetadata, generateRobotsTxt, canonicalMap } from "./src/utils/seoHelpers";
 import {
   isGoogleConfigured,
   getIndexingHistory,
@@ -194,7 +194,8 @@ function injectSEOMetadata(html: string, urlPath: string): string {
   
   // 2. Build the canonical URL
   const siteUrl = "https://dallasfortworthzultys.com";
-  const canonicalUrl = `${siteUrl}${normPath === '/' ? '' : normPath}`;
+  const canonicalPath = canonicalMap[normPath] || normPath;
+  const canonicalUrl = `${siteUrl}${canonicalPath === '/' ? '' : canonicalPath}`;
 
   // 3. Determine if this page should be noindexed (admin, dashboards, etc.)
   const isNoIndex = 
@@ -1030,11 +1031,16 @@ async function startServer() {
       const routes = extractRoutesFromApp();
       const routesData = routes.map((route) => {
         const seo = getRouteSEO(route);
+        const norm = route.toLowerCase();
+        const canonicalPath = canonicalMap[norm];
+        const isCanonical = !canonicalPath || canonicalPath === norm;
         return {
           path: route,
           priority: seo.priority,
           changefreq: seo.changefreq,
-          url: `https://dallasfortworthzultys.com${route}`
+          url: `https://dallasfortworthzultys.com${route}`,
+          isCanonical,
+          canonicalPath: canonicalPath || route
         };
       });
       res.json({ success: true, routes: routesData });

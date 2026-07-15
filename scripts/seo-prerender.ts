@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { VALID_PATHS } from "../src/routes";
-import { generateEliteMetadata } from "../src/utils/seoHelpers";
+import { generateEliteMetadata, canonicalMap } from "../src/utils/seoHelpers";
 
 console.log("\n==================================================");
 console.log("🚀 STARTING STATIC SEO PRE-RENDERING ENGINE");
@@ -130,7 +130,8 @@ function injectSEOMetadata(html: string, urlPath: string): string {
   
   // 2. Build the canonical URL
   const siteUrl = "https://dallasfortworthzultys.com";
-  const canonicalUrl = `${siteUrl}${normPath === '/' ? '' : normPath}`;
+  const canonicalPath = canonicalMap[normPath] || normPath;
+  const canonicalUrl = `${siteUrl}${canonicalPath === '/' ? '' : canonicalPath}`;
 
   // 3. Determine if this page should be noindexed (admin, dashboards, etc.)
   const isNoIndex = 

@@ -41,7 +41,7 @@ import {
 
 export function Sitemap() {
   const { openQuote } = useQuote();
-  const [dynamicRoutes, setDynamicRoutes] = useState<{ path: string; priority: string; changefreq: string; url: string }[]>([]);
+  const [dynamicRoutes, setDynamicRoutes] = useState<{ path: string; priority: string; changefreq: string; url: string; isCanonical?: boolean; canonicalPath?: string }[]>([]);
   const [loadingRoutes, setLoadingRoutes] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'dynamic' | 'xml' | 'seo'>('standard');
   const [copied, setCopied] = useState(false);
@@ -238,14 +238,16 @@ export function Sitemap() {
 
   const generateXmlOnTheFly = () => {
     const lastmod = new Date().toISOString().split('T')[0];
-    const urlEntries = dynamicRoutes.map(route => {
-      return `  <url>
+    const urlEntries = dynamicRoutes
+      .filter(route => route.isCanonical !== false)
+      .map(route => {
+        return `  <url>
     <loc>${route.url}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>`;
-    }).join('\n');
+      }).join('\n');
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
@@ -624,6 +626,7 @@ ${urlEntries}
                       <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
                         <tr>
                           <th className="px-6 py-4">URL / Path</th>
+                          <th className="px-6 py-4">SEO Type / Canonical</th>
                           <th className="px-6 py-4">Indexing Priority</th>
                           <th className="px-6 py-4">Change Frequency</th>
                           <th className="px-6 py-4 text-right">Actions</th>
@@ -634,6 +637,22 @@ ${urlEntries}
                           <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                             <td className="px-6 py-4 font-mono font-medium text-gray-900 truncate max-w-[280px]">
                               {route.path}
+                            </td>
+                            <td className="px-6 py-4">
+                              {route.isCanonical !== false ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                  Canonical
+                                </span>
+                              ) : (
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="inline-flex items-center self-start px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                                    Alias Route
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 font-mono">
+                                    → {route.canonicalPath}
+                                  </span>
+                                </div>
+                              )}
                             </td>
                             <td className="px-6 py-4">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">

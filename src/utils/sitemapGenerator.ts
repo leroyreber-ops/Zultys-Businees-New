@@ -3,6 +3,7 @@ import path from "path";
 import { isGoogleConfigured, notifyGoogleUrlChange, submitSitemapToGoogle, logIndexingActivity } from "./googleIndexer.js";
 import { SitemapIndexProvider } from "./SitemapIndexProvider.js";
 import { GoogleIndexingAdminService } from "./googleIndexingAdminService.js";
+import { canonicalMap } from "./seoHelpers.js";
 
 /**
  * Interface representing a route's SEO configuration.
@@ -252,13 +253,25 @@ export function buildSitemapXml(): string {
   const xmlEntries = routes
     .filter((route) => {
       const normalized = route.toLowerCase();
-      return !(
+      
+      // Filter out admin and diagnostic utility dashboards
+      if (
         normalized === "/seo-dashboard" ||
         normalized === "/citation-health" ||
         normalized === "/admin/search-console" ||
         normalized === "/admin/citations" ||
         normalized.startsWith("/admin/")
-      );
+      ) {
+        return false;
+      }
+
+      // Filter out non-canonical alias URLs
+      const canonicalPath = canonicalMap[normalized];
+      if (canonicalPath && canonicalPath !== normalized) {
+        return false;
+      }
+
+      return true;
     })
     .map((route) => {
       const seo = getRouteSEO(route);
