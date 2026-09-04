@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { Activity, AlertTriangle, CheckCircle, ChevronDown, Clock, Gauge, Layout, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageAltAudit } from './ImageAltAudit';
+import { isEditorEnvironment } from '../utils/envHelper';
 
 // Scoring configuration parameters (p100 = perfect, p90 = threshold for score 90, p50 = threshold for score 50)
 const METRIC_CONFIGS = {
@@ -39,7 +40,7 @@ export function PerformanceMonitor() {
 
   // Check visibility / owner permissions on mount
   useEffect(() => {
-    const isDev = process.env.NODE_ENV === 'development';
+    const isEditor = isEditorEnvironment();
     let hasPerfParam = false;
     let storedPerf = false;
 
@@ -61,7 +62,7 @@ export function PerformanceMonitor() {
       // Fail-safe
     }
 
-    if (isDev || hasPerfParam || storedPerf) {
+    if (isEditor || hasPerfParam || storedPerf) {
       setIsVisible(true);
     }
   }, []);

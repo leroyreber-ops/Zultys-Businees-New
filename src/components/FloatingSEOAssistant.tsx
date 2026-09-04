@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRankPolling } from '../hooks/useRankPolling';
+import { isEditorEnvironment } from '../utils/envHelper';
 
 interface Competitor {
   domain: string;
@@ -38,14 +39,10 @@ interface RankNotification {
 }
 
 export function FloatingSEOAssistant() {
-  // Check if we are on an admin page to restrict visibility
-  const isDevOrAdmin = 
-    typeof window !== 'undefined' && (
-      window.location.pathname === '/seo-admin' ||
-      window.location.pathname === '/seo-dashboard'
-    );
+  // Only mount in the AI Studio editor/preview or local dev environment
+  const isAllowed = isEditorEnvironment();
 
-  if (!isDevOrAdmin) {
+  if (!isAllowed) {
     return null;
   }
 
@@ -306,7 +303,7 @@ export function FloatingSEOAssistant() {
       {/* Floating Button Bubble */}
       <div 
         ref={widgetRef}
-        className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-2 pointer-events-none select-none"
+        className="fixed bottom-20 md:bottom-6 left-4 md:left-6 z-40 flex flex-col items-start gap-2 pointer-events-none select-none"
       >
         <AnimatePresence>
           {!isOpen && (
@@ -352,12 +349,20 @@ export function FloatingSEOAssistant() {
       {/* Expanded Draggable Assistant Panel */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-xs">
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm pointer-events-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsOpen(false);
+              }
+            }}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white border border-slate-200 w-full max-w-4xl h-[620px] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white border border-slate-200 w-full max-w-4xl max-h-[92vh] h-[640px] rounded-3xl shadow-2xl overflow-hidden flex flex-col pointer-events-auto"
             >
               {/* Top Titlebar */}
               <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">

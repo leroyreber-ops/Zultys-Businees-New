@@ -74,7 +74,7 @@ export function Allen() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/allen-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/allen-tx-zultys-voip');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Allen() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Allen Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Allen, Texas.',
-      url: 'https://dallasfortworthzultys.com/allen-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/allen-tx-zultys-voip',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

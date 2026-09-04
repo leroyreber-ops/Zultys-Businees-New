@@ -74,7 +74,7 @@ export function Mansfield() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/mansfield-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/mansfield-tx-zultys-phone-systems-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Mansfield() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Mansfield Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Mansfield, Texas.',
-      url: 'https://dallasfortworthzultys.com/mansfield-zultys',
+      url: 'https://dallasfortworthzultys.com/mansfield-tx-zultys-phone-systems-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

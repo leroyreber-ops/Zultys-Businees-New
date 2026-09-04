@@ -74,7 +74,7 @@ export function Denton() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/denton-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/denton-business-phone-systems-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Denton() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Denton Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Denton, Texas.',
-      url: 'https://dallasfortworthzultys.com/denton-zultys',
+      url: 'https://dallasfortworthzultys.com/denton-business-phone-systems-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

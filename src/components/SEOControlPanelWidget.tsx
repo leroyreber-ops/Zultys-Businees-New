@@ -8,6 +8,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { isEditorEnvironment } from '../utils/envHelper';
 
 interface LogEntry {
   type: 'sitemap' | 'indexing';
@@ -19,18 +20,10 @@ interface LogEntry {
 }
 
 export function SEOControlPanelWidget() {
-  // Check if we are in local/dev/preview environment or on /seo-admin
-  const isDevOrAdmin = 
-    typeof window !== 'undefined' && (
-      (import.meta as any).env?.DEV || 
-      window.location.hostname === 'localhost' || 
-      window.location.hostname.includes('127.0.0.1') || 
-      window.location.hostname.includes('.run.app') || 
-      window.location.hostname.includes('netlify.app') || 
-      window.location.pathname === '/seo-admin'
-    );
+  // Check if we are in the editor workspace or local/dev/preview environment
+  const isAllowed = isEditorEnvironment();
 
-  if (!isDevOrAdmin) {
+  if (!isAllowed) {
     return null;
   }
 
@@ -319,7 +312,7 @@ export function SEOControlPanelWidget() {
   return (
     <>
       {/* Subtle, beautiful Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-20 md:bottom-20 left-4 md:left-6 z-40">
         <button
           onClick={() => setIsOpen(true)}
           className="group relative flex items-center gap-2.5 bg-slate-900 hover:bg-blue-600 active:scale-95 text-white px-5 py-3.5 rounded-full shadow-2xl transition-all duration-300 border border-slate-800 hover:border-blue-500 hover:shadow-blue-500/20 cursor-pointer"

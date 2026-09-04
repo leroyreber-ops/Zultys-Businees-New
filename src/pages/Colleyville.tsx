@@ -74,7 +74,7 @@ export function Colleyville() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/colleyville-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/colleyville-voip');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Colleyville() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Colleyville Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Colleyville, Texas.',
-      url: 'https://dallasfortworthzultys.com/colleyville-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/colleyville-voip',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

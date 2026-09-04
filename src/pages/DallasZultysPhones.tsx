@@ -74,7 +74,7 @@ export function DallasZultysPhones() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/dallas-zultys-phones-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/dallas-zultys-phones-zultys-phones');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function DallasZultysPhones() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Dallas Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Dallas, Texas.',
-      url: 'https://dallasfortworthzultys.com/dallas-zultys-phones-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/dallas-zultys-phones-zultys-phones',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

@@ -74,7 +74,7 @@ export function Euless() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/euless-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/euless-business-phones-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Euless() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Euless Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Euless, Texas.',
-      url: 'https://dallasfortworthzultys.com/euless-zultys',
+      url: 'https://dallasfortworthzultys.com/euless-business-phones-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

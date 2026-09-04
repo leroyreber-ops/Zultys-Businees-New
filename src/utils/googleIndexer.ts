@@ -5,10 +5,35 @@ import path from 'path';
 export interface IndexingLogEntry {
   type: 'sitemap' | 'indexing';
   url: string;
-  status: 'SUCCESS' | 'FAILED';
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
   action?: 'URL_UPDATED' | 'URL_DELETED';
   message: string;
   timestamp: string;
+}
+
+/**
+ * Parses Google API error responses into clean, concise single-line error descriptions.
+ */
+export function extractGoogleErrorMessage(errorText: string, status?: number): string {
+  try {
+    const parsed = JSON.parse(errorText);
+    if (parsed.error) {
+      if (typeof parsed.error === 'string') return parsed.error;
+      if (parsed.error.message) {
+        return `Google API error ${status || parsed.error.code || ''}: ${parsed.error.message}`.trim();
+      }
+    }
+    if (parsed.error_description) {
+      return parsed.error_description;
+    }
+    if (parsed.message) {
+      return parsed.message;
+    }
+  } catch (e) {
+    // Non-JSON response text
+  }
+  const singleLine = (errorText || '').replace(/\s+/g, ' ').trim();
+  return singleLine.length > 200 ? `${singleLine.slice(0, 200)}...` : singleLine || `Error status ${status || 'unknown'}`;
 }
 
 /**
@@ -109,7 +134,8 @@ export async function getGoogleAccessToken(scopes: string[]): Promise<string> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Google OAuth error: ${response.status} - ${errorText}`);
+    const cleanMsg = extractGoogleErrorMessage(errorText, response.status);
+    throw new Error(`Google OAuth error: ${cleanMsg}`);
   }
 
   const data = await response.json();
@@ -117,14 +143,77 @@ export async function getGoogleAccessToken(scopes: string[]): Promise<string> {
 }
 
 /**
+ * Retrieves the list of verified site properties the Service Account has access to in Google Search Console.
+ */
+export async function getVerifiedGoogleSites(): Promise<string[]> {
+  try {
+    if (!isGoogleConfigured()) return [];
+    const accessToken = await getGoogleAccessToken([
+      'https://www.googleapis.com/auth/webmasters'
+    ]);
+    const response = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    if (data.siteEntry && Array.isArray(data.siteEntry)) {
+      return data.siteEntry.map((entry: any) => entry.siteUrl);
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Returns the exact Search Console site property string matching the target URL, if verified.
+ */
+export async function getMatchedGoogleSiteProperty(targetUrl: string): Promise<string | null> {
+  try {
+    const sites = await getVerifiedGoogleSites();
+    if (sites.length === 0) return null;
+
+    const normalized = targetUrl.replace(/\/$/, '').toLowerCase();
+    for (const site of sites) {
+      const normSite = site.replace(/\/$/, '').toLowerCase();
+      if (normSite === normalized) return site;
+      if (normSite.startsWith('sc-domain:')) {
+        const domain = normSite.replace('sc-domain:', '').toLowerCase();
+        if (normalized.includes(domain)) return site;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Checks if the configured Service Account has verified access to a given site property in Search Console.
+ */
+export async function hasGoogleSitePermission(siteUrl: string): Promise<boolean> {
+  try {
+    const matched = await getMatchedGoogleSiteProperty(siteUrl);
+    return !!matched;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Submits a sitemap URL to Google Search Console for a given site property.
+ * Handles permission delegation gracefully without failing or logging uncaught errors.
  */
 export async function submitSitemapToGoogle(siteUrl: string, sitemapUrl: string): Promise<string> {
+  const { clientEmail } = getGoogleCredentials();
+  const matchedProperty = await getMatchedGoogleSiteProperty(siteUrl);
+  const targetProperty = matchedProperty || siteUrl;
+
   const accessToken = await getGoogleAccessToken([
     'https://www.googleapis.com/auth/webmasters'
   ]);
 
-  const encodedSiteUrl = encodeURIComponent(siteUrl);
+  const encodedSiteUrl = encodeURIComponent(targetProperty);
   const encodedSitemapUrl = encodeURIComponent(sitemapUrl);
   const url = `https://www.googleapis.com/webmasters/v3/sites/${encodedSiteUrl}/sitemaps/${encodedSitemapUrl}`;
 
@@ -138,7 +227,21 @@ export async function submitSitemapToGoogle(siteUrl: string, sitemapUrl: string)
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Google Search Console API error: ${response.status} - ${errorText}`);
+    const cleanMsg = extractGoogleErrorMessage(errorText, response.status);
+
+    if (response.status === 403 || response.status === 404) {
+      const noticeMsg = `Pending Search Console delegation: Service account ${clientEmail || 'Google'} must be added as a user for property "${siteUrl}" in Google Search Console.`;
+      logIndexingActivity({
+        type: 'sitemap',
+        url: sitemapUrl,
+        status: 'PENDING',
+        message: noticeMsg,
+        timestamp: new Date().toISOString()
+      });
+      return noticeMsg;
+    }
+
+    throw new Error(cleanMsg);
   }
 
   const statusText = response.status === 204 ? 'Sitemap successfully registered/updated.' : 'Sitemap submitted.';
@@ -146,7 +249,7 @@ export async function submitSitemapToGoogle(siteUrl: string, sitemapUrl: string)
     type: 'sitemap',
     url: sitemapUrl,
     status: 'SUCCESS',
-    message: `Submitted successfully to site property "${siteUrl}". Response status: ${response.status} - ${statusText}`,
+    message: `Submitted successfully to site property "${targetProperty}". Response status: ${response.status} - ${statusText}`,
     timestamp: new Date().toISOString()
   });
 
@@ -177,15 +280,16 @@ export async function notifyGoogleUrlChange(targetUrl: string, action: 'URL_UPDA
   const responseText = await response.text();
 
   if (!response.ok) {
+    const cleanMsg = extractGoogleErrorMessage(responseText, response.status);
     logIndexingActivity({
       type: 'indexing',
       url: targetUrl,
       status: 'FAILED',
       action,
-      message: `Google Indexing API returned status ${response.status}: ${responseText}`,
+      message: `Google Indexing API error: ${cleanMsg}`,
       timestamp: new Date().toISOString()
     });
-    throw new Error(`Google Indexing API error: ${response.status} - ${responseText}`);
+    throw new Error(cleanMsg);
   }
 
   let parsedData = {};
@@ -258,11 +362,25 @@ export function getIndexingHistory(): IndexingLogEntry[] {
  * Fetches Search Console Analytics & Sitemap data.
  */
 export async function fetchSearchConsoleData(siteUrl: string) {
+  const isAuthorized = await hasGoogleSitePermission(siteUrl);
+  if (!isAuthorized) {
+    return {
+      sitemaps: [],
+      performance: { clicks: 0, impressions: 0, ctr: 0, position: 0 },
+      topQueries: [],
+      topPages: [],
+      awaitingVerification: true
+    };
+  }
+
+  const matchedProperty = await getMatchedGoogleSiteProperty(siteUrl);
+  const targetProperty = matchedProperty || siteUrl;
+
   const accessToken = await getGoogleAccessToken([
     'https://www.googleapis.com/auth/webmasters'
   ]);
 
-  const encodedSite = encodeURIComponent(siteUrl);
+  const encodedSite = encodeURIComponent(targetProperty);
   
   // 1. Fetch Sitemaps
   let sitemapsData = [];
@@ -274,10 +392,11 @@ export async function fetchSearchConsoleData(siteUrl: string) {
       const data = await sitemapsRes.json();
       sitemapsData = data.sitemap || [];
     } else {
-      console.warn(`Sitemaps API returned status ${sitemapsRes.status}`);
+      const errText = await sitemapsRes.text();
+      console.log(`ℹ️ GSC Sitemaps API note (${sitemapsRes.status}): ${extractGoogleErrorMessage(errText, sitemapsRes.status)}`);
     }
   } catch (err: any) {
-    console.error('Error fetching sitemaps from Search Console:', err.message);
+    console.log('ℹ️ GSC Sitemaps notice:', err.message);
   }
 
   // 2. Fetch Search Analytics (last 30 days overall performance)
@@ -307,10 +426,11 @@ export async function fetchSearchConsoleData(siteUrl: string) {
         performanceOverview = data.rows[0];
       }
     } else {
-      console.warn(`SearchAnalytics query returned status ${perfRes.status}`);
+      const errText = await perfRes.text();
+      console.log(`ℹ️ GSC SearchAnalytics query note (${perfRes.status}): ${extractGoogleErrorMessage(errText, perfRes.status)}`);
     }
   } catch (err: any) {
-    console.error('Error fetching search analytics overview:', err.message);
+    console.log('ℹ️ GSC SearchAnalytics notice:', err.message);
   }
 
   // 3. Fetch Top Queries
@@ -332,9 +452,12 @@ export async function fetchSearchConsoleData(siteUrl: string) {
     if (queriesRes.ok) {
       const data = await queriesRes.json();
       topQueries = data.rows || [];
+    } else {
+      const errText = await queriesRes.text();
+      console.log(`ℹ️ GSC Queries note (${queriesRes.status}): ${extractGoogleErrorMessage(errText, queriesRes.status)}`);
     }
   } catch (err: any) {
-    console.error('Error fetching search analytics queries:', err.message);
+    console.log('ℹ️ GSC Queries notice:', err.message);
   }
 
   // 4. Fetch Top Pages
@@ -356,9 +479,12 @@ export async function fetchSearchConsoleData(siteUrl: string) {
     if (pagesRes.ok) {
       const data = await pagesRes.json();
       topPages = data.rows || [];
+    } else {
+      const errText = await pagesRes.text();
+      console.log(`ℹ️ GSC Top Pages note (${pagesRes.status}): ${extractGoogleErrorMessage(errText, pagesRes.status)}`);
     }
   } catch (err: any) {
-    console.error('Error fetching search analytics pages:', err.message);
+    console.log('ℹ️ GSC Top Pages notice:', err.message);
   }
 
   return {
@@ -373,6 +499,22 @@ export async function fetchSearchConsoleData(siteUrl: string) {
  * Inspects a URL's status in Google Search Console using the URL Inspection API.
  */
 export async function inspectUrlStatus(siteUrl: string, inspectionUrl: string) {
+  const isAuthorized = await hasGoogleSitePermission(siteUrl);
+  if (!isAuthorized) {
+    const { clientEmail } = getGoogleCredentials();
+    return {
+      inspectionResultLink: "https://search.google.com/search-console",
+      indexStatusResult: {
+        verdict: "NEUTRAL",
+        coverageState: `Service account (${clientEmail || 'Google'}) awaiting property delegation in Google Search Console.`,
+        indexingState: "INDEXING_ALLOWED"
+      }
+    };
+  }
+
+  const matchedProperty = await getMatchedGoogleSiteProperty(siteUrl);
+  const targetProperty = matchedProperty || siteUrl;
+
   const accessToken = await getGoogleAccessToken([
     'https://www.googleapis.com/auth/webmasters'
   ]);
@@ -386,14 +528,15 @@ export async function inspectUrlStatus(siteUrl: string, inspectionUrl: string) {
     },
     body: JSON.stringify({
       inspectionUrl,
-      siteUrl,
+      siteUrl: targetProperty,
       languageCode: 'en-US'
     })
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Google URL Inspection API error: ${response.status} - ${errorText}`);
+    const cleanMsg = extractGoogleErrorMessage(errorText, response.status);
+    throw new Error(cleanMsg);
   }
 
   const data = await response.json();
@@ -486,10 +629,11 @@ export async function fetchSearchConsoleRankTrackerData(siteUrl: string) {
         gscRows = payload.rows || [];
         demoData = false;
       } else {
-        console.warn(`Rank tracker Search Console query returned status ${res.status}. Falling back to demo dataset.`);
+        const errText = await res.text();
+        console.log(`ℹ️ Rank tracker Search Console note (${res.status}): ${extractGoogleErrorMessage(errText, res.status)}. Using simulated baseline trends.`);
       }
     } catch (err: any) {
-      console.error('Error fetching GSC keyword ranking data, using sandbox simulation:', err.message);
+      console.log('ℹ️ Rank tracker query notice, using simulated trends:', err.message);
     }
   }
 
@@ -672,9 +816,12 @@ export async function fetchSearchConsoleCityHeatmapData(siteUrl: string) {
         const payload = await res.json();
         realPagesData = payload.rows || [];
         isDemo = false;
+      } else {
+        const errText = await res.text();
+        console.log(`ℹ️ Heatmap GSC query note (${res.status}): ${extractGoogleErrorMessage(errText, res.status)}`);
       }
     } catch (err: any) {
-      console.error('Error fetching heatmap pages from GSC:', err.message);
+      console.log('ℹ️ Heatmap GSC query notice:', err.message);
     }
   }
 

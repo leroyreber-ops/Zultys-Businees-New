@@ -74,7 +74,7 @@ export function Grapevine() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/grapevine-business-voip');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/grapevine-business-voip-business-voip');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Grapevine() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Grapevine Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Grapevine, Texas.',
-      url: 'https://dallasfortworthzultys.com/grapevine-business-voip',
+      url: 'https://dallasfortworthzultys.com/grapevine-business-voip-business-voip',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

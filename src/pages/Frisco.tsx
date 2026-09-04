@@ -74,7 +74,7 @@ export function Frisco() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/frisco-voip-solutions');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/frisco-voip-solutions-voip-solutions');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Frisco() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Frisco Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Frisco, Texas.',
-      url: 'https://dallasfortworthzultys.com/frisco-voip-solutions',
+      url: 'https://dallasfortworthzultys.com/frisco-voip-solutions-voip-solutions',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

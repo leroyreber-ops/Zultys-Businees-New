@@ -74,7 +74,7 @@ export function Gunter() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/gunter-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/gunter-tx-zultys-phone-systems-tx-zultys-phone-systems');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Gunter() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Gunter Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Gunter, Texas.',
-      url: 'https://dallasfortworthzultys.com/gunter-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/gunter-tx-zultys-phone-systems-tx-zultys-phone-systems',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

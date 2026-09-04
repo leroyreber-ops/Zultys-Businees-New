@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { HashLink as Link, useLocation, useNavigate } from './HashLink';
-import { Phone, Menu, X, ChevronDown } from 'lucide-react';
+import { Phone, Menu, X, ChevronDown, Bot, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { QuotePopup } from './QuotePopup';
 import { useQuote } from '../context/QuoteContext';
@@ -328,8 +328,19 @@ export function Header() {
             </button>
           </div>
 
-          {/* CTA button */}
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          {/* CTA buttons */}
+          <div className="hidden lg:flex lg:flex-1 lg:justify-end items-center gap-3">
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('open-ai-booking', { detail: { tab: 'chat' } }));
+                }
+              }}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-750 text-white text-xs font-extrabold px-3.5 py-2 rounded-lg border border-slate-700 hover:border-emerald-500/50 shadow-sm transition-all group"
+            >
+              <Bot className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>AI Concierge</span>
+            </button>
             <Button 
               onClick={openQuote}
               className="bg-zultys-green hover:bg-zultys-green/90 text-white font-semibold px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200"
@@ -344,12 +355,26 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-white/10 bg-charcoal max-h-[calc(100vh-120px)] overflow-y-auto overscroll-contain">
           <div className="space-y-2 px-6 pb-6 pt-6">
-            <button
-              onClick={openQuote}
-              className="flex items-center justify-center w-full rounded-lg bg-zultys-green px-3 py-3 text-white font-black mb-4 shadow-lg"
-            >
-              GET A FREE QUOTE
-            </button>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-ai-booking', { detail: { tab: 'chat' } }));
+                  }
+                }}
+                className="flex items-center justify-center gap-2 rounded-lg bg-slate-800 border border-slate-700 px-3 py-3 text-white font-bold text-xs shadow-md"
+              >
+                <Bot className="h-4 w-4 text-emerald-400" />
+                <span>AI Concierge</span>
+              </button>
+              <button
+                onClick={openQuote}
+                className="flex items-center justify-center w-full rounded-lg bg-zultys-green px-3 py-3 text-white font-black text-xs shadow-lg"
+              >
+                GET FREE QUOTE
+              </button>
+            </div>
             <button
               onClick={() => handleNavigation('/')}
               className={`block w-full text-left rounded-lg px-3 py-2 transition-colors ${

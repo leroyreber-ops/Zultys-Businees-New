@@ -74,7 +74,7 @@ export function HaltomCity() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/haltom-city-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/haltom-city-zultys-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function HaltomCity() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Haltom City Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Haltom City, Texas.',
-      url: 'https://dallasfortworthzultys.com/haltom-city-zultys',
+      url: 'https://dallasfortworthzultys.com/haltom-city-zultys-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

@@ -157,6 +157,71 @@ export const canonicalMap: Record<string, string> = {
   '/colleyville-ip-phones': '/colleyville-voip',
   '/zultys-vs-competition': '/zultys-vs-competitors',
   '/sitemap': '/sitemap.html',
+  '/zultys-business-phone-systems-dallas-fort-worth': '/dallas-zultys-phones',
+  '/business-voip-phone-system-dallas-fort-worth': '/zultys-cloud-services',
+  '/cloud-pbx-hosted-pbx-dallas-fort-worth': '/zultys-cloud-services',
+  '/unified-communications-ucaas-dallas-fort-worth': '/solutions',
+  '/hybrid-on-premise-voip-pbx-dallas-fort-worth': '/fort-worth-zultys-hybrid',
+  '/hybrid': '/fort-worth-zultys-hybrid',
+  '/contact-center-solutions-dallas-fort-worth': '/fort-worth-zultys-contact-center',
+  '/microsoft-teams-phone-system-integration-dallas-fort-worth': '/zultys-vs-microsoft-teams',
+  '/zultys-phone-system-installation-support-dallas-fort-worth': '/fort-worth-zultys-installation',
+  '/zultys-phone-system-pricing-dallas-fort-worth': '/zultys-pricing',
+  '/business-internet-networking-dallas-fort-worth': '/blog/how-to-optimize-your-office-network-for-voip-performance',
+  '/service-areas/dallas-fort-worth': '/dallas-zultys-phones',
+  '/request-a-quote': '/contact',
+  '/contact-us': '/contact',
+  '/pricing': '/zultys-pricing',
+  '/cloud-services': '/zultys-cloud-services',
+  '/contact-center': '/fort-worth-zultys-contact-center',
+  '/installation': '/fort-worth-zultys-installation',
+  '/zip-49g-ip-phone': '/fort-worth-zultys-zip-49g-phone',
+  '/zip-47g-ip-phone': '/fort-worth-zultys-zip-47g-phone',
+  '/zip-45g-ip-phone': '/fort-worth-zultys-zip-45g-phone',
+  '/zip-43g-ip-phone': '/fort-worth-zultys-zip-43g-phone',
+  '/mx-se-hardware-appliance': '/fort-worth-zultys-mx-se',
+
+  // 39 Legacy Phantom URLs mapped to their canonical destinations
+  '/allen-tx-zultys-phone-systems': '/allen-tx-zultys-voip',
+  '/arlington-tx-zultys-phone-systems': '/arlington-ip-pbx',
+  '/balch-springs-tx-zultys-phone-systems': '/balch-springs-tx-zultys-voip',
+  '/bedford-tx-zultys-phone-systems': '/bedford-zultys-solutions',
+  '/benbrook-tx-zultys-phone-systems': '/benbrook-phone-systems',
+  '/carrollton-tx-zultys-phone-systems': '/carrollton-zultys',
+  '/cedar-hill-tx-zultys-phone-systems': '/cedar-hill-tx-zultys-voip',
+  '/colleyville-tx-zultys-phone-systems': '/colleyville-voip',
+  '/dallas-tx-zultys-phone-systems': '/dallas-zultys-phones',
+  '/dallas-zultys-phones-tx-zultys-phone-systems': '/dallas-zultys-phones',
+  '/denton-tx-zultys-phone-systems': '/denton-business-phone-systems',
+  '/duncanville-tx-zultys-phone-systems': '/duncanville-tx-zultys-voip',
+  '/euless-tx-zultys-phone-systems': '/euless-business-phones',
+  '/flower-mound-tx-zultys-phone-systems': '/flower-mound-business-phones',
+  '/fort-worth-tx-zultys-phone-systems': '/fort-worth-zultys-systems',
+  '/frisco-tx-zultys-phone-systems': '/frisco-voip-solutions',
+  '/garland-tx-zultys-phone-systems': '/garland-business-voip',
+  '/grand-prairie-tx-zultys-phone-systems': '/grand-prairie-zultys',
+  '/grapevine-tx-zultys-phone-systems': '/grapevine-business-voip',
+  '/haltom-city-tx-zultys-phone-systems': '/haltom-city-zultys',
+  '/hurst-tx-zultys-phone-systems': '/hurst-ip-pbx',
+  '/irving-tx-zultys-phone-systems': '/irving-business-phone-systems',
+  '/keller-tx-zultys-phone-systems': '/keller-zultys-dealer',
+  '/lancaster-tx-zultys-phone-systems': '/lancaster-tx-zultys-dealer',
+  '/lewisville-tx-zultys-phone-systems': '/lewisville-voip-solutions',
+  '/mckinney-tx-zultys-phone-systems': '/mckinney-zultys-dealer',
+  '/mesquite-tx-zultys-phone-systems': '/mesquite-zultys-phone-systems',
+  '/murphy-tx-zultys-phone-systems': '/murphy-tx-zultys-voip',
+  '/north-richland-hills-tx-zultys-phone-systems': '/north-richland-hills-zultys',
+  '/plano-tx-zultys-phone-systems': '/plano-zultys-dealer',
+  '/richardson-tx-zultys-phone-systems': '/richardson-phone-systems',
+  '/river-oaks-tx-zultys-phone-systems': '/river-oaks-zultys',
+  '/rowlett-tx-zultys-phone-systems': '/rowlett-tx-zultys-dealer',
+  '/sachse-tx-zultys-phone-systems': '/sachse-tx-zultys-dealer',
+  '/saginaw-tx-zultys-phone-systems': '/saginaw-business-communications',
+  '/southlake-tx-zultys-phone-systems': '/southlake-ip-phones',
+  '/the-colony-tx-zultys-phone-systems': '/the-colony-tx-zultys-voip',
+  '/watauga-tx-zultys-phone-systems': '/watauga-voip-solutions',
+  '/westworth-village-tx-zultys-phone-systems': '/westworth-village-zultys',
+  '/white-settlement-tx-zultys-phone-systems': '/white-settlement-business-phones',
 };
 
 export interface SEOProps {
@@ -320,13 +385,6 @@ function updateSchema(props: SEOProps) {
           "name": "DFW Business Communications",
           "url": "https://dallasfortworthzultys.com"
         }
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "bestRating": "5",
-        "worstRating": "1",
-        "reviewCount": "127"
       }
     };
     schemas.push(productSchema);
@@ -361,19 +419,6 @@ function updateSchema(props: SEOProps) {
       }))
     };
     schemas.push(faqSchema);
-  }
-
-  // Review Schema
-  if (props.reviewSchema) {
-    const reviewSchema = {
-      "@context": "https://schema.org",
-      "@type": "AggregateRating",
-      "ratingValue": props.reviewSchema.ratingValue,
-      "reviewCount": props.reviewSchema.reviewCount,
-      ...(props.reviewSchema.bestRating && { "bestRating": props.reviewSchema.bestRating }),
-      ...(props.reviewSchema.worstRating && { "worstRating": props.reviewSchema.worstRating })
-    };
-    schemas.push(reviewSchema);
   }
 
   // HowTo Schema
@@ -598,14 +643,15 @@ export function generateEliteRawMetadata(path: string): { title: string; descrip
 
   // 3. Products & Hardware Pages
   if (
-    normalized.includes('phone') || 
-    normalized.includes('product') || 
+    normalized === '/products' ||
+    normalized.startsWith('/products/') ||
     normalized.includes('zip-') || 
     normalized.includes('z-2') || 
     normalized.includes('gateways') || 
     normalized.includes('mx-series') || 
+    normalized.includes('mx-se') || 
     normalized.includes('mxse') || 
-    normalized.includes('zac') || 
+    normalized.includes('/zac') || 
     normalized.includes('mxmobile') || 
     normalized.includes('mxconference')
   ) {
@@ -685,11 +731,32 @@ export function generateEliteRawMetadata(path: string): { title: string; descrip
       keywords: 'contact Zultys DFW, business phone support Dallas, VoIP quotes Fort Worth, local telecom help Texas'
     };
   }
-  if (normalized === '/pricing') {
+  if (normalized === '/pricing' || normalized === '/zultys-pricing') {
     return {
       title: 'Zultys VoIP & Cloud Phone System Pricing | DFW Business Telecom',
       description: 'Explore highly flexible pricing for Zultys Cloud licenses, custom hybrid deployments, and dedicated on-premise IP-PBX servers. Get your free, rapid cost audit today with zero hidden fees.',
       keywords: 'Zultys pricing, business phone system cost, VoIP subscription rates Dallas, cloud PBX price Fort Worth'
+    };
+  }
+  if (normalized === '/cloud-services' || normalized === '/zultys-cloud-services') {
+    return {
+      title: 'Zultys Hosted Cloud Phone System & PBX | Dallas-Fort Worth VoIP',
+      description: 'Enterprise-grade Zultys cloud-hosted phone systems for Dallas-Fort Worth businesses. Enjoy 99.99% uptime, unified mobility, HD voice, and full local support without on-premise PBX maintenance.',
+      keywords: 'Zultys cloud PBX, hosted business VoIP Dallas, cloud phone system Fort Worth, UCaaS Texas'
+    };
+  }
+  if (normalized === '/products' || normalized === '/zultys-ip-phones') {
+    return {
+      title: 'Zultys IP Phones & Unified Communications Hardware | DFW Dealer',
+      description: 'Explore our complete catalog of Zultys Gigabit desktop IP phones, touchscreens, wireless mobility handsets, and MX appliances engineered for maximum clarity and durability.',
+      keywords: 'Zultys IP phones, ZIP 49G, ZIP 47G, enterprise desk phones, Zultys hardware Dallas Fort Worth'
+    };
+  }
+  if (normalized === '/solutions') {
+    return {
+      title: 'Zultys Unified Communications & Business VoIP Solutions | DFW',
+      description: 'Tailored enterprise VoIP solutions including contact centers, CRM integration, mobile office apps, Microsoft Teams calling, and hybrid telecommunications for North Texas.',
+      keywords: 'Zultys solutions, unified communications DFW, contact center VoIP, Microsoft Teams integration Texas'
     };
   }
   if (normalized === '/free-audit') {
@@ -827,23 +894,14 @@ function enhanceTitleWithFocusKeywords(title: string, path: string): string {
 
   let enhanced = cleanTitle;
 
-  // 1. Dallas specific paths
-  if (lp.includes('dallas') && !lp.includes('fort-worth')) {
-    enhanced = `Zultys Phone Systems Dallas | VoIP Provider`;
-  }
-  // 2. Fort Worth specific paths
-  else if (lp.includes('fort-worth') && !lp.includes('dallas')) {
-    enhanced = `Zultys Phone Systems Fort Worth | Local Support`;
-  }
-  // 3. Products/IP Phone paths
-  else if (
-    lp.includes('phone') || 
-    lp.includes('product') || 
+  // 1. Hardware/Device/Phone specific paths (prioritize over city prefix)
+  if (
     lp.includes('zip-') || 
     lp.includes('z-2') || 
     lp.includes('gateways') || 
     lp.includes('mx-series') || 
     lp.includes('mxse') || 
+    lp.includes('mx-se') ||
     lp.includes('zac') || 
     lp.includes('mxmobile') || 
     lp.includes('mxconference')
@@ -854,9 +912,21 @@ function enhanceTitleWithFocusKeywords(title: string, path: string): string {
       enhanced = `${cleanTitle} | Zultys VoIP Phones`;
     }
   }
-  // 4. Cloud specific paths
+  // 2. Pricing specific paths
+  else if (lp.includes('pricing')) {
+    enhanced = 'Zultys Phone System Pricing | DFW VoIP Plans';
+  }
+  // 3. Cloud specific paths
   else if (lp.includes('cloud')) {
     enhanced = `Zultys Cloud Phone System | Hosted Business VoIP`;
+  }
+  // 4. Dallas specific paths
+  else if (lp.includes('dallas') && !lp.includes('fort-worth')) {
+    enhanced = `Zultys Phone Systems Dallas | VoIP Provider`;
+  }
+  // 5. Fort Worth specific paths
+  else if (lp.includes('fort-worth') && !lp.includes('dallas')) {
+    enhanced = `Zultys Phone Systems Fort Worth | Local Support`;
   }
   // 5. Solution/vertical paths
   else if (

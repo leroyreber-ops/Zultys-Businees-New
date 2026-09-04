@@ -241,6 +241,8 @@ import { LocalBusinessSchema } from './components/LocalBusinessSchema';
 import { ServiceSchema } from './components/ServiceSchema';
 import { WebSiteSchema } from './components/WebSiteSchema';
 import { FAQPageSchema } from './components/FAQPageSchema';
+import { AIBookingConcierge } from './components/AIBookingConcierge';
+import { AIBookingSchema } from './components/AIBookingSchema';
 import { PerformanceMonitor } from './components/PerformanceMonitor';
 import { FloatingSEOAssistant } from './components/FloatingSEOAssistant';
 import { useSEOHeadManager } from './hooks/useSEOHeadManager';
@@ -587,14 +589,14 @@ export default function App() {
       <ServiceSchema path={currentPath} />
       <WebSiteSchema path={currentPath} />
       <FAQPageSchema path={currentPath} headless={true} />
+      <AIBookingSchema />
       <Suspense fallback={getSuspenseFallback(currentPath)}>
         {renderPage()}
       </Suspense>
       <Toaster position="top-right" richColors />
       <QuotePopupWrapper />
       <FloatingTextCTA />
-      <PerformanceMonitor />
-      <FloatingSEOAssistant />
+      <AIBookingConcierge />
     </QuoteProvider>
   );
 }

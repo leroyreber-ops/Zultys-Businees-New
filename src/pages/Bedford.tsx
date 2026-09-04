@@ -74,7 +74,7 @@ export function Bedford() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/bedford-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/bedford-zultys-solutions');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Bedford() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Bedford Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Bedford, Texas.',
-      url: 'https://dallasfortworthzultys.com/bedford-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/bedford-zultys-solutions',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

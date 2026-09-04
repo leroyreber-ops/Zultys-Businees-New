@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
-import { isGoogleConfigured, notifyGoogleUrlChange, submitSitemapToGoogle, logIndexingActivity } from "./googleIndexer.js";
+import { isGoogleConfigured, hasGoogleSitePermission, notifyGoogleUrlChange, submitSitemapToGoogle, logIndexingActivity } from "./googleIndexer.js";
 import { SitemapIndexProvider } from "./SitemapIndexProvider.js";
 import { GoogleIndexingAdminService } from "./googleIndexingAdminService.js";
 import { canonicalMap } from "./seoHelpers.js";
+import { VALID_PATHS } from "../routes.js";
 
 /**
  * Interface representing a route's SEO configuration.
@@ -127,59 +128,40 @@ export function getRouteSEO(route: string): RouteSEO {
 }
 
 /**
- * Extracts all routes from App.tsx by parsing code statements.
+ * Extracts strictly preferred canonical public URLs that return HTTP 200 and are eligible for indexing.
+ * Excludes admin, dashboard, diagnostic, 3XX redirects, and non-canonical alias URLs.
  */
 export function extractRoutesFromApp(): string[] {
   try {
-    const appPath = path.join(process.cwd(), "src", "App.tsx");
-    if (!fs.existsSync(appPath)) {
-      console.warn("⚠️ App.tsx not found at", appPath);
-      return [];
-    }
-    const content = fs.readFileSync(appPath, "utf8");
+    const noindexRoutes = new Set([
+      "/seo-dashboard",
+      "/admin/search-console",
+      "/citation-health",
+      "/admin/citations",
+      "/seo-admin"
+    ]);
 
-    // Matches 'normalizedPath === "/path"' or 'normalizedPath === '\''/path'\'''
-    const regex = /normalizedPath\s*===\s*['"]([^'"]+)['"]/g;
-    const routes = new Set<string>();
-    let match;
-
-    while ((match = regex.exec(content)) !== null) {
-      const route = match[1];
-      // Skip root index duplicates, wildcards, placeholders, or external links
-      if (
-        route &&
-        route.startsWith("/") &&
-        !route.includes("*") &&
-        route !== "/index.html"
-      ) {
-        routes.add(route);
-      }
-    }
-
-    // Merge dynamic city routes to guarantee Google search discovery
-    const dynamicCityRoutes = SitemapIndexProvider.getDynamicCityRoutes();
-    dynamicCityRoutes.forEach((route) => {
-      if (!routes.has(route)) {
-        routes.add(route);
-      }
+    const validCanonicalRoutes = VALID_PATHS.filter((route) => {
+      const norm = route.toLowerCase().trim();
+      if (!norm || norm === "/index.html") return false;
+      if (norm.startsWith("/admin/") || noindexRoutes.has(norm)) return false;
+      if (canonicalMap[norm] && canonicalMap[norm] !== norm) return false;
+      if (norm.endsWith(".html") && norm !== "/sitemap.html") return false;
+      return true;
     });
 
-    // Always ensure the home route is present at the top
-    const sortedRoutes = Array.from(routes).sort();
-    if (!sortedRoutes.includes("/")) {
+    const sortedRoutes = Array.from(new Set(validCanonicalRoutes)).sort();
+    const homeIdx = sortedRoutes.indexOf("/");
+    if (homeIdx > 0) {
+      sortedRoutes.splice(homeIdx, 1);
       sortedRoutes.unshift("/");
-    } else {
-      // Move "/" to the first index
-      const homeIdx = sortedRoutes.indexOf("/");
-      if (homeIdx > 0) {
-        sortedRoutes.splice(homeIdx, 1);
-        sortedRoutes.unshift("/");
-      }
+    } else if (!sortedRoutes.includes("/")) {
+      sortedRoutes.unshift("/");
     }
 
     return sortedRoutes;
   } catch (err) {
-    console.error("❌ Failed to extract routes from App.tsx:", err);
+    console.error("❌ Failed to extract canonical routes:", err);
     return [];
   }
 }
@@ -257,6 +239,7 @@ export function buildSitemapXml(): string {
       // Filter out admin and diagnostic utility dashboards
       if (
         normalized === "/seo-dashboard" ||
+        normalized === "/seo-admin" ||
         normalized === "/citation-health" ||
         normalized === "/admin/search-console" ||
         normalized === "/admin/citations" ||
@@ -405,13 +388,19 @@ export function checkAndTriggerAutoPing(currentRoutes: string[]): void {
           const sitemapUrl = "https://dallasfortworthzultys.com/sitemap.xml";
           
           if (configured) {
-            submitSitemapToGoogle(siteUrl, sitemapUrl)
-              .then(() => {
-                console.log(`[Auto-Ping] Google Search Console sitemap update successfully triggered.`);
-              })
-              .catch((err) => {
-                console.error(`[Auto-Ping] Google Search Console sitemap update failed:`, err.message);
-              });
+            hasGoogleSitePermission(siteUrl).then((authorized) => {
+              if (authorized) {
+                submitSitemapToGoogle(siteUrl, sitemapUrl)
+                  .then(() => {
+                    console.log(`[Auto-Ping] Google Search Console sitemap update successfully triggered.`);
+                  })
+                  .catch((err) => {
+                    console.log(`[Auto-Ping] Google Search Console sitemap sync note:`, err.message);
+                  });
+              } else {
+                console.log(`[Auto-Ping] Service account awaiting Search Console property verification for ${siteUrl}.`);
+              }
+            }).catch(() => {});
           } else {
             logIndexingActivity({
               type: 'sitemap',

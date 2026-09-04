@@ -74,7 +74,7 @@ export function Irving() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/irving-business-phones');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/irving-business-phone-systems-business-phones');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Irving() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Irving Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Irving, Texas.',
-      url: 'https://dallasfortworthzultys.com/irving-business-phones',
+      url: 'https://dallasfortworthzultys.com/irving-business-phone-systems-business-phones',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

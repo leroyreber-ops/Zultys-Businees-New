@@ -74,7 +74,7 @@ export function Lewisville() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/lewisville-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/lewisville-voip-solutions-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Lewisville() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Lewisville Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Lewisville, Texas.',
-      url: 'https://dallasfortworthzultys.com/lewisville-zultys',
+      url: 'https://dallasfortworthzultys.com/lewisville-voip-solutions-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

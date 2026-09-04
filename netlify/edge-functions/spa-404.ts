@@ -1,5 +1,6 @@
 import type { Context } from "https://edge.netlify.com";
 import { VALID_PATHS } from "../../src/routes.ts";
+import { canonicalMap } from "../../src/utils/seoHelpers.ts";
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
@@ -25,7 +26,13 @@ export default async (request: Request, context: Context) => {
     normalizedPath = "/";
   }
 
-  // Check if normalized path is in the valid routes array
+  // 1. Check if normalized path requires a 301 Permanent Redirect
+  const redirectTarget = canonicalMap[normalizedPath];
+  if (redirectTarget && redirectTarget !== normalizedPath) {
+    return Response.redirect(`${url.origin}${redirectTarget}`, 301);
+  }
+
+  // 2. Check if normalized path is in the valid routes array
   const isValid = VALID_PATHS.includes(normalizedPath);
 
   if (isValid) {

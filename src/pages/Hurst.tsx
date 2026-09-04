@@ -74,7 +74,7 @@ export function Hurst() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/hurst-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/hurst-ip-pbx-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Hurst() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Hurst Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Hurst, Texas.',
-      url: 'https://dallasfortworthzultys.com/hurst-zultys',
+      url: 'https://dallasfortworthzultys.com/hurst-ip-pbx-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

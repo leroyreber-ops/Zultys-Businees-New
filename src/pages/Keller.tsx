@@ -74,7 +74,7 @@ export function Keller() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/keller-zultys-dealer');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/keller-zultys-dealer-zultys-dealer');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Keller() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Keller Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Keller, Texas.',
-      url: 'https://dallasfortworthzultys.com/keller-zultys-dealer',
+      url: 'https://dallasfortworthzultys.com/keller-zultys-dealer-zultys-dealer',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

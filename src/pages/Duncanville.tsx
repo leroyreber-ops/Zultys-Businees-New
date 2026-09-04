@@ -74,7 +74,7 @@ export function Duncanville() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/duncanville-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/duncanville-tx-zultys-voip-tx-zultys-phone-systems');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Duncanville() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Duncanville Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Duncanville, Texas.',
-      url: 'https://dallasfortworthzultys.com/duncanville-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/duncanville-tx-zultys-voip-tx-zultys-phone-systems',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

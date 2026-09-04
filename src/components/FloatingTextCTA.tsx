@@ -27,9 +27,9 @@ export function FloatingTextCTA() {
     <AnimatePresence>
       {isVisible && (
         <>
-          {/* Always Visible Floating Pill & Tooltip */}
+          {/* Always Visible Floating Pill & Tooltip on Desktop */}
           <div 
-            className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-3"
+            className="hidden md:flex fixed bottom-6 right-6 z-50 flex-col items-end gap-3"
             id="floating-text-cta-container"
           >
             {/* Friendly Tooltip Bubble */}

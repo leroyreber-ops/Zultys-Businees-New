@@ -47,9 +47,12 @@ import {
   DollarSign,
   Target,
   Handshake,
+  Bot,
+  Sparkles,
+  Calendar,
 } from 'lucide-react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { SEOControlPanelWidget } from '../components/SEOControlPanelWidget';
+import { HeroAIConciergeCard } from '../components/HeroAIConciergeCard';
 
 export function Home() {
   const { openQuote } = useQuote();
@@ -139,112 +142,16 @@ export function Home() {
                     Call 817-231-2962
                   </a>
                 </div>
+
+                {/* Mobile Hero AI Concierge Widget */}
+                <div className="mt-8 lg:hidden">
+                  <HeroAIConciergeCard />
+                </div>
               </div>
 
-              {/* Right Column: Connected Cloud Telecommunications Interactive Artwork Card */}
+              {/* Right Column: Interactive AI Telecom Concierge & Consultation Booking Agent Card */}
               <div className="lg:col-span-5 hidden lg:flex items-center justify-center">
-                <div className="relative w-full max-w-lg p-6 rounded-[2rem] bg-slate-900/85 backdrop-blur-xl border border-white/15 shadow-[0_50px_100px_-20px_rgba(0,168,45,0.3)] overflow-hidden">
-                  {/* Neon Glow Effects */}
-                  <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-zultys-green/20 blur-[80px]"></div>
-                  <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-zultys-gold/20 blur-[80px]"></div>
-                  
-                  {/* Tech grid overlay */}
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none"></div>
-
-                  <div className="relative space-y-6">
-                    {/* Title & Pulse Indicator */}
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="relative flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zultys-green opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-zultys-green"></span>
-                        </div>
-                        <span className="text-xs font-black uppercase tracking-widest text-slate-300">Zultys Cloud Core Active</span>
-                      </div>
-                      <span className="text-[10px] font-mono text-zultys-gold bg-zultys-gold/10 px-2.5 py-1 rounded-full border border-zultys-gold/20">DFW Cluster</span>
-                    </div>
-
-                    {/* SVG Network Cloud Telephony Diagram */}
-                    <div className="relative h-44 flex items-center justify-center">
-                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 220">
-                        <defs>
-                          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#00A82D" stopOpacity="0.8" />
-                            <stop offset="100%" stopColor="#D4A017" stopOpacity="0.8" />
-                          </linearGradient>
-                        </defs>
-                        
-                        {/* Connection Lines with Pulsing Dash Array */}
-                        <path d="M 60 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_20s_linear_infinite]" />
-                        <path d="M 60 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_25s_linear_infinite]" />
-                        <path d="M 340 60 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_18s_linear_infinite]" />
-                        <path d="M 340 160 L 200 110" stroke="url(#lineGrad)" strokeWidth="2.5" strokeDasharray="6 4" className="animate-[dash_22s_linear_infinite]" />
-                        
-                        {/* Central Cloud Orbit */}
-                        <circle cx="200" cy="110" r="44" fill="#000000" fillOpacity="0.3" stroke="#00A82D" strokeWidth="2" strokeDasharray="4 4" className="animate-[spin_40s_linear_infinite]" />
-
-                        {/* Endpoint Nodes */}
-                        <g className="translate-x-[40px] translate-y-[40px] cursor-pointer">
-                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                          <path d="M 14 17 L 14 23 M 17 20 L 23 20" stroke="#00A82D" strokeWidth="2" />
-                        </g>
-                        <g className="translate-x-[40px] translate-y-[140px] cursor-pointer">
-                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                          <rect x="15" y="14" width="10" height="12" rx="1.5" stroke="#D4A017" strokeWidth="1.5" fill="none" />
-                        </g>
-                        <g className="translate-x-[320px] translate-y-[40px] cursor-pointer">
-                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                          <path d="M 15 25 L 15 17 L 20 13 L 25 17 L 25 25 Z" stroke="#00A82D" strokeWidth="1.5" fill="none" />
-                        </g>
-                        <g className="translate-x-[320px] translate-y-[140px] cursor-pointer">
-                          <circle cx="20" cy="20" r="16" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
-                          <path d="M 14 20 A 6 6 0 0 1 26 20 M 26 20 L 26 24" stroke="#D4A017" strokeWidth="1.5" fill="none" />
-                        </g>
-                      </svg>
-                      
-                      <div className="relative z-10 p-4 bg-slate-950/90 rounded-full border border-zultys-green shadow-[0_0_40px_rgba(0,168,45,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
-                        <Cloud className="h-10 w-10 text-zultys-green" />
-                      </div>
-                    </div>
-
-                    {/* Equalizer Feed */}
-                    <div className="bg-slate-950/60 p-3 rounded-xl border border-white/5 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">SIP Jitter Feed</span>
-                        <span className="text-[9px] font-mono text-zultys-green font-bold">12ms (Excellent)</span>
-                      </div>
-                      <div className="flex items-end justify-center gap-1.5 h-8 px-2">
-                        {[30, 60, 45, 90, 75, 40, 80, 55, 95, 65, 35, 70, 50, 85, 40, 60].map((h, i) => (
-                          <div 
-                            key={i} 
-                            className="w-1 bg-zultys-green rounded-full transition-all duration-300"
-                            style={{ 
-                              height: `${h}%`,
-                              animation: `bounceEqualizer ${1 + (i % 3) * 0.3}s ease-in-out infinite alternate`,
-                              animationDelay: `${i * 0.05}s`
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Active Features Badges */}
-                    <div className="grid grid-cols-3 gap-2 pt-1">
-                      <div className="p-2 rounded-lg bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
-                        <span className="text-xs font-black text-white">99.999%</span>
-                        <span className="text-[8px] font-black uppercase text-slate-400 mt-0.5">Uptime SLA</span>
-                      </div>
-                      <div className="p-2 rounded-lg bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
-                        <span className="text-xs font-black text-zultys-green">AES-256</span>
-                        <span className="text-[8px] font-black uppercase text-slate-400 mt-0.5">Encrypted</span>
-                      </div>
-                      <div className="p-2 rounded-lg bg-white/5 border border-white/5 flex flex-col items-center justify-center text-center">
-                        <span className="text-xs font-black text-zultys-gold">QoS VoIP</span>
-                        <span className="text-[8px] font-black uppercase text-slate-400 mt-0.5">Priority</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <HeroAIConciergeCard />
               </div>
             </div>
 
@@ -384,6 +291,162 @@ export function Home() {
           productType="phone"
           onOpenContactForm={openQuote}
         />
+
+        {/* AI Booking Agent & Service Options Showcase (SEO & Search Crawler Grounded) */}
+        <section className="py-24 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden" id="ai-booking-section">
+          <div className="absolute inset-0 bg-[radial-gradient(#00A82D_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
+          
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider mb-4">
+                <Sparkles className="h-3.5 w-3.5" /> AI Telecom Concierge & Instant Consultation Booking
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                Ask Questions & Book Your DFW Phone Consultation
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-slate-300 font-normal leading-relaxed">
+                Connect directly with our intelligent AI concierge for instant telecom pricing, phone model comparisons, and zero-downtime porting answers—or book a free on-site survey anywhere in Dallas–Fort Worth.
+              </p>
+            </div>
+
+            {/* Service Options Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {[
+                {
+                  icon: '☁️',
+                  title: 'Cloud Hosted PBX / VoIP',
+                  tag: '$19–$35 / Seat',
+                  desc: 'Fully managed cloud phone system with 99.999% SLA, desktop ZAC softphone, mobile apps, and zero server maintenance.',
+                  action: 'Explore Cloud'
+                },
+                {
+                  icon: '🏢',
+                  title: 'On-Premise IP-PBX (MX250)',
+                  tag: 'Zero Monthly Seat Fees',
+                  desc: 'Dedicated on-site telecommunications server supporting up to 1,000 users with complete LAN control and SIP trunking savings.',
+                  action: 'View On-Prem'
+                },
+                {
+                  icon: '💼',
+                  title: 'Microsoft Teams Phone Integration',
+                  tag: 'Direct Routing',
+                  desc: 'Native dial tone and PBX features directly inside Teams with IVR, call recording, and contact center queues.',
+                  action: 'Learn Teams'
+                },
+                {
+                  icon: '🎧',
+                  title: 'Contact Center & ACD Queues',
+                  tag: 'Omnichannel & Visual',
+                  desc: 'Skills-based call routing, live supervisor whisper/barge-in, visual wallboards, and compliance call recording.',
+                  action: 'Contact Center'
+                },
+                {
+                  icon: '🔄',
+                  title: 'Hybrid Business Phone Systems',
+                  tag: 'Local + Cloud Backup',
+                  desc: 'Combine on-site appliance survivability with automatic cloud disaster recovery failover during internet drops.',
+                  action: 'Hybrid Options'
+                },
+                {
+                  icon: '🔌',
+                  title: 'Structured Cabling & Network QoS',
+                  tag: 'Cat6 & Fiber',
+                  desc: 'Enterprise Cat6/Fiber cabling, PoE Gigabit switching, and bandwidth prioritization for crystal-clear HD voice.',
+                  action: 'Network Services'
+                },
+                {
+                  icon: '🛠️',
+                  title: 'DFW Emergency Support & Repair',
+                  tag: 'Same-Day Dispatch',
+                  desc: 'Certified local technicians dispatched across 180+ DFW cities for system moves, line additions, and urgent repairs.',
+                  action: 'Emergency Service'
+                },
+                {
+                  icon: '📊',
+                  title: 'Free Telecom & Bill Assessment',
+                  tag: '100% Free Audit',
+                  desc: 'On-site site survey, carrier bill review, and guaranteed total-cost-of-ownership savings analysis.',
+                  action: 'Book Free Audit'
+                }
+              ].map((service, index) => (
+                <div 
+                  key={index}
+                  className="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/50 p-6 rounded-2xl transition-all duration-300 flex flex-col justify-between group shadow-lg"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-3xl">{service.icon}</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                        {service.tag}
+                      </span>
+                    </div>
+                    <h3 className="font-extrabold text-base text-white mb-2 group-hover:text-emerald-400 transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                      {service.desc}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('open-ai-booking', { detail: { tab: 'book' } }));
+                      }
+                    }}
+                    className="mt-6 flex items-center justify-between text-xs font-black text-zultys-green hover:text-emerald-300 pt-3 border-t border-slate-700/60"
+                  >
+                    <span>Book or Quote Service</span>
+                    <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Interactive Callout Banner */}
+            <div className="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+              <div className="flex items-center gap-5">
+                <div className="bg-gradient-to-tr from-zultys-green to-emerald-400 p-4 rounded-2xl text-slate-950 font-black shadow-lg flex-shrink-0">
+                  <Bot className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl md:text-2xl font-black text-white">
+                    Have Specific Questions About Your DFW Office?
+                  </h3>
+                  <p className="text-slate-300 text-sm mt-1 max-w-xl font-medium">
+                    Ask our AI assistant about phone extensions, current promotions, number porting timelines, or compare Zultys directly against RingCentral and 8x8.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('open-ai-booking', { detail: { tab: 'chat' } }));
+                    }
+                  }}
+                  className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-750 text-white font-extrabold px-6 py-3.5 rounded-xl border border-slate-700 text-xs shadow-md transition-all"
+                >
+                  <Bot className="h-4 w-4 text-emerald-400" />
+                  <span>Launch AI Chat</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new CustomEvent('open-ai-booking', { detail: { tab: 'book' } }));
+                    }
+                  }}
+                  className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-zultys-green to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-extrabold px-6 py-3.5 rounded-xl text-xs shadow-lg transition-all"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Book Free Consultation</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Features Section */}
         <motion.section 
@@ -682,7 +745,6 @@ export function Home() {
 
       <Footer />
       <ScrollToTop />
-      <SEOControlPanelWidget />
     </div>
   );
 }

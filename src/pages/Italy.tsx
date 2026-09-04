@@ -74,7 +74,7 @@ export function Italy() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/italy-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/italy-tx-zultys-phone-systems-tx-zultys-phone-systems');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Italy() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Italy Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Italy, Texas.',
-      url: 'https://dallasfortworthzultys.com/italy-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/italy-tx-zultys-phone-systems-tx-zultys-phone-systems',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

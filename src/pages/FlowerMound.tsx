@@ -74,7 +74,7 @@ export function FlowerMound() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/flower-mound-business-phones');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/flower-mound-business-phones-business-phones');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function FlowerMound() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Flower Mound Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Flower Mound, Texas.',
-      url: 'https://dallasfortworthzultys.com/flower-mound-business-phones',
+      url: 'https://dallasfortworthzultys.com/flower-mound-business-phones-business-phones',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

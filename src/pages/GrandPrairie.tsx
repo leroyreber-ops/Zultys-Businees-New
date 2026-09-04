@@ -74,7 +74,7 @@ export function GrandPrairie() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/grand-prairie-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/grand-prairie-zultys-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function GrandPrairie() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Grand Prairie Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Grand Prairie, Texas.',
-      url: 'https://dallasfortworthzultys.com/grand-prairie-zultys',
+      url: 'https://dallasfortworthzultys.com/grand-prairie-zultys-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

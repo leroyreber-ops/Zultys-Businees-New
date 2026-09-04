@@ -74,7 +74,7 @@ export function Garland() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/garland-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/garland-business-voip-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Garland() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Garland Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Garland, Texas.',
-      url: 'https://dallasfortworthzultys.com/garland-zultys',
+      url: 'https://dallasfortworthzultys.com/garland-business-voip-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

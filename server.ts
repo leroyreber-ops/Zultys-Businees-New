@@ -9,6 +9,8 @@ import { buildSitemapXml, watchAndGenerateSitemap, extractRoutesFromApp, getRout
 import { generateEliteMetadata, generateRobotsTxt, canonicalMap } from "./src/utils/seoHelpers";
 import {
   isGoogleConfigured,
+  hasGoogleSitePermission,
+  getVerifiedGoogleSites,
   getIndexingHistory,
   submitSitemapToGoogle,
   notifyGoogleUrlChange,
@@ -663,6 +665,221 @@ async function startServer() {
     }
   });
 
+  // API Route for AI Booking & Concierge Q&A
+  app.post("/api/ai-concierge", async (req, res) => {
+    try {
+      const { message, conversationHistory = [], contextPage = "" } = req.body;
+
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({
+          success: false,
+          error: "Message is required",
+        });
+      }
+
+      // Check if Gemini API is available and active
+      let replyText = "";
+      let isAiGrounded = false;
+      const apiKey = process.env.GEMINI_API_KEY;
+
+      if (apiKey && Date.now() > geminiDisabledUntil) {
+        try {
+          const ai = getGeminiClient();
+          const systemInstruction = `You are the official Senior Solutions Architect & AI Booking Concierge for DallasFortWorthZultys.com (Dallas–Fort Worth's premier authorized Zultys telecommunications and business phone systems provider).
+
+YOUR MISSION:
+Help business owners, IT directors, office managers, and enterprise executives across Dallas, Fort Worth, and the entire DFW Metroplex understand Zultys VoIP, Cloud PBX, On-Premise systems, UCaaS, Contact Centers, and Microsoft Teams integration. Guide them to select the right service and invite them to schedule a free consultation or custom quote.
+
+KEY FACTS & KNOWLEDGE BASE:
+1. Contact Details: Direct phone/text: 817-231-2962 | Email: info@dallasfortworthzultys.com | Local DFW field dispatch across all 180+ DFW cities.
+2. Core Solutions & Service Options:
+   - Cloud PBX / Hosted VoIP ($19 - $35/user/mo): Fully managed, geo-redundant, 99.999% uptime SLA, zero server maintenance.
+   - On-Premise & Hybrid IP-PBX (MX250 up to 1,000 users / MX-SE up to 50 users): 100% on-prem control, one-time hardware investment, SIP trunking savings.
+   - Unified Communications (ZAC - Zultys Advanced Communicator): Presence, chat, visual voicemail, desktop softphone, screen sharing, mobile app (MXmobile for iOS & Android).
+   - Contact Center Solutions: Skills-based ACD routing, supervisor barge-in/whisper, omni-channel queues, real-time visual dashboards, call recording.
+   - Microsoft Teams Integration: Connect your existing Microsoft 365 / Teams client directly to Zultys enterprise PBX dial tone with no clunky 3rd-party bots.
+   - Structured Cabling & Network Optimization: Cat6/Fiber optic cabling, PoE switching, QoS bandwidth prioritization, failover SD-WAN.
+   - Maintenance, Repair & Same-Day DFW Support: Emergency certified local technicians dispatched across Dallas, Fort Worth, Arlington, Plano, Frisco, Irving, etc.
+   - Free Telecom Audit: Comprehensive bill review and site network readiness inspection.
+3. IP Phone Models:
+   - ZIP 49GA: Executive Gigabit color touchscreen with built-in Wi-Fi & Bluetooth.
+   - ZIP 47GE: High-volume executive/receptionist phone with 48 programmable keys.
+   - ZIP 45G: Mid-level commercial workhorse with 8 line keys and color display.
+   - ZIP 43G: Value-packed desktop phone for cubicles and general staff.
+   - Z 23GE: Modern entry Gigabit color IP phone.
+   - DECT cordless handsets: For warehouses, automotive dealerships, and clinics.
+4. Competitive Advantages:
+   - All-in-one appliance architecture (PBX, IVR, fax server, voice recording, conference bridge on a single platform).
+   - Zero downtime number porting (keep 100% of your existing phone and fax numbers).
+   - True local Texas support team (no overseas call center runarounds).
+
+CONVERSATION GUIDELINES:
+- Keep your tone friendly, authoritative, consultative, and concise (2-4 clear paragraphs or bullet points).
+- Always include clear guidance on user seat counts, service recommendations, and direct CTA to book a site survey or speak with Leroy at 817-231-2962.
+- Provide direct, honest pricing ranges when asked.`;
+
+          const contents: any[] = [];
+          
+          // Add recent conversation history if provided
+          if (Array.isArray(conversationHistory)) {
+            conversationHistory.slice(-6).forEach((item: any) => {
+              if (item.role && item.text) {
+                contents.push({
+                  role: item.role === "user" ? "user" : "model",
+                  parts: [{ text: item.text }],
+                });
+              }
+            });
+          }
+
+          // Add current query with context page
+          const userPrompt = contextPage
+            ? `[Visitor is currently browsing page: ${contextPage}]\nUser Question: ${message}`
+            : message;
+
+          contents.push({
+            role: "user",
+            parts: [{ text: userPrompt }],
+          });
+
+          const response = await ai.models.generateContent({
+            model: "gemini-3.7-flash",
+            contents: contents,
+            config: {
+              systemInstruction: systemInstruction,
+              temperature: 0.7,
+              maxOutputTokens: 800,
+            },
+          });
+
+          replyText = response.text || "";
+          isAiGrounded = true;
+        } catch (geminiError: any) {
+          console.warn("⚠️ Gemini API execution failed in ai-concierge, using telecom knowledge base:", geminiError?.message || geminiError);
+        }
+      }
+
+      // Offline intelligent knowledge fallback if Gemini was not available
+      if (!replyText) {
+        const lower = message.toLowerCase();
+
+        if (lower.includes("price") || lower.includes("cost") || lower.includes("rate") || lower.includes("how much")) {
+          replyText = `**Zultys Pricing Overview for Dallas–Fort Worth Businesses:**\n\n- **Cloud Hosted PBX:** Typically ranges from **$19 to $35/seat/month**, depending on user features (standard extensions vs. executive UCaaS with mobile ZAC and video).\n- **On-Premise Systems (MX250 / MX-SE):** Capital hardware purchase starting around $2,500 - $6,500+ with near-zero ongoing recurring seat fees—saving 50–70% over 5 years.\n- **Installation & Setup:** Includes free number porting, on-site network QoS tuning, and user training across DFW.\n\nWould you like an exact breakdown for your specific seat count? You can select your options in the booking tab or call us directly at **817-231-2962**.`;
+        } else if (lower.includes("cloud") && lower.includes("premise") || lower.includes("difference") || lower.includes("vs")) {
+          replyText = `**Cloud vs. On-Premise Zultys Systems:**\n\n1. **Cloud PBX:** Zero equipment closet footprint, monthly subscription, automatic updates, and multi-location flexibility. Best for hybrid teams and growing businesses.\n2. **On-Premise (MX Series):** You own the server. All voice traffic stays on your local LAN with ultimate survivability even if your internet drops. Lowest total cost of ownership over 3–7 years.\n3. **Hybrid:** Combine on-premise hardware with cloud disaster recovery.\n\nOur Fort Worth & Dallas telecom engineers can assess your building's cabling and internet to recommend the ideal fit!`;
+        } else if (lower.includes("teams") || lower.includes("microsoft")) {
+          replyText = `**Zultys Microsoft Teams Integration:**\n\nYes! Zultys provides seamless **Direct Routing & Native PBX integration with Microsoft Teams**. \n\n- Keep your existing Teams desktop and mobile interface while gaining enterprise phone features: advanced ACD call queues, multi-level IVR auto-attendants, call recording, and visual faxing.\n- Save significantly compared to costly native Microsoft calling plans.\n\nWe can configure a demo for your IT team anytime!`;
+        } else if (lower.includes("port") || lower.includes("number") || lower.includes("keep")) {
+          replyText = `**Keeping Your Phone Numbers:**\n\n**100% Yes.** You keep all of your existing local DFW phone numbers, toll-free numbers, direct inward dials (DIDs), and fax lines.\n\nOur team coordinates the entire porting process with AT&T, Spectrum, Frontier, or your previous carrier to guarantee **zero downtime** during your cutover.`;
+        } else if (lower.includes("support") || lower.includes("repair") || lower.includes("service") || lower.includes("emergency")) {
+          replyText = `**Local Dallas–Fort Worth Support & Maintenance:**\n\nWe provide certified local Zultys support across all DFW counties (Tarrant, Dallas, Collin, Denton, Johnson, Parker, etc.):\n\n- **Emergency On-Site Response:** Same-day technician dispatch.\n- **Remote Helpdesk:** Fast Tier-1 to Tier-3 resolution.\n- **System Moves & Upgrades:** Relocating offices or expanding lines.\n\nFor immediate emergency assistance, call or text our direct dispatch desk at **817-231-2962**.`;
+        } else if (lower.includes("book") || lower.includes("consult") || lower.includes("survey") || lower.includes("quote") || lower.includes("schedule")) {
+          replyText = `**Schedule Your Free Telecom Site Consultation:**\n\nWe would love to connect! You can switch to the **"Book Consultation"** tab right here in this window to pick your preferred date and service, or text/call Leroy directly at **817-231-2962**.\n\nOur consultations include a full on-site network audit, phone demonstration, and a guaranteed price proposal.`;
+        } else {
+          replyText = `Hello! I am your **Dallas–Fort Worth Zultys AI Solutions Assistant**. \n\nI can help you explore:\n- **Cloud & On-Premise Phone Systems** (MX250, MX-SE, Cloud Hosted)\n- **Unified Communications** (ZAC Desktop, Mobile Apps & Video)\n- **Contact Center & Call Center Queues**\n- **Microsoft Teams Direct Routing**\n- **Structured Cabling & Network Optimization**\n\nHow many employees need phones, or would you like to schedule a free on-site demonstration in DFW? You can also call us directly at **817-231-2962**.`;
+        }
+      }
+
+      res.json({
+        success: true,
+        reply: replyText,
+        aiGrounded: isAiGrounded,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      console.error("❌ Error in /api/ai-concierge:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to process concierge request",
+      });
+    }
+  });
+
+  // API Route for Booking Consultations and Scheduling
+  app.post("/api/book-consultation", async (req, res) => {
+    try {
+      const {
+        serviceType,
+        userCount,
+        company,
+        name,
+        email,
+        phone,
+        city,
+        consultationType,
+        preferredTime,
+        notes
+      } = req.body;
+
+      console.log("========================================");
+      console.log("📅 NEW CONSULTATION BOOKING REQUEST:");
+      console.log(`   Contact: ${name} (${company || "Individual"})`);
+      console.log(`   Phone:   ${phone}`);
+      console.log(`   Email:   ${email}`);
+      console.log(`   City:    ${city || "DFW Metroplex"}`);
+      console.log(`   Service: ${serviceType || "Business Phone System"}`);
+      console.log(`   Seats:   ${userCount || "Not specified"}`);
+      console.log(`   Format:  ${consultationType || "On-site visit"}`);
+      console.log(`   Timing:  ${preferredTime || "ASAP"}`);
+      console.log(`   Notes:   ${notes || "None"}`);
+      console.log("========================================");
+
+      // Construct email notification body
+      const emailBody = `
+        <h2>📅 New Zultys Consultation Booking</h2>
+        <p><strong>Customer Name:</strong> ${name}</p>
+        <p><strong>Company:</strong> ${company || 'N/A'}</p>
+        <p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>
+        <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+        <p><strong>City / Location:</strong> ${city || 'DFW Metroplex'}</p>
+        <hr />
+        <h3>Consultation Details:</h3>
+        <p><strong>Requested Service:</strong> ${serviceType || 'Zultys Business Phone Solution'}</p>
+        <p><strong>Number of Extensions/Seats:</strong> ${userCount || 'N/A'}</p>
+        <p><strong>Consultation Format:</strong> ${consultationType || 'On-site Survey & Demo'}</p>
+        <p><strong>Preferred Date / Time:</strong> ${preferredTime || 'As soon as possible'}</p>
+        <p><strong>Additional Requirements:</strong> ${notes || 'None provided'}</p>
+      `;
+
+      if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: parseInt(process.env.EMAIL_PORT || "587"),
+            secure: process.env.EMAIL_SECURE === "true",
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+            },
+          });
+
+          await transporter.sendMail({
+            from: `"${name}" <${process.env.EMAIL_USER}>`,
+            to: "info@dallasfortworthzultys.com",
+            subject: `BOOKING REQUEST: ${company || name} - ${serviceType || 'Zultys Consultation'} (${userCount || '10+'} users)`,
+            html: emailBody,
+            replyTo: email,
+          });
+          console.log("✅ Live Consultation Booking Email Dispatched!");
+        } catch (emailErr) {
+          console.warn("⚠️ SMTP dispatch failed for booking, logged to container console:", emailErr);
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Consultation booked successfully. Our DFW telecom specialist will contact you to confirm.",
+        bookingId: `DFW-${Date.now().toString().slice(-6)}`,
+      });
+    } catch (error: any) {
+      console.error("❌ Error booking consultation:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to process booking",
+      });
+    }
+  });
+
   // API Route to scan all images in the project for accessibility & SEO
   app.get("/api/scan-images", (req, res) => {
     try {
@@ -823,15 +1040,30 @@ async function startServer() {
   });
 
   // GET Google Search Console configuration status
-  app.get("/api/search-console/status", (req, res) => {
+  app.get("/api/search-console/status", async (req, res) => {
     try {
       const configured = isGoogleConfigured();
       const { clientEmail } = getGoogleCredentials();
+      const siteUrl = "https://dallasfortworthzultys.com";
+      const isAuthorized = configured ? await hasGoogleSitePermission(siteUrl) : false;
+      const verifiedSites = configured ? await getVerifiedGoogleSites() : [];
+
+      let message = "Google Search Console API credentials missing.";
+      if (configured) {
+        if (isAuthorized) {
+          message = `Google Search Console API connected and verified for ${siteUrl}.`;
+        } else {
+          message = `Google Service Account (${clientEmail}) connected. To activate live sync, add this email in Google Search Console (Settings > Users and permissions) for ${siteUrl}.`;
+        }
+      }
+
       res.json({
         success: true,
         configured,
+        isAuthorized,
         clientEmail: configured ? clientEmail : null,
-        message: configured ? "Google Search Console API connected." : "Google Search Console API credentials missing."
+        verifiedSites,
+        message
       });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -852,12 +1084,14 @@ async function startServer() {
   app.get("/api/search-console/dashboard-data", async (req, res) => {
     const siteUrl = (req.query.siteUrl as string) || "https://dallasfortworthzultys.com";
     const isConfigured = isGoogleConfigured();
+    const isAuthorized = isConfigured ? await hasGoogleSitePermission(siteUrl) : false;
 
-    if (!isConfigured) {
-      // Return high-quality, relevant Demo Data if unconfigured so the UI looks beautiful
+    if (!isConfigured || !isAuthorized) {
+      // Return high-quality, relevant Demo Data if unconfigured or awaiting property delegation so the UI looks beautiful
       return res.json({
         success: true,
         demoData: true,
+        awaitingDelegation: isConfigured && !isAuthorized,
         data: {
           sitemaps: [
             {
@@ -4514,17 +4748,29 @@ export function ${componentName}() {
       }
     }, ONE_DAY_MS);
 
-    // Auto-submit sitemap to Google Search Console on server boot if Google integration is configured
+    // Auto-submit sitemap to Google Search Console on server boot if Google integration is configured and property is verified
     if (isGoogleConfigured()) {
-      console.log("🚀 Google Search Console integration is active. Requesting automatic sitemap submission...");
       const siteUrl = "https://dallasfortworthzultys.com";
       const sitemapUrl = "https://dallasfortworthzultys.com/sitemap.xml";
-      submitSitemapToGoogle(siteUrl, sitemapUrl)
-        .then((status) => {
-          console.log(`✅ Automatic sitemap submission completed: ${status}`);
+      const { clientEmail } = getGoogleCredentials();
+
+      hasGoogleSitePermission(siteUrl)
+        .then((isAuthorized) => {
+          if (isAuthorized) {
+            console.log("🚀 Google Search Console integration is active and property is verified. Requesting automatic sitemap submission...");
+            submitSitemapToGoogle(siteUrl, sitemapUrl)
+              .then((status) => {
+                console.log(`✅ Automatic sitemap submission completed: ${status}`);
+              })
+              .catch((err) => {
+                console.log(`ℹ️ Google Search Console sitemap sync notice: ${err?.message || err}`);
+              });
+          } else {
+            console.log(`ℹ️ Google Search Console service account connected (${clientEmail}). Ready to sync once verified in Search Console.`);
+          }
         })
-        .catch((err) => {
-          console.warn(`⚠️ Automatic sitemap submission skipped on boot: GSC API responded with ${err.message || err}. Ensure your Service Account has verified access in Google Search Console.`);
+        .catch(() => {
+          console.log(`ℹ️ Google Search Console service account connected (${clientEmail}).`);
         });
     } else {
       console.log("ℹ️ Google Search Console is not yet configured. Complete the integration using environment variables.");

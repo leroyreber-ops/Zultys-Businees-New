@@ -80,6 +80,7 @@ export function useSEOHeadManager(currentPath: string) {
       // Robots directives
       const isNoIndexPage = 
         normalized === '/seo-dashboard' || 
+        normalized === '/seo-admin' || 
         normalized === '/admin/search-console' || 
         normalized === '/citation-health' || 
         normalized === '/admin/citations' ||

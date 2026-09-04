@@ -28,7 +28,7 @@ interface LogEntry {
 export default function SEODashboard() {
   const { rankings: polledRankings, notifications, lastUpdated: rankingsLastUpdated } = useRankPolling();
 
-  const [status, setStatus] = useState<{ configured: boolean; clientEmail: string | null; message: string } | null>(null);
+  const [status, setStatus] = useState<{ configured: boolean; isAuthorized?: boolean; clientEmail: string | null; message: string } | null>(null);
   const [history, setHistory] = useState<LogEntry[]>([]);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -1081,6 +1081,7 @@ export default function SEODashboard() {
       if (data.success) {
         setStatus({
           configured: data.configured,
+          isAuthorized: data.isAuthorized,
           clientEmail: data.clientEmail,
           message: data.message,
         });
@@ -1424,16 +1425,28 @@ export default function SEODashboard() {
                 </div>
               ) : status?.configured ? (
                 <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold">
-                    <CheckCircle className="h-3.5 w-3.5" /> Google Cloud Service Active
+                  <div className={`inline-flex items-center gap-2 px-3 py-1 ${status.isAuthorized ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-blue-700 border-blue-200'} border rounded-full text-xs font-semibold`}>
+                    <CheckCircle className="h-3.5 w-3.5" /> {status.isAuthorized ? 'Google Search Console Verified' : 'Service Account Connected'}
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                    <span className="text-xs text-slate-500 font-mono block">Client Email Account</span>
+                    <span className="text-xs text-slate-500 font-mono block">Service Account Email</span>
                     <span className="text-sm font-medium font-mono text-slate-800 break-all">{status.clientEmail}</span>
                   </div>
-                  <p className="text-xs text-emerald-600 font-medium">
-                    ✔ Ready to trigger automated sitemap submissions and URL re-crawling.
-                  </p>
+                  {status.isAuthorized ? (
+                    <p className="text-xs text-emerald-600 font-medium">
+                      ✔ Property is verified in Google Search Console. Ready for automated sitemap submissions and URL re-crawling.
+                    </p>
+                  ) : (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
+                      <p className="font-semibold flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                        Awaiting Search Console Delegation
+                      </p>
+                      <p className="text-slate-700">
+                        To enable live Search Console sync, open <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="text-blue-600 underline font-semibold">Google Search Console</a> &rarr; <strong>Settings</strong> &rarr; <strong>Users and permissions</strong>, and add <span className="font-mono font-semibold">{status.clientEmail}</span> as a user for <span className="font-mono font-semibold">{siteUrl}</span>.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">

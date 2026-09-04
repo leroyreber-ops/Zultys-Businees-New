@@ -74,7 +74,7 @@ export function BalchSprings() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/balch-springs-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/balch-springs-tx-zultys-voip-tx-zultys-phone-systems');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function BalchSprings() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Balch Springs Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Balch Springs, Texas.',
-      url: 'https://dallasfortworthzultys.com/balch-springs-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/balch-springs-tx-zultys-voip-tx-zultys-phone-systems',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

@@ -83,7 +83,7 @@ export function CollinCountyVoip() {
               '@type': 'ListItem',
               'position': 2,
               'name': 'Service Areas',
-              'item': 'https://dallasfortworthzultys.com/sitemap'
+              'item': 'https://dallasfortworthzultys.com/sitemap.html'
             },
             {
               '@type': 'ListItem',
@@ -105,11 +105,11 @@ export function CollinCountyVoip() {
   }, []);
 
   const collinCities = [
-    { name: 'Plano', path: '/plano-tx-zultys-phone-systems', desc: 'Enterprise business phone systems and cloud solutions for corporate Plano headquarters.' },
-    { name: 'Frisco', path: '/frisco-tx-zultys-phone-systems', desc: 'Unified communications and scaling local business VoIP for Frisco high-growth tech firms.' },
-    { name: 'McKinney', path: '/mckinney-tx-zultys-phone-systems', desc: 'Certified Zultys support, installation, and sales for historic and growing McKinney offices.' },
+    { name: 'Plano', path: '/plano-zultys-dealer', desc: 'Enterprise business phone systems and cloud solutions for corporate Plano headquarters.' },
+    { name: 'Frisco', path: '/frisco-voip-solutions', desc: 'Unified communications and scaling local business VoIP for Frisco high-growth tech firms.' },
+    { name: 'McKinney', path: '/mckinney-zultys-dealer', desc: 'Certified Zultys support, installation, and sales for historic and growing McKinney offices.' },
     { name: 'Celina', path: '/celina-tx-zultys-phone-systems', desc: 'HIPAA and secure local PBX deployments for the Celina business and medical districts.' },
-    { name: 'Allen', path: '/allen-tx-zultys-phone-systems', desc: 'VoIP, phone hardware installation, and on-site support for the Allen business corridor.' },
+    { name: 'Allen', path: '/allen-tx-zultys-voip', desc: 'VoIP, phone hardware installation, and on-site support for the Allen business corridor.' },
     { name: 'Prosper', path: '/prosper-tx-zultys-phone-systems', desc: 'Professional VoIP phone services customized for Prosper medical, dental, and corporate offices.' },
     { name: 'Wylie', path: '/wylie-tx-zultys-phone-systems', desc: 'Affordable, enterprise-level communication systems designed for Wylie light industrial sites.' },
     { name: 'Anna', path: '/anna-tx-zultys-phone-systems', desc: 'Robust unified office communications supporting the rapid expansion of Anna enterprises.' }

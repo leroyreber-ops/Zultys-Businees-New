@@ -74,7 +74,7 @@ export function Arlington() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/arlington-tx-zultys-phone-systems');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/arlington-ip-pbx');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function Arlington() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - Arlington Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in Arlington, Texas.',
-      url: 'https://dallasfortworthzultys.com/arlington-tx-zultys-phone-systems',
+      url: 'https://dallasfortworthzultys.com/arlington-ip-pbx',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

@@ -475,45 +475,6 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
       'https://www.facebook.com/zultys',
       'https://www.linkedin.com/company/zultys-inc-'
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '127',
-      bestRating: '5',
-      worstRating: '1'
-    },
-    review: [
-      {
-        '@type': 'Review',
-        author: {
-          '@type': 'Person',
-          name: 'Sarah Jenkins'
-        },
-        datePublished: '2026-03-15',
-        reviewBody: `DFW Business Communications provided an outstanding Zultys installation for our team in ${cityName === 'Dallas-Fort Worth' ? 'the DFW Metroplex' : cityName}. The VoIP call quality is crystal clear and local service has been incredibly responsive.`,
-        reviewRating: {
-          '@type': 'Rating',
-          worstRating: '1',
-          bestRating: '5',
-          ratingValue: '5'
-        }
-      },
-      {
-        '@type': 'Review',
-        author: {
-          '@type': 'Person',
-          name: 'Marcus Vance'
-        },
-        datePublished: '2026-04-10',
-        reviewBody: `Transitioning our office phone systems to Zultys Cloud with DFW Business Communications was flawless. Zero downtime, outstanding staff training, and ongoing local help.`,
-        reviewRating: {
-          '@type': 'Rating',
-          worstRating: '1',
-          bestRating: '5',
-          ratingValue: '5'
-        }
-      }
-    ],
     provider: {
       '@type': 'Organization',
       name: 'DFW Business Communications',

@@ -2,6 +2,9 @@ import fs from "fs";
 import path from "path";
 import { generateRobotsTxt } from "./seoHelpers.js";
 
+import { VALID_PATHS } from "../routes.js";
+import { canonicalMap } from "./seoHelpers.js";
+
 // Self-contained known cities list for Dallas-Fort Worth metroplex area to prevent circular component dependencies
 export const KNOWN_CITIES = [
   'Dallas', 'Fort Worth', 'Arlington', 'Plano', 'Garland', 'Irving', 
@@ -64,48 +67,30 @@ export class SitemapIndexProvider {
   }
 
   /**
-   * Generates standard search-discovery slugs for all regional cities in the DFW metroplex.
+   * Returns all canonical search-discovery slugs for regional cities in the DFW metroplex.
+   * Only returns valid, canonical URLs that return HTTP 200 and are defined in VALID_PATHS.
    */
   static getDynamicCityRoutes(): string[] {
-    const routes: string[] = [];
-
-    // Custom exact paths defined for top tier cities
-    const topTierCityPaths = [
-      "/fort-worth-zultys-systems",
-      "/dallas-zultys-phones",
-      "/plano-zultys-dealer",
-      "/arlington-ip-pbx",
-      "/frisco-voip-solutions",
-      "/irving-business-phone-systems",
-      "/garland-business-voip",
-      "/grand-prairie-zultys",
-      "/mckinney-zultys-dealer",
-      "/mesquite-zultys-phone-systems",
-      "/carrollton-zultys",
-      "/denton-business-phone-systems"
-    ];
-
-    topTierCityPaths.forEach(p => {
-      if (!routes.includes(p)) routes.push(p);
+    const routes = VALID_PATHS.filter(p => {
+      const norm = p.toLowerCase();
+      // Exclude non-canonical aliases/redirects
+      if (canonicalMap[norm] && canonicalMap[norm] !== norm) {
+        return false;
+      }
+      // Return regional city routes
+      return (
+        norm.includes("-tx-zultys") ||
+        norm.includes("-zultys-") ||
+        norm.endsWith("-zultys") ||
+        norm.endsWith("-voip") ||
+        norm.endsWith("-phones") ||
+        norm.endsWith("-systems") ||
+        norm.endsWith("-solutions") ||
+        norm.endsWith("-dealer") ||
+        norm.endsWith("-communications")
+      );
     });
 
-    // Populate standard patterns for every known city to guarantee Google indexed presence
-    KNOWN_CITIES.forEach(city => {
-      const slug = city.toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-
-      const simplePath = `/${slug}`;
-      const fullPath = `/${slug}-tx-zultys-phone-systems`;
-
-      if (!routes.includes(simplePath)) {
-        routes.push(simplePath);
-      }
-      if (!routes.includes(fullPath)) {
-        routes.push(fullPath);
-      }
-    });
-
-    return routes;
+    return Array.from(new Set(routes)).sort();
   }
 }

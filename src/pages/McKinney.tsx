@@ -74,7 +74,7 @@ export function McKinney() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/mckinney-zultys');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/mckinney-zultys-dealer-zultys');
 
     // JSON-LD Schema
     const schema = {
@@ -82,7 +82,7 @@ export function McKinney() {
       '@type': 'LocalBusiness',
       name: 'DFW Business Communications - McKinney Zultys Support',
       description: 'Authorized Zultys dealer providing enterprise business phone systems and VoIP solutions to businesses in McKinney, Texas.',
-      url: 'https://dallasfortworthzultys.com/mckinney-zultys',
+      url: 'https://dallasfortworthzultys.com/mckinney-zultys-dealer-zultys',
       telephone: '817-231-2962',
       address: {
         '@type': 'PostalAddress',

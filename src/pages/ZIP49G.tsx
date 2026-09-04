@@ -62,7 +62,7 @@ export function ZIP49G() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-zip-49g-smart-media-phone');
+    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zip-49g-ip-phone');
 
     // JSON-LD Schema
     const schema = {
@@ -83,11 +83,6 @@ export function ZIP49G() {
           '@type': 'Organization',
           name: 'DFW Business Communications'
         }
-      },
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '4.9',
-        reviewCount: '24'
       }
     };
 
