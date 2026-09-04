@@ -28,6 +28,9 @@ export function Contact() {
     email: '',
     phone: '',
     company: '',
+    service: 'Cloud PBX',
+    companySize: '6-20',
+    timeline: 'Within 30 Days',
     message: '',
   });
 
@@ -38,6 +41,23 @@ export function Contact() {
     const description = 'Contact DFW Business Communications for Zultys phone systems in Fort Worth. Get a free quote, request support, or schedule a consultation.';
     if (metaDescription) {
       metaDescription.setAttribute('content', description);
+    }
+
+    // Read query parameters to prefill form when linked from AI Concierge or quick CTAs
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlService = params.get('service');
+      const urlMessage = params.get('message');
+      const urlSeats = params.get('seats');
+
+      if (urlService || urlMessage || urlSeats) {
+        setFormData(prev => ({
+          ...prev,
+          service: urlService || prev.service,
+          message: urlMessage || prev.message,
+          companySize: urlSeats || prev.companySize
+        }));
+      }
     }
   }, []);
 
@@ -58,21 +78,33 @@ export function Contact() {
           email: formData.email,
           phone: formData.phone,
           company: formData.company,
-          message: formData.message,
-          subject: `New Contact Form Submission from ${formData.name}`
+          service: formData.service,
+          companySize: formData.companySize,
+          timeline: formData.timeline,
+          message: `[Service: ${formData.service} | Company Size: ${formData.companySize} | Timeline: ${formData.timeline}]\n\n${formData.message}`,
+          subject: `New Quote/Contact Request: ${formData.service} from ${formData.name}`
         })
       });
 
       const result = await response.json();
       
       if (result.success) {
-        toast.success('Message sent! We will contact you shortly.', { id: loadingToast });
-        setFormData({ name: '', email: '', phone: '', company: '', message: '' });
+        toast.success(result.message || 'Message sent! We will contact you shortly.', { id: loadingToast });
+        setFormData({ 
+          name: '', 
+          email: '', 
+          phone: '', 
+          company: '', 
+          service: 'Cloud PBX',
+          companySize: '6-20',
+          timeline: 'Within 30 Days',
+          message: '' 
+        });
       } else {
-        toast.error(result.message || 'Something went wrong. Please try again.', { id: loadingToast, duration: 5000 });
+        toast.error(result.error || result.message || 'Unable to send message. Please call 817-231-2962.', { id: loadingToast, duration: 6000 });
       }
     } catch (error) {
-      toast.error('Failed to send message. Please check your connection.', { id: loadingToast });
+      toast.error('Network connection issue. Please call our DFW team directly at 817-231-2962.', { id: loadingToast, duration: 6000 });
       console.error('Form submission error:', error);
     }
   };
@@ -163,6 +195,54 @@ export function Contact() {
                           value={formData.company}
                           onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                         />
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-8">
+                      <div className="space-y-3">
+                        <label className="text-sm font-black text-charcoal uppercase tracking-wider">Service Needed</label>
+                        <select
+                          className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-zultys-green focus:border-transparent outline-none transition-all bg-gray-50/50 text-charcoal font-medium"
+                          value={formData.service}
+                          onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                        >
+                          <option value="Phone system">Phone system</option>
+                          <option value="Business VoIP">Business VoIP</option>
+                          <option value="Cloud PBX">Cloud PBX</option>
+                          <option value="UCaaS">UCaaS</option>
+                          <option value="Contact center">Contact center</option>
+                          <option value="Microsoft Teams integration">Microsoft Teams integration</option>
+                          <option value="Installation or support">Installation or support</option>
+                          <option value="Networking/internet">Networking/internet</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-sm font-black text-charcoal uppercase tracking-wider">Company Size</label>
+                        <select
+                          className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-zultys-green focus:border-transparent outline-none transition-all bg-gray-50/50 text-charcoal font-medium"
+                          value={formData.companySize}
+                          onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
+                        >
+                          <option value="1-5 users">1-5 users</option>
+                          <option value="6-20 users">6-20 users</option>
+                          <option value="21-50 users">21-50 users</option>
+                          <option value="51-100 users">51-100 users</option>
+                          <option value="100+ users">100+ users</option>
+                        </select>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-sm font-black text-charcoal uppercase tracking-wider">Project Timeline</label>
+                        <select
+                          className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-zultys-green focus:border-transparent outline-none transition-all bg-gray-50/50 text-charcoal font-medium"
+                          value={formData.timeline}
+                          onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
+                        >
+                          <option value="Immediate">Immediate (Emergency / Urgent)</option>
+                          <option value="Within 30 Days">Within 30 Days</option>
+                          <option value="1-3 Months">1-3 Months</option>
+                          <option value="3-6 Months">3-6 Months</option>
+                          <option value="Exploring Options">Exploring Options / Budgeting</option>
+                        </select>
                       </div>
                     </div>
                     <div className="space-y-3">

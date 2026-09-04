@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HashLink as Link } from './HashLink';
 import { 
   Bot, 
   Sparkles, 
@@ -14,12 +15,21 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { routeConciergeIntent, ConciergeAction } from '../utils/conciergeRouter';
+
+interface HeroChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
+  actions?: ConciergeAction[];
+  fallback?: { label: string; phone: string; url: string };
+  disclosure?: string;
+}
 
 export function HeroAIConciergeCard() {
   const [activeMode, setActiveMode] = useState<'chat' | 'book'>('chat');
   const [question, setQuestion] = useState('');
   const [isAnswering, setIsAnswering] = useState(false);
-  const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
+  const [chatHistory, setChatHistory] = useState<HeroChatMessage[]>([
     {
       role: 'assistant',
       text: "👋 Hi! I'm your DFW Zultys AI Concierge. Ask me about cloud vs on-premise pricing, phone models, or book your free on-site survey!"
@@ -72,16 +82,29 @@ export function HeroAIConciergeCard() {
 
       const data = await res.json();
       if (data.success && data.reply) {
-        setChatHistory(prev => [...prev, { role: 'assistant', text: data.reply }]);
+        setChatHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            text: data.reply,
+            actions: data.actions || [],
+            fallback: data.fallback,
+            disclosure: data.disclosure
+          }
+        ]);
       } else {
         throw new Error('No reply');
       }
     } catch (e) {
+      const fallbackRouting = routeConciergeIntent(currentText);
       setChatHistory(prev => [
         ...prev, 
         { 
           role: 'assistant', 
-          text: "We provide Cloud Hosted PBX ($19-$35/mo) and On-Premise MX250 appliances with zero seat fees across Dallas–Fort Worth. Call 817-231-2962 or click Book Survey to reserve a demo!" 
+          text: fallbackRouting.verifiedAnswer,
+          actions: fallbackRouting.actions,
+          fallback: fallbackRouting.fallback,
+          disclosure: fallbackRouting.disclosure
         }
       ]);
     } finally {
@@ -113,10 +136,16 @@ export function HeroAIConciergeCard() {
       const data = await res.json();
       if (data.success) {
         setIsBooked(true);
-        toast.success('Consultation booked! Our DFW technician will reach out.');
+        toast.success(data.message || 'Consultation booked! Our DFW technician will reach out.');
+      } else {
+        toast.error('Booking Could Not Be Completed', {
+          description: data.error || 'Please call or text 817-231-2962 to schedule directly.'
+        });
       }
     } catch {
-      setIsBooked(true);
+      toast.error('Connection Issue', {
+        description: 'Unable to reach booking service. Please call or text 817-231-2962.'
+      });
     } finally {
       setIsSubmittingBooking(false);
     }
@@ -185,6 +214,34 @@ export function HeroAIConciergeCard() {
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{item.text}</p>
+                  {item.actions && item.actions.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-700/60 flex flex-wrap gap-1.5">
+                      {item.actions.map(act => (
+                        <Link
+                          key={act.id}
+                          to={act.url}
+                          className="inline-flex items-center gap-1 bg-zultys-green hover:bg-emerald-600 text-white font-bold text-[10px] px-2 py-1 rounded-md shadow-xs transition-colors"
+                        >
+                          <span>{act.label}</span>
+                          <ArrowRight className="h-2.5 w-2.5" />
+                        </Link>
+                      ))}
+                      {item.fallback && (
+                        <a
+                          href={`tel:${item.fallback.phone}`}
+                          className="inline-flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-slate-200 text-[10px] font-bold px-2 py-1 rounded-md transition-colors"
+                        >
+                          <Phone className="h-2.5 w-2.5 text-emerald-400" />
+                          <span>{item.fallback.label}</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {item.disclosure && (
+                    <p className="text-[9px] text-slate-400 mt-1.5 italic">
+                      {item.disclosure}
+                    </p>
+                  )}
                 </div>
               ))}
               {isAnswering && (

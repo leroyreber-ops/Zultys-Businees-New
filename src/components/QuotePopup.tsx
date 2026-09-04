@@ -61,7 +61,7 @@ export function QuotePopup({ isOpen, onClose }: QuotePopupProps) {
 
       if (data.success) {
         toast.success('Quote Request Sent!', {
-          description: "We'll prepare your custom Zultys quote and contact you shortly."
+          description: data.message || "We'll prepare your custom Zultys quote and contact you shortly."
         });
         
         // Reset and close
@@ -79,13 +79,13 @@ export function QuotePopup({ isOpen, onClose }: QuotePopupProps) {
           });
         }, 2000);
       } else {
-        toast.error('Submission Failed', {
-          description: data.message || 'Please call us at 817-231-2962 for an immediate quote.'
+        toast.error('Submission Could Not Be Completed', {
+          description: data.error || data.message || 'Please call us at 817-231-2962 for an immediate quote.'
         });
       }
     } catch (error) {
-      toast.error('Submission Failed', {
-        description: 'Please call us at 817-231-2962 for an immediate quote.'
+      toast.error('Connection Issue', {
+        description: 'Unable to deliver request online. Please call us at 817-231-2962 for an immediate quote.'
       });
     } finally {
       setIsSubmitting(false);

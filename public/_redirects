@@ -4,15 +4,15 @@
 /robots.txt /robots.txt 200
 
 # High-Intent Core Service Aliases (301 Permanent Redirects)
-/zultys-business-phone-systems-dallas-fort-worth /zultys-business-phone-systems 301!
-/business-voip-phone-system-dallas-fort-worth /cloud-services 301!
-/cloud-pbx-hosted-pbx-dallas-fort-worth /cloud-services 301!
+/zultys-business-phone-systems-dallas-fort-worth /dallas-zultys-phones 301!
+/business-voip-phone-system-dallas-fort-worth /zultys-cloud-services 301!
+/cloud-pbx-hosted-pbx-dallas-fort-worth /zultys-cloud-services 301!
 /unified-communications-ucaas-dallas-fort-worth /solutions 301!
-/hybrid-on-premise-voip-pbx-dallas-fort-worth /hybrid 301!
-/contact-center-solutions-dallas-fort-worth /contact-center 301!
+/hybrid-on-premise-voip-pbx-dallas-fort-worth /fort-worth-zultys-hybrid 301!
+/contact-center-solutions-dallas-fort-worth /fort-worth-zultys-contact-center 301!
 /microsoft-teams-phone-system-integration-dallas-fort-worth /zultys-vs-microsoft-teams 301!
-/zultys-phone-system-installation-support-dallas-fort-worth /installation 301!
-/zultys-phone-system-pricing-dallas-fort-worth /pricing 301!
+/zultys-phone-system-installation-support-dallas-fort-worth /fort-worth-zultys-installation 301!
+/zultys-phone-system-pricing-dallas-fort-worth /zultys-pricing 301!
 /business-internet-networking-dallas-fort-worth /blog/how-to-optimize-your-office-network-for-voip-performance 301!
 /service-areas/dallas-fort-worth /dallas-zultys-phones 301!
 /request-a-quote /contact 301!

@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { CONCIERGE_EXPLORE_LINKS } from '../data/conciergeDestinations';
+import { routeConciergeIntent, ConciergeAction } from '../utils/conciergeRouter';
 
 interface Message {
   id: string;
@@ -33,6 +35,9 @@ interface Message {
   text: string;
   timestamp: string;
   suggestedAction?: 'book' | 'call' | 'pricing';
+  actions?: ConciergeAction[];
+  fallback?: { label: string; phone: string; url: string };
+  disclosure?: string;
 }
 
 const SERVICE_OPTIONS = [
@@ -145,20 +150,27 @@ export function AIBookingConcierge() {
           sender: 'bot',
           text: data.reply,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          suggestedAction: data.reply.toLowerCase().includes('book') || data.reply.toLowerCase().includes('consult') ? 'book' : undefined
+          suggestedAction: data.reply.toLowerCase().includes('book') || data.reply.toLowerCase().includes('consult') ? 'book' : undefined,
+          actions: data.actions || [],
+          fallback: data.fallback,
+          disclosure: data.disclosure
         };
         setMessages(prev => [...prev, botMessage]);
       } else {
         throw new Error(data.error || 'No reply received');
       }
     } catch (err) {
-      // Fallback response
+      // Deterministic offline fallback routing
+      const fallbackRouting = routeConciergeIntent(userText);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        text: `Thank you for your question! For immediate pricing or to speak directly with our senior telecom engineer for Dallas–Fort Worth, you can call or text **817-231-2962** or click the **"Book Consultation"** tab above to reserve an on-site visit.`,
+        text: fallbackRouting.verifiedAnswer,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        suggestedAction: 'book'
+        suggestedAction: 'book',
+        actions: fallbackRouting.actions,
+        fallback: fallbackRouting.fallback,
+        disclosure: fallbackRouting.disclosure
       };
       setMessages(prev => [...prev, botMessage]);
     } finally {
@@ -186,17 +198,17 @@ export function AIBookingConcierge() {
         setBookingCompleted(true);
         setBookingRefId(data.bookingId || `DFW-${Math.floor(100000 + Math.random() * 900000)}`);
         toast.success('Consultation Booked!', {
-          description: 'Our DFW Zultys telecom specialist will contact you shortly to confirm.'
+          description: data.message || 'Our DFW Zultys telecom specialist will contact you shortly to confirm.'
         });
       } else {
-        throw new Error(data.error || 'Failed to submit booking');
+        toast.error('Booking Request Could Not Be Delivered', {
+          description: data.error || 'Please call or text Leroy directly at 817-231-2962 to book immediately.'
+        });
       }
     } catch (err: any) {
-      toast.error('Booking Received in Workspace', {
-        description: 'You can also text or call Leroy directly at 817-231-2962 for instant confirmation.'
+      toast.error('Network Issue', {
+        description: 'Unable to reach booking service online. Please call or text Leroy directly at 817-231-2962 for instant confirmation.'
       });
-      setBookingCompleted(true);
-      setBookingRefId(`DFW-${Math.floor(100000 + Math.random() * 900000)}`);
     } finally {
       setIsBookingSubmitting(false);
     }
@@ -333,16 +345,9 @@ export function AIBookingConcierge() {
                     <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 flex-shrink-0">
                       <Compass className="h-3 w-3 text-zultys-green" /> Explore:
                     </span>
-                    {[
-                      { label: '☁️ Cloud PBX', href: '/cloud-phone-systems' },
-                      { label: '🏢 On-Prem MX250', href: '/on-premise-systems' },
-                      { label: '💼 Teams Phone', href: '/hosted-solutions' },
-                      { label: '📞 ZIP Phones', href: '/equipment' },
-                      { label: '🛠️ DFW Repair', href: '/contact' },
-                      { label: '📊 Pricing & ROI', href: '/quote' }
-                    ].map((nav, nIdx) => (
+                    {CONCIERGE_EXPLORE_LINKS.map((nav) => (
                       <Link
-                        key={nIdx}
+                        key={nav.id}
                         to={nav.href}
                         onClick={() => setIsOpen(false)}
                         className="whitespace-nowrap text-[11px] font-bold bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 hover:text-zultys-green px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors flex-shrink-0 flex items-center gap-1 shadow-2xs"
@@ -398,7 +403,33 @@ export function AIBookingConcierge() {
                             })}
                           </div>
 
-                          {msg.suggestedAction === 'book' && (
+                          {/* Verified Allowlist Action Buttons */}
+                          {msg.actions && msg.actions.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700 flex flex-wrap gap-2">
+                              {msg.actions.map((act) => (
+                                <Link
+                                  key={act.id}
+                                  to={act.url}
+                                  onClick={() => setIsOpen(false)}
+                                  className="inline-flex items-center gap-1.5 bg-zultys-green hover:bg-emerald-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-lg shadow-sm transition-all"
+                                >
+                                  <span>{act.label}</span>
+                                  <ArrowRight className="h-3 w-3" />
+                                </Link>
+                              ))}
+                              {msg.fallback && (
+                                <a
+                                  href={`tel:${msg.fallback.phone}`}
+                                  className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-800 dark:text-white font-extrabold text-xs px-3 py-1.5 rounded-lg transition-all"
+                                >
+                                  <Phone className="h-3.5 w-3.5 text-emerald-500" />
+                                  <span>{msg.fallback.label}</span>
+                                </a>
+                              )}
+                            </div>
+                          )}
+
+                          {msg.suggestedAction === 'book' && (!msg.actions || msg.actions.length === 0) && (
                             <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700 flex flex-wrap gap-2">
                               <button
                                 onClick={() => setActiveTab('book')}
@@ -413,6 +444,12 @@ export function AIBookingConcierge() {
                                 <Phone className="h-3.5 w-3.5 text-emerald-500" /> Call 817-231-2962
                               </a>
                             </div>
+                          )}
+
+                          {msg.disclosure && (
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 italic border-l-2 border-slate-300 dark:border-slate-700 pl-2">
+                              {msg.disclosure}
+                            </p>
                           )}
 
                           <span className="text-[10px] opacity-60 block mt-2 text-right">

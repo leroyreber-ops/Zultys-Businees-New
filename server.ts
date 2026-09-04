@@ -28,6 +28,19 @@ import { scanInternalLinks, injectInternalLink } from "./src/utils/internalLinkA
 import { scanAccessibilityAndSEO } from "./src/utils/accessibilityAndSEOAuditor";
 import { applyFixes } from "./src/seo/seoFix";
 import { GoogleGenAI, Type } from "@google/genai";
+import { routeConciergeIntent } from "./src/utils/conciergeRouter";
+import {
+  createMailTransporter,
+  getMailConfig,
+  getRecipientEmail,
+  validateEmail,
+  validatePhone,
+  sanitizeHeader,
+  sanitizeText,
+  isHoneypotTriggered,
+  checkLeadRateLimit,
+  logSafeMailError
+} from "./src/utils/mailConfig";
 
 let aiClient: GoogleGenAI | null = null;
 let searchGroundingDisabledUntil = 0;
@@ -567,107 +580,177 @@ async function startServer() {
     next();
   });
 
-  // API Route for sending emails with a premium Sandbox local logging fallback
+  // API Route for sending contact and quote lead emails
   app.post("/api/send-email", async (req, res) => {
-    const { name, email, phone, company, message, subject, userCount, industry, currentSystem } = req.body;
+    const clientIp = (req.headers["x-forwarded-for"] as string || req.socket.remoteAddress || "127.0.0.1").split(",")[0].trim();
 
-    console.log("----------------------------------------");
-    console.log("📨 RECEIVED LEAD SUBMISSION:");
-    console.log(`   Name:    ${name}`);
-    console.log(`   Email:   ${email}`);
-    console.log(`   Phone:   ${phone}`);
-    console.log(`   Company: ${company || "N/A"}`);
-    if (userCount || industry || currentSystem) {
-      console.log(`   Users:   ${userCount || "N/A"}`);
-      console.log(`   Industry:${industry || "N/A"}`);
-      console.log(`   Current: ${currentSystem || "N/A"}`);
-    }
-    console.log(`   Message: ${message || "N/A"}`);
-    console.log("----------------------------------------");
-
-    // Check if environment variables are present
-    const missingVars = [];
-    if (!process.env.EMAIL_HOST) missingVars.push("EMAIL_HOST");
-    if (!process.env.EMAIL_PORT) missingVars.push("EMAIL_PORT");
-    if (!process.env.EMAIL_USER) missingVars.push("EMAIL_USER");
-    if (!process.env.EMAIL_PASS) missingVars.push("EMAIL_PASS");
-
-    if (missingVars.length > 0) {
-      console.warn("⚠️ SMTP Environment Variables are missing:", missingVars.join(", "));
-      console.warn("📁 The lead has been logged above. To send live emails, configure SMTP variables in Settings.");
-      
-      // Return a graceful success status with a descriptive message so the front-end user sees a beautiful completion state!
-      return res.status(200).json({ 
-        success: true, 
-        sandboxMode: true,
-        message: "Lead received and logged in workspace logs. Configure SMTP variables to enable live email delivery." 
+    // 1. Rate limiting: 10 requests per 10 minutes per IP
+    const rateCheck = checkLeadRateLimit(clientIp, "/api/send-email", 10, 600000);
+    if (!rateCheck.allowed) {
+      logSafeMailError("/api/send-email", "E_RATE_LIMIT", "Too many submission attempts from IP", { ip: clientIp });
+      return res.status(429).json({
+        success: false,
+        error: "Too many submission attempts. Please wait a few minutes or call us directly at 817-231-2962."
       });
     }
+
+    // 2. Honeypot check
+    if (isHoneypotTriggered(req.body)) {
+      logSafeMailError("/api/send-email", "E_HONEYPOT", "Honeypot field triggered");
+      return res.status(400).json({
+        success: false,
+        error: "Automated submission detected and blocked."
+      });
+    }
+
+    const {
+      name,
+      email,
+      phone,
+      company,
+      message,
+      subject,
+      userCount,
+      industry,
+      currentSystem,
+      service,
+      companySize,
+      timeline,
+      sourcePage
+    } = req.body;
+
+    // 3. Name validation & header injection sanitization
+    const cleanName = sanitizeHeader(name, 80);
+    if (!cleanName) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide your name."
+      });
+    }
+
+    // 4. Contact method validation: Require at least ONE of valid email or valid phone
+    const hasValidEmail = validateEmail(email);
+    const hasValidPhone = validatePhone(phone);
+
+    if (!hasValidEmail && !hasValidPhone) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide at least one valid contact method (email address or phone number) so our team can reach you."
+      });
+    }
+
+    // Sanitize all headers and fields
+    const cleanEmail = hasValidEmail ? (email as string).trim() : "";
+    const cleanPhone = hasValidPhone ? (phone as string).trim() : sanitizeHeader(phone, 30);
+    const cleanCompany = sanitizeHeader(company, 100);
+    const cleanUserCount = sanitizeHeader(userCount || companySize, 50);
+    const cleanIndustry = sanitizeHeader(industry, 50);
+    const cleanSystem = sanitizeHeader(currentSystem, 50);
+    const cleanService = sanitizeHeader(service, 80);
+    const cleanTimeline = sanitizeHeader(timeline, 50);
+    const cleanSource = sanitizeHeader(sourcePage, 150) || "/contact";
+    const cleanMessage = sanitizeText(message, 4000);
+
+    const isQuote = Boolean(cleanUserCount || cleanIndustry || cleanSystem || /quote/i.test(subject || "") || /quote/i.test(cleanService));
+    const defaultSubject = isQuote
+      ? `QUOTE REQUEST: ${cleanCompany || cleanName} (${cleanUserCount || 'Business Phone'})`
+      : `CONTACT MESSAGE: ${cleanCompany || cleanName}`;
+    const cleanSubject = sanitizeHeader(subject, 120) || defaultSubject;
+
+    // 5. Config validation
+    const mailConfig = getMailConfig();
+    if (!mailConfig.isConfigured) {
+      logSafeMailError("/api/send-email", "E_SMTP_NOT_CONFIGURED", "SMTP credentials missing", {
+        missing: mailConfig.missingVars.join(",")
+      });
+      return res.status(503).json({
+        success: false,
+        error: "Our messaging system is temporarily offline for maintenance. Please call us directly at 817-231-2962 for immediate assistance."
+      });
+    }
+
+    const recipient = getRecipientEmail(isQuote ? "quote" : "contact");
 
     try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: parseInt(process.env.EMAIL_PORT || "465"),
-        secure: parseInt(process.env.EMAIL_PORT || "465") === 465, // Use SSL for port 465
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        debug: false,
-        logger: false
+      const transporter = createMailTransporter();
+
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+          <div style="background-color: #0f172a; color: #ffffff; padding: 20px 24px;">
+            <h2 style="margin: 0; font-size: 20px;">${isQuote ? '💼 New Quote Request' : '📨 New Contact Message'}</h2>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">Dallas Fort Worth Zultys Lead Router</p>
+          </div>
+          <div style="padding: 24px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 8px 0; font-weight: bold; width: 140px; color: #64748b;">Full Name:</td><td style="padding: 8px 0; font-weight: bold;">${cleanName}</td></tr>
+              ${cleanEmail ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Email Address:</td><td style="padding: 8px 0;"><a href="mailto:${cleanEmail}" style="color: #00872e; font-weight: bold;">${cleanEmail}</a></td></tr>` : ''}
+              ${cleanPhone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Phone Number:</td><td style="padding: 8px 0;"><a href="tel:${cleanPhone}" style="color: #00872e; font-weight: bold;">${cleanPhone}</a></td></tr>` : ''}
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Company:</td><td style="padding: 8px 0;">${cleanCompany || 'Not specified'}</td></tr>
+              ${cleanService ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Service Needed:</td><td style="padding: 8px 0;">${cleanService}</td></tr>` : ''}
+              ${cleanUserCount ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Extensions / Users:</td><td style="padding: 8px 0;">${cleanUserCount}</td></tr>` : ''}
+              ${cleanIndustry ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Industry:</td><td style="padding: 8px 0;">${cleanIndustry}</td></tr>` : ''}
+              ${cleanSystem ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Current System:</td><td style="padding: 8px 0;">${cleanSystem}</td></tr>` : ''}
+              ${cleanTimeline ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Timeline:</td><td style="padding: 8px 0;">${cleanTimeline}</td></tr>` : ''}
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Source Page:</td><td style="padding: 8px 0; font-size: 12px; color: #64748b;">${cleanSource}</td></tr>
+            </table>
+
+            <div style="margin-top: 20px; padding: 16px; background-color: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #334155;">Customer Message / Notes:</h4>
+              <p style="margin: 0; font-size: 14px; white-space: pre-wrap; color: #1e293b;">${cleanMessage || 'No extra notes provided.'}</p>
+            </div>
+          </div>
+          <div style="background-color: #f1f5f9; padding: 12px 24px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0;">
+            Direct Telecom Specialist Hotline: (817) 231-2962 • DFW Metroplex
+          </div>
+        </div>
+      `;
+
+      await transporter.sendMail({
+        from: mailConfig.from,
+        to: recipient,
+        replyTo: hasValidEmail ? cleanEmail : mailConfig.user || recipient,
+        subject: cleanSubject,
+        html: emailHtml,
       });
 
-      // Construct email body based on form type
-      let emailBody = `
-        <h3>New Submission from Dallas Fort Worth Zultys Website</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Company:</strong> ${company || 'N/A'}</p>
-      `;
+      console.log(`[MAIL_SENT] endpoint=/api/send-email recipient=${recipient} hasEmail=${hasValidEmail} hasPhone=${hasValidPhone}`);
 
-      if (userCount || industry || currentSystem) {
-        emailBody += `
-          <h4>Quick Quote Details:</h4>
-          <p><strong>User Count:</strong> ${userCount}</p>
-          <p><strong>Industry:</strong> ${industry}</p>
-          <p><strong>Current System:</strong> ${currentSystem}</p>
-        `;
-      }
-
-      emailBody += `
-        <h4>Message:</h4>
-        <p>${message || 'No message provided'}</p>
-      `;
-
-      const mailOptions = {
-        from: `"${name}" <${process.env.EMAIL_USER}>`,
-        to: "info@dallasfortworthzultys.com",
-        subject: subject || "New Contact Form Submission",
-        html: emailBody,
-        replyTo: email,
-      };
-
-      const info = await transporter.sendMail(mailOptions);
-      console.log("✅ Live Email Sent Successfully! Message ID:", info.messageId);
-      
-      res.status(200).json({ success: true, message: "Email sent successfully" });
-    } catch (error) {
-      console.error("❌ Live SMTP Send Failed:", error);
-      console.warn("📁 Falling back to Sandbox logging. Lead is safe and was printed above.");
-      
-      // Return graceful success even on SMTP failure to keep the user experience seamless
-      res.status(200).json({ 
-        success: true, 
-        sandboxMode: true,
-        message: "Submission captured successfully in workspace. Note: live SMTP transmission bypassed." 
+      return res.status(200).json({
+        success: true,
+        message: "Your message has been sent successfully. A DFW specialist will follow up shortly."
+      });
+    } catch (error: any) {
+      logSafeMailError("/api/send-email", "E_SMTP_DISPATCH_FAILED", error, { recipientDomain: recipient.split("@")[1] || "unknown" });
+      return res.status(500).json({
+        success: false,
+        error: "We were unable to deliver your message online at this moment. Please call our team directly at 817-231-2962."
       });
     }
   });
 
+  // In-memory sliding-window rate limiter for AI concierge
+  const conciergeRateLimits = new Map<string, { count: number; resetAt: number }>();
+
   // API Route for AI Booking & Concierge Q&A
   app.post("/api/ai-concierge", async (req, res) => {
     try {
+      const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+      const now = Date.now();
+      const userLimit = conciergeRateLimits.get(clientIp);
+
+      if (userLimit && userLimit.resetAt > now) {
+        if (userLimit.count >= 30) {
+          return res.status(429).json({
+            success: false,
+            error: "Too many requests. Please wait a minute or call our dispatch desk directly at 817-231-2962.",
+            fallbackPhone: "817-231-2962",
+          });
+        }
+        userLimit.count++;
+      } else {
+        conciergeRateLimits.set(clientIp, { count: 1, resetAt: now + 60000 });
+      }
+
       const { message, conversationHistory = [], contextPage = "" } = req.body;
 
       if (!message || typeof message !== "string") {
@@ -677,8 +760,11 @@ async function startServer() {
         });
       }
 
+      // Sanitize input: limit length and strip dangerous characters
+      const sanitizedMessage = message.slice(0, 500).replace(/[<>]/g, "").trim();
+
       // Check if Gemini API is available and active
-      let replyText = "";
+      let rawAiReply = "";
       let isAiGrounded = false;
       const apiKey = process.env.GEMINI_API_KEY;
 
@@ -688,54 +774,36 @@ async function startServer() {
           const systemInstruction = `You are the official Senior Solutions Architect & AI Booking Concierge for DallasFortWorthZultys.com (Dallas–Fort Worth's premier authorized Zultys telecommunications and business phone systems provider).
 
 YOUR MISSION:
-Help business owners, IT directors, office managers, and enterprise executives across Dallas, Fort Worth, and the entire DFW Metroplex understand Zultys VoIP, Cloud PBX, On-Premise systems, UCaaS, Contact Centers, and Microsoft Teams integration. Guide them to select the right service and invite them to schedule a free consultation or custom quote.
+Provide concise, factual information on Zultys Cloud PBX, On-Premise IP-PBX, UCaaS, Contact Centers, and Microsoft Teams integration across Dallas–Fort Worth.
+NEVER generate or invent destination URLs or Markdown links. Navigation is handled exclusively by verified system action buttons.
+State that solution details and exact pricing are confirmed by a DFW Zultys certified specialist.
 
-KEY FACTS & KNOWLEDGE BASE:
-1. Contact Details: Direct phone/text: 817-231-2962 | Email: info@dallasfortworthzultys.com | Local DFW field dispatch across all 180+ DFW cities.
-2. Core Solutions & Service Options:
-   - Cloud PBX / Hosted VoIP ($19 - $35/user/mo): Fully managed, geo-redundant, 99.999% uptime SLA, zero server maintenance.
-   - On-Premise & Hybrid IP-PBX (MX250 up to 1,000 users / MX-SE up to 50 users): 100% on-prem control, one-time hardware investment, SIP trunking savings.
-   - Unified Communications (ZAC - Zultys Advanced Communicator): Presence, chat, visual voicemail, desktop softphone, screen sharing, mobile app (MXmobile for iOS & Android).
-   - Contact Center Solutions: Skills-based ACD routing, supervisor barge-in/whisper, omni-channel queues, real-time visual dashboards, call recording.
-   - Microsoft Teams Integration: Connect your existing Microsoft 365 / Teams client directly to Zultys enterprise PBX dial tone with no clunky 3rd-party bots.
-   - Structured Cabling & Network Optimization: Cat6/Fiber optic cabling, PoE switching, QoS bandwidth prioritization, failover SD-WAN.
-   - Maintenance, Repair & Same-Day DFW Support: Emergency certified local technicians dispatched across Dallas, Fort Worth, Arlington, Plano, Frisco, Irving, etc.
-   - Free Telecom Audit: Comprehensive bill review and site network readiness inspection.
-3. IP Phone Models:
-   - ZIP 49GA: Executive Gigabit color touchscreen with built-in Wi-Fi & Bluetooth.
-   - ZIP 47GE: High-volume executive/receptionist phone with 48 programmable keys.
-   - ZIP 45G: Mid-level commercial workhorse with 8 line keys and color display.
-   - ZIP 43G: Value-packed desktop phone for cubicles and general staff.
-   - Z 23GE: Modern entry Gigabit color IP phone.
-   - DECT cordless handsets: For warehouses, automotive dealerships, and clinics.
-4. Competitive Advantages:
-   - All-in-one appliance architecture (PBX, IVR, fax server, voice recording, conference bridge on a single platform).
-   - Zero downtime number porting (keep 100% of your existing phone and fax numbers).
-   - True local Texas support team (no overseas call center runarounds).
-
-CONVERSATION GUIDELINES:
-- Keep your tone friendly, authoritative, consultative, and concise (2-4 clear paragraphs or bullet points).
-- Always include clear guidance on user seat counts, service recommendations, and direct CTA to book a site survey or speak with Leroy at 817-231-2962.
-- Provide direct, honest pricing ranges when asked.`;
+KNOWLEDGE FACTS:
+1. Contact Details: Direct phone/text: 817-231-2962 | Email: info@dallasfortworthzultys.com | Local DFW field dispatch across all North Texas cities.
+2. Cloud PBX ($19 - $35/user/mo): Fully managed, geo-redundant, 99.999% uptime SLA, zero server maintenance.
+3. On-Premise & Hybrid IP-PBX (MX250 up to 1,000 users / MX-SE up to 50 users): 100% on-prem control, zero recurring seat license fees.
+4. Unified Communications: ZAC desktop softphone, mobile app, chat, video, presence.
+5. Contact Center: Skills-based ACD routing, supervisor whisper/barge-in, call recording, live dashboards.
+6. Microsoft Teams: Direct routing integration connecting Teams clients to Zultys enterprise PBX dial tone.
+7. Local Support: Same-day emergency technician dispatch across Dallas, Fort Worth, Arlington, Plano, and surrounding counties.
+8. Free Assessment: Comprehensive telecom bill audit and on-site network QoS inspection.`;
 
           const contents: any[] = [];
           
-          // Add recent conversation history if provided
           if (Array.isArray(conversationHistory)) {
             conversationHistory.slice(-6).forEach((item: any) => {
               if (item.role && item.text) {
                 contents.push({
                   role: item.role === "user" ? "user" : "model",
-                  parts: [{ text: item.text }],
+                  parts: [{ text: String(item.text).slice(0, 400).replace(/[<>]/g, "") }],
                 });
               }
             });
           }
 
-          // Add current query with context page
           const userPrompt = contextPage
-            ? `[Visitor is currently browsing page: ${contextPage}]\nUser Question: ${message}`
-            : message;
+            ? `[Visitor browsing page: ${String(contextPage).slice(0, 100)}]\nUser Question: ${sanitizedMessage}`
+            : sanitizedMessage;
 
           contents.push({
             role: "user",
@@ -747,42 +815,31 @@ CONVERSATION GUIDELINES:
             contents: contents,
             config: {
               systemInstruction: systemInstruction,
-              temperature: 0.7,
-              maxOutputTokens: 800,
+              temperature: 0.5,
+              maxOutputTokens: 500,
             },
           });
 
-          replyText = response.text || "";
+          rawAiReply = response.text || "";
+          // Strip any accidental markdown URLs from AI output to prevent hallucinated links
+          rawAiReply = rawAiReply.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
           isAiGrounded = true;
         } catch (geminiError: any) {
-          console.warn("⚠️ Gemini API execution failed in ai-concierge, using telecom knowledge base:", geminiError?.message || geminiError);
+          console.warn("⚠️ Gemini API execution failed in ai-concierge, using verified intent router fallback:", geminiError?.message || geminiError);
         }
       }
 
-      // Offline intelligent knowledge fallback if Gemini was not available
-      if (!replyText) {
-        const lower = message.toLowerCase();
-
-        if (lower.includes("price") || lower.includes("cost") || lower.includes("rate") || lower.includes("how much")) {
-          replyText = `**Zultys Pricing Overview for Dallas–Fort Worth Businesses:**\n\n- **Cloud Hosted PBX:** Typically ranges from **$19 to $35/seat/month**, depending on user features (standard extensions vs. executive UCaaS with mobile ZAC and video).\n- **On-Premise Systems (MX250 / MX-SE):** Capital hardware purchase starting around $2,500 - $6,500+ with near-zero ongoing recurring seat fees—saving 50–70% over 5 years.\n- **Installation & Setup:** Includes free number porting, on-site network QoS tuning, and user training across DFW.\n\nWould you like an exact breakdown for your specific seat count? You can select your options in the booking tab or call us directly at **817-231-2962**.`;
-        } else if (lower.includes("cloud") && lower.includes("premise") || lower.includes("difference") || lower.includes("vs")) {
-          replyText = `**Cloud vs. On-Premise Zultys Systems:**\n\n1. **Cloud PBX:** Zero equipment closet footprint, monthly subscription, automatic updates, and multi-location flexibility. Best for hybrid teams and growing businesses.\n2. **On-Premise (MX Series):** You own the server. All voice traffic stays on your local LAN with ultimate survivability even if your internet drops. Lowest total cost of ownership over 3–7 years.\n3. **Hybrid:** Combine on-premise hardware with cloud disaster recovery.\n\nOur Fort Worth & Dallas telecom engineers can assess your building's cabling and internet to recommend the ideal fit!`;
-        } else if (lower.includes("teams") || lower.includes("microsoft")) {
-          replyText = `**Zultys Microsoft Teams Integration:**\n\nYes! Zultys provides seamless **Direct Routing & Native PBX integration with Microsoft Teams**. \n\n- Keep your existing Teams desktop and mobile interface while gaining enterprise phone features: advanced ACD call queues, multi-level IVR auto-attendants, call recording, and visual faxing.\n- Save significantly compared to costly native Microsoft calling plans.\n\nWe can configure a demo for your IT team anytime!`;
-        } else if (lower.includes("port") || lower.includes("number") || lower.includes("keep")) {
-          replyText = `**Keeping Your Phone Numbers:**\n\n**100% Yes.** You keep all of your existing local DFW phone numbers, toll-free numbers, direct inward dials (DIDs), and fax lines.\n\nOur team coordinates the entire porting process with AT&T, Spectrum, Frontier, or your previous carrier to guarantee **zero downtime** during your cutover.`;
-        } else if (lower.includes("support") || lower.includes("repair") || lower.includes("service") || lower.includes("emergency")) {
-          replyText = `**Local Dallas–Fort Worth Support & Maintenance:**\n\nWe provide certified local Zultys support across all DFW counties (Tarrant, Dallas, Collin, Denton, Johnson, Parker, etc.):\n\n- **Emergency On-Site Response:** Same-day technician dispatch.\n- **Remote Helpdesk:** Fast Tier-1 to Tier-3 resolution.\n- **System Moves & Upgrades:** Relocating offices or expanding lines.\n\nFor immediate emergency assistance, call or text our direct dispatch desk at **817-231-2962**.`;
-        } else if (lower.includes("book") || lower.includes("consult") || lower.includes("survey") || lower.includes("quote") || lower.includes("schedule")) {
-          replyText = `**Schedule Your Free Telecom Site Consultation:**\n\nWe would love to connect! You can switch to the **"Book Consultation"** tab right here in this window to pick your preferred date and service, or text/call Leroy directly at **817-231-2962**.\n\nOur consultations include a full on-site network audit, phone demonstration, and a guaranteed price proposal.`;
-        } else {
-          replyText = `Hello! I am your **Dallas–Fort Worth Zultys AI Solutions Assistant**. \n\nI can help you explore:\n- **Cloud & On-Premise Phone Systems** (MX250, MX-SE, Cloud Hosted)\n- **Unified Communications** (ZAC Desktop, Mobile Apps & Video)\n- **Contact Center & Call Center Queues**\n- **Microsoft Teams Direct Routing**\n- **Structured Cabling & Network Optimization**\n\nHow many employees need phones, or would you like to schedule a free on-site demonstration in DFW? You can also call us directly at **817-231-2962**.`;
-        }
-      }
+      // Deterministically route intent and ensure 100% strictly verified canonical actions
+      const routeResult = routeConciergeIntent(sanitizedMessage, rawAiReply);
 
       res.json({
         success: true,
-        reply: replyText,
+        reply: routeResult.verifiedAnswer,
+        intent: routeResult.intent,
+        intentLabel: routeResult.intentLabel,
+        actions: routeResult.actions,
+        fallback: routeResult.fallback,
+        disclosure: routeResult.disclosure,
         aiGrounded: isAiGrounded,
         timestamp: new Date().toISOString(),
       });
@@ -797,85 +854,152 @@ CONVERSATION GUIDELINES:
 
   // API Route for Booking Consultations and Scheduling
   app.post("/api/book-consultation", async (req, res) => {
+    const clientIp = (req.headers["x-forwarded-for"] as string || req.socket.remoteAddress || "127.0.0.1").split(",")[0].trim();
+
+    // 1. Rate limiting: 10 requests per 10 minutes per IP
+    const rateCheck = checkLeadRateLimit(clientIp, "/api/book-consultation", 10, 600000);
+    if (!rateCheck.allowed) {
+      logSafeMailError("/api/book-consultation", "E_RATE_LIMIT", "Too many booking attempts from IP", { ip: clientIp });
+      return res.status(429).json({
+        success: false,
+        error: "Too many booking attempts. Please wait a few minutes or call us directly at 817-231-2962."
+      });
+    }
+
+    // 2. Honeypot check
+    if (isHoneypotTriggered(req.body)) {
+      logSafeMailError("/api/book-consultation", "E_HONEYPOT", "Honeypot field triggered in booking");
+      return res.status(400).json({
+        success: false,
+        error: "Automated submission detected and blocked."
+      });
+    }
+
+    const {
+      serviceType,
+      userCount,
+      company,
+      name,
+      email,
+      phone,
+      city,
+      consultationType,
+      preferredTime,
+      notes,
+      sourcePage,
+      aiIntent
+    } = req.body;
+
+    // 3. Name validation
+    const cleanName = sanitizeHeader(name, 80);
+    if (!cleanName) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide your contact name."
+      });
+    }
+
+    // 4. Contact method validation: At least one of valid email or valid phone
+    const hasValidEmail = validateEmail(email);
+    const hasValidPhone = validatePhone(phone);
+
+    if (!hasValidEmail && !hasValidPhone) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide at least one valid contact method (phone number or email address) to schedule your consultation."
+      });
+    }
+
+    // Sanitize all headers and fields
+    const cleanEmail = hasValidEmail ? (email as string).trim() : "";
+    const cleanPhone = hasValidPhone ? (phone as string).trim() : sanitizeHeader(phone, 30);
+    const cleanCompany = sanitizeHeader(company, 100);
+    const cleanService = sanitizeHeader(serviceType, 80) || "Zultys Business Phone Solution";
+    const cleanSeats = sanitizeHeader(userCount, 40) || "Not specified";
+    const cleanCity = sanitizeHeader(city, 80) || "Dallas / Fort Worth Metroplex";
+    const cleanFormat = sanitizeHeader(consultationType, 80) || "On-site Survey & Demo";
+    const cleanTiming = sanitizeHeader(preferredTime, 80) || "As soon as possible";
+    const cleanSource = sanitizeHeader(sourcePage, 150) || "/book";
+    const cleanAiIntent = sanitizeHeader(aiIntent, 80);
+    const cleanNotes = sanitizeText(notes, 4000);
+
+    const bookingId = `DFW-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    // 5. Config validation
+    const mailConfig = getMailConfig();
+    if (!mailConfig.isConfigured) {
+      logSafeMailError("/api/book-consultation", "E_SMTP_NOT_CONFIGURED", "SMTP credentials missing", {
+        missing: mailConfig.missingVars.join(",")
+      });
+      return res.status(503).json({
+        success: false,
+        error: "Online booking is temporarily undergoing scheduled maintenance. Please call or text 817-231-2962 to book immediately."
+      });
+    }
+
+    const recipient = getRecipientEmail("booking");
+
     try {
-      const {
-        serviceType,
-        userCount,
-        company,
-        name,
-        email,
-        phone,
-        city,
-        consultationType,
-        preferredTime,
-        notes
-      } = req.body;
+      const transporter = createMailTransporter();
 
-      console.log("========================================");
-      console.log("📅 NEW CONSULTATION BOOKING REQUEST:");
-      console.log(`   Contact: ${name} (${company || "Individual"})`);
-      console.log(`   Phone:   ${phone}`);
-      console.log(`   Email:   ${email}`);
-      console.log(`   City:    ${city || "DFW Metroplex"}`);
-      console.log(`   Service: ${serviceType || "Business Phone System"}`);
-      console.log(`   Seats:   ${userCount || "Not specified"}`);
-      console.log(`   Format:  ${consultationType || "On-site visit"}`);
-      console.log(`   Timing:  ${preferredTime || "ASAP"}`);
-      console.log(`   Notes:   ${notes || "None"}`);
-      console.log("========================================");
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+          <div style="background-color: #0f172a; color: #ffffff; padding: 20px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h2 style="margin: 0; font-size: 20px;">📅 New Consultation Booking</h2>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">Ref ID: ${bookingId}</p>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 24px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+              <tr><td style="padding: 8px 0; font-weight: bold; width: 150px; color: #64748b;">Contact Name:</td><td style="padding: 8px 0; font-weight: bold;">${cleanName}</td></tr>
+              ${cleanPhone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Phone Number:</td><td style="padding: 8px 0;"><a href="tel:${cleanPhone}" style="color: #00872e; font-weight: bold;">${cleanPhone}</a></td></tr>` : ''}
+              ${cleanEmail ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Email Address:</td><td style="padding: 8px 0;"><a href="mailto:${cleanEmail}" style="color: #00872e; font-weight: bold;">${cleanEmail}</a></td></tr>` : ''}
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Company / Org:</td><td style="padding: 8px 0;">${cleanCompany || 'Individual / Small Business'}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Metroplex Location:</td><td style="padding: 8px 0;">${cleanCity}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Requested System:</td><td style="padding: 8px 0;">${cleanService}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Phone Extensions:</td><td style="padding: 8px 0;">${cleanSeats}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Format:</td><td style="padding: 8px 0;">${cleanFormat}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Preferred Date/Time:</td><td style="padding: 8px 0;">${cleanTiming}</td></tr>
+              ${cleanAiIntent ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">AI Concierge Intent:</td><td style="padding: 8px 0; font-size: 12px; color: #64748b;">${cleanAiIntent}</td></tr>` : ''}
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Source Page:</td><td style="padding: 8px 0; font-size: 12px; color: #64748b;">${cleanSource}</td></tr>
+            </table>
 
-      // Construct email notification body
-      const emailBody = `
-        <h2>📅 New Zultys Consultation Booking</h2>
-        <p><strong>Customer Name:</strong> ${name}</p>
-        <p><strong>Company:</strong> ${company || 'N/A'}</p>
-        <p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>
-        <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-        <p><strong>City / Location:</strong> ${city || 'DFW Metroplex'}</p>
-        <hr />
-        <h3>Consultation Details:</h3>
-        <p><strong>Requested Service:</strong> ${serviceType || 'Zultys Business Phone Solution'}</p>
-        <p><strong>Number of Extensions/Seats:</strong> ${userCount || 'N/A'}</p>
-        <p><strong>Consultation Format:</strong> ${consultationType || 'On-site Survey & Demo'}</p>
-        <p><strong>Preferred Date / Time:</strong> ${preferredTime || 'As soon as possible'}</p>
-        <p><strong>Additional Requirements:</strong> ${notes || 'None provided'}</p>
+            <div style="margin-top: 20px; padding: 16px; background-color: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #334155;">Requirements & Notes:</h4>
+              <p style="margin: 0; font-size: 14px; white-space: pre-wrap; color: #1e293b;">${cleanNotes || 'None specified.'}</p>
+            </div>
+          </div>
+          <div style="background-color: #f1f5f9; padding: 12px 24px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0;">
+            Action Item: Contact customer to confirm appointment window • (817) 231-2962
+          </div>
+        </div>
       `;
 
-      if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        try {
-          const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: parseInt(process.env.EMAIL_PORT || "587"),
-            secure: process.env.EMAIL_SECURE === "true",
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASS,
-            },
-          });
+      const cleanSubject = sanitizeHeader(`BOOKING REQUEST: ${cleanCompany || cleanName} - ${cleanService} (${cleanSeats})`);
 
-          await transporter.sendMail({
-            from: `"${name}" <${process.env.EMAIL_USER}>`,
-            to: "info@dallasfortworthzultys.com",
-            subject: `BOOKING REQUEST: ${company || name} - ${serviceType || 'Zultys Consultation'} (${userCount || '10+'} users)`,
-            html: emailBody,
-            replyTo: email,
-          });
-          console.log("✅ Live Consultation Booking Email Dispatched!");
-        } catch (emailErr) {
-          console.warn("⚠️ SMTP dispatch failed for booking, logged to container console:", emailErr);
-        }
-      }
+      await transporter.sendMail({
+        from: mailConfig.from,
+        to: recipient,
+        replyTo: hasValidEmail ? cleanEmail : mailConfig.user || recipient,
+        subject: cleanSubject,
+        html: emailHtml,
+      });
 
-      res.status(200).json({
+      console.log(`[BOOKING_SENT] bookingId=${bookingId} recipient=${recipient} hasEmail=${hasValidEmail} hasPhone=${hasValidPhone}`);
+
+      return res.status(200).json({
         success: true,
         message: "Consultation booked successfully. Our DFW telecom specialist will contact you to confirm.",
-        bookingId: `DFW-${Date.now().toString().slice(-6)}`,
+        bookingId
       });
     } catch (error: any) {
-      console.error("❌ Error booking consultation:", error);
-      res.status(500).json({
+      logSafeMailError("/api/book-consultation", "E_SMTP_DISPATCH_FAILED", error, { recipientDomain: recipient.split("@")[1] || "unknown" });
+      return res.status(500).json({
         success: false,
-        error: "Failed to process booking",
+        error: "We were unable to complete your booking online. Please call or text our DFW specialist directly at 817-231-2962."
       });
     }
   });
@@ -2232,62 +2356,54 @@ The JSON schema:
         </html>
       `;
 
-      // SMTP check
-      const missingVars = [];
-      if (!process.env.EMAIL_HOST) missingVars.push("EMAIL_HOST");
-      if (!process.env.EMAIL_PORT) missingVars.push("EMAIL_PORT");
-      if (!process.env.EMAIL_USER) missingVars.push("EMAIL_USER");
-      if (!process.env.EMAIL_PASS) missingVars.push("EMAIL_PASS");
+      // SMTP delivery via centralized mail configuration
+      const mailConfig = getMailConfig();
+      const targetRecipient = validateEmail(activeEmail) ? activeEmail : getRecipientEmail("seo_report");
 
       let sendResult = { sent: false, message: "" };
 
       console.log("----------------------------------------");
       console.log("📨 GENERATED WEEKLY AUTOMATED EMAIL REPORT:");
-      console.log(`   To Address: ${activeEmail}`);
+      console.log(`   To Address: ${targetRecipient}`);
       console.log(`   Day:        ${activeDay}`);
       console.log(`   Keywords:   ${filteredList.length} items evaluated`);
       console.log(`   Better:     +${improvements.length} keywords`);
       console.log(`   Worse:      -${drops.length} keywords`);
       console.log("----------------------------------------");
 
-      if (missingVars.length > 0) {
-        console.warn("⚠️ SMTP Environment Variables missing for Weekly Reports, falling back to Sandbox.");
+      if (!mailConfig.isConfigured) {
+        logSafeMailError("/api/seo/send-scheduled-report", "E_SMTP_NOT_CONFIGURED", "SMTP variables missing for Weekly SEO Digest", {
+          missing: mailConfig.missingVars.join(",")
+        });
         sendResult = { 
-          sent: true, 
-          message: `Report compiled! Falls back to Sandbox logging. To send live emails, configure SMTP variables in Settings.` 
+          sent: false, 
+          message: `Report compiled! SMTP credentials not configured (${mailConfig.missingVars.join(", ")}). Configure SMTP in environment to deliver live.` 
         };
       } else {
         try {
-          const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: parseInt(process.env.EMAIL_PORT || "465"),
-            secure: parseInt(process.env.EMAIL_PORT || "465") === 465,
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASS,
-            }
-          });
+          const transporter = createMailTransporter();
 
           const mailOptions = {
-            from: `"DFW Zultys SEO Digest" <${process.env.EMAIL_USER}>`,
-            to: activeEmail,
+            from: mailConfig.from,
+            to: targetRecipient,
             subject: `Weekly SEO Search Visibility Digest for ${targetDomain.replace('https://', '')}`,
             html: htmlBody
           };
 
           const info = await transporter.sendMail(mailOptions);
           console.log("✅ Weekly Digest Email Sent Successfully! Message ID:", info.messageId);
-          sendResult = { sent: true, message: `Report sent successfully to ${activeEmail} via SMTP.` };
+          sendResult = { sent: true, message: `Report delivered successfully to ${targetRecipient}.` };
         } catch (mailError: any) {
-          console.error("❌ Live SMTP Send Failed for Weekly Digest, using Sandbox fallback:", mailError.message);
-          sendResult = { sent: true, message: `Compiled successfully. SMTP Send Failed: ${mailError.message}. Logged in sandbox mode.` };
+          logSafeMailError("/api/seo/send-scheduled-report", "E_SMTP_DISPATCH_FAILED", mailError, {
+            recipientDomain: targetRecipient.split("@")[1] || "unknown"
+          });
+          sendResult = { sent: false, message: `Report compiled, but SMTP dispatch failed. Check mail server logs.` };
         }
       }
 
       res.json({
-        success: true,
-        sandboxMode: missingVars.length > 0,
-        email: activeEmail,
+        success: sendResult.sent,
+        email: targetRecipient,
         sendResult,
         stats: {
           evaluated: filteredList.length,
