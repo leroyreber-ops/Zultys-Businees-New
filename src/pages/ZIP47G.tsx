@@ -53,32 +53,29 @@ export function ZIP47G() {
     metaKeywords.setAttribute('content', 'Zultys ZIP 47G, ZIP 47G phone, color screen IP phone, Gigabit IP phone, professional Zultys phone, Zultys dealer Fort Worth, Dallas business phones');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-zip-47g-phone';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-zip-47g-ip-phone');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys ZIP 47G IP Phone',
       description: 'Professional Gigabit IP phone with 4.3-inch 480x272 pixel color display and 48 programmable keys.',
+      url: canonicalUrl,
+      image: ZULTYS_ZIP_47G,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'AggregateOffer',
-        availability: 'https://schema.org/InStock',
-        priceCurrency: 'USD',
-        seller: {
-          '@type': 'Organization',
-          name: 'DFW Business Communications'
-        }
       }
     };
 

@@ -1,14 +1,20 @@
 import type { Context } from "https://edge.netlify.com";
 import { VALID_PATHS } from "../../src/routes.ts";
-import { canonicalMap } from "../../src/utils/seoHelpers.ts";
+import { canonicalMap } from "../../src/canonicalMap.ts";
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
+  // Only handle GET and HEAD requests
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return;
+  }
+
   // Let static assets, API paths, and Netlify internal/system paths pass through untouched
   if (
     pathname.includes(".") || 
+    pathname.startsWith("/assets/") ||
     pathname.startsWith("/api/") || 
     pathname.startsWith("/.netlify/") ||
     pathname.startsWith("/@") ||

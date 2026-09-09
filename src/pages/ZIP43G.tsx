@@ -53,32 +53,28 @@ export function ZIP43G() {
     metaKeywords.setAttribute('content', 'Zultys ZIP 43G, ZIP 43G phone, entry level IP phone, Gigabit IP phone, Zultys dealer Dallas, Zultys support Fort Worth, business VoIP phone DFW');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-zip-43g-phone';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-zip-43g-ip-phone');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys ZIP 43G IP Phone',
       description: 'Cost-effective Gigabit IP phone with 2.8-inch backlit display for small and medium businesses.',
+      url: canonicalUrl,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'AggregateOffer',
-        availability: 'https://schema.org/InStock',
-        priceCurrency: 'USD',
-        seller: {
-          '@type': 'Organization',
-          name: 'DFW Business Communications'
-        }
       }
     };
 

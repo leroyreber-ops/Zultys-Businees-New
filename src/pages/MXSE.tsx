@@ -56,28 +56,29 @@ export function MXSE() {
     metaKeywords.setAttribute('content', 'Zultys MX-SE Dallas, small business server Fort Worth, all-in-one phone system DFW, Zultys small office server North Texas, office phone hardware Dallas');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-mx-se';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-mx-se');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys MX-SE IP PBX',
-      description: 'Compact all-in-one IP PBX for small businesses in Dallas-Fort Worth.',
+      description: 'Compact all-in-one IP PBX appliance engineered for small businesses in Dallas-Fort Worth.',
+      url: canonicalUrl,
+      image: ZULTYS_MXSE,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'Offer',
-        availability: 'https://schema.org/InStock',
-        areaServed: 'Dallas-Fort Worth'
       }
     };
 

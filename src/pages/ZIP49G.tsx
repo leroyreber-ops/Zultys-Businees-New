@@ -56,33 +56,29 @@ export function ZIP49G() {
     metaKeywords.setAttribute('content', 'Zultys ZIP 49G, ZIP 49G phone, Zultys executive phone, video IP phone, Android business phone, Zultys dealer Fort Worth, Zultys phone system Dallas, executive VoIP phone DFW');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-zip-49g-phone';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zip-49g-ip-phone');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys ZIP 49G Smart Media Phone',
       description: 'Executive video IP phone with Android OS, 7-inch touch screen, and HD video capabilities.',
-      image: 'https://dallasfortworthzultys.com/images/zultys-zip-49g.webp',
+      url: canonicalUrl,
+      image: ZULTYS_ZIP_49G,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'AggregateOffer',
-        availability: 'https://schema.org/InStock',
-        priceCurrency: 'USD',
-        seller: {
-          '@type': 'Organization',
-          name: 'DFW Business Communications'
-        }
       }
     };
 

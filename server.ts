@@ -64,13 +64,8 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
-const currentFilename = typeof import.meta !== "undefined" && import.meta.url
-  ? fileURLToPath(import.meta.url)
-  : (typeof __filename !== "undefined" ? __filename : "");
-
-const currentDirname = typeof import.meta !== "undefined" && import.meta.url
-  ? path.dirname(currentFilename)
-  : (typeof __dirname !== "undefined" ? __dirname : "");
+const currentFilename = typeof __filename !== "undefined" ? __filename : process.cwd();
+const currentDirname = typeof __dirname !== "undefined" ? __dirname : process.cwd();
 
 // --- Technical SEO Routing and Metadata Pre-injection Helpers ---
 const validRoutes = new Set<string>();
@@ -364,11 +359,6 @@ function injectSEOMetadata(html: string, urlPath: string): string {
           sameAs: `https://en.wikipedia.org/wiki/${cityName.replace(/\s+/g, '_')},_Texas`
         }
       ],
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '5.0',
-        reviewCount: '48'
-      },
       provider: {
         '@type': 'Organization',
         name: 'DFW Business Communications',
@@ -3254,12 +3244,7 @@ The JSON schema:
             "@context": "https://schema.org",
             "@type": "ProductCollection",
             "name": "DFW Business VoIP Solutions",
-            "description": "Compare Zultys business systems vs RingCentral and Vonage on Dallas-Fort Worth area networks.",
-            "offers": {
-              "@type": "AggregateOffer",
-              "priceCurrency": "USD",
-              "lowPrice": "19.99"
-            }
+            "description": "Compare Zultys business systems vs RingCentral and Vonage on Dallas-Fort Worth area networks."
           }
         };
         logMsg = `Injected comparison Product schema metadata targeting competitor outranking on route ${normalizedRoute}`;

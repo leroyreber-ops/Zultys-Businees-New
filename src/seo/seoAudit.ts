@@ -205,7 +205,7 @@ export function auditSite(routes: string[], siteOrigin?: string): AuditReport {
     } else {
       // Node environment (build gate / server-side crawler context)
       try {
-        const req = eval("require");
+        const req = typeof require === "function" ? require : undefined;
         const fsMod = req("fs");
         const pathMod = req("path");
         const pagesDir = pathMod.join(process.cwd(), "src", "pages");

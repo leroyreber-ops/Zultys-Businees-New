@@ -56,28 +56,29 @@ export function MXSeries() {
     metaKeywords.setAttribute('content', 'Zultys MX250 Dallas, Zultys MX30 Fort Worth, IP PBX hardware DFW, Zultys server Dallas, business phone appliances North Texas');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-mx-series';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-mx-series');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys MX Series IP PBX',
       description: 'Enterprise-grade IP PBX appliances including MX250 and MX30 for businesses in DFW.',
+      url: canonicalUrl,
+      image: ZULTYS_MX250,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'Offer',
-        availability: 'https://schema.org/InStock',
-        areaServed: 'Dallas-Fort Worth'
       }
     };
 

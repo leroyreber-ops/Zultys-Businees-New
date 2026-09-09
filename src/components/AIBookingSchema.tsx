@@ -44,17 +44,7 @@ export function AIBookingSchema() {
                 "itemOffered": {
                   "@type": "Service",
                   "name": "Zultys Cloud Hosted PBX & VoIP",
-                  "description": "Fully managed enterprise cloud telephone system with 99.999% uptime SLA, desktop ZAC softphone, and mobile app.",
-                  "offers": {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "USD",
-                    "lowPrice": "19.00",
-                    "highPrice": "35.00",
-                    "priceSpecification": {
-                      "@type": "UnitPriceSpecification",
-                      "unitText": "user/month"
-                    }
-                  }
+                  "description": "Fully managed enterprise cloud telephone system with 99.999% uptime SLA, desktop ZAC softphone, and mobile app."
                 }
               },
               {

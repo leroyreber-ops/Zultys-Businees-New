@@ -227,16 +227,6 @@ export function ServiceSchema({ path }: ServiceSchemaProps) {
         '@type': 'Place',
         'name': cityName === 'Dallas-Fort Worth' ? 'Dallas-Fort Worth Metroplex' : `${cityName}, TX`
       },
-      'offers': {
-        '@type': 'Offer',
-        'priceCurrency': 'USD',
-        'price': '0.00',
-        'priceSpecification': {
-          '@type': 'UnitPriceSpecification',
-          'priceType': 'Custom Quote',
-          'priceCurrency': 'USD'
-        }
-      },
       'brand': brandDetails
     });
   }
@@ -255,16 +245,6 @@ export function ServiceSchema({ path }: ServiceSchemaProps) {
         '@type': 'Place',
         'name': cityName === 'Dallas-Fort Worth' ? 'Dallas-Fort Worth Metroplex' : `${cityName}, TX`
       },
-      'offers': {
-        '@type': 'Offer',
-        'priceCurrency': 'USD',
-        'price': '0.00',
-        'priceSpecification': {
-          '@type': 'UnitPriceSpecification',
-          'priceType': 'Custom Quote',
-          'priceCurrency': 'USD'
-        }
-      },
       'brand': brandDetails
     });
   }
@@ -282,16 +262,6 @@ export function ServiceSchema({ path }: ServiceSchemaProps) {
       'areaServed': {
         '@type': 'Place',
         'name': cityName === 'Dallas-Fort Worth' ? 'Dallas-Fort Worth Metroplex' : `${cityName}, TX`
-      },
-      'offers': {
-        '@type': 'Offer',
-        'priceCurrency': 'USD',
-        'price': '0.00',
-        'priceSpecification': {
-          '@type': 'UnitPriceSpecification',
-          'priceType': 'Custom Quote',
-          'priceCurrency': 'USD'
-        }
       },
       'brand': brandDetails
     });

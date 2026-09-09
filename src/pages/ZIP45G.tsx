@@ -53,32 +53,29 @@ export function ZIP45G() {
     metaKeywords.setAttribute('content', 'Zultys ZIP 45G, ZIP 45G phone, business IP phone, Gigabit IP phone, Zultys DFW, Zultys dealer Fort Worth, mid-range VoIP phone');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-zip-45g-phone';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-zip-45g-ip-phone');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys ZIP 45G IP Phone',
       description: 'Versatile Gigabit IP phone with 3.7-inch backlit display and 21 programmable keys.',
+      url: canonicalUrl,
+      image: ZULTYS_ZIP_45G,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'AggregateOffer',
-        availability: 'https://schema.org/InStock',
-        priceCurrency: 'USD',
-        seller: {
-          '@type': 'Organization',
-          name: 'DFW Business Communications'
-        }
       }
     };
 

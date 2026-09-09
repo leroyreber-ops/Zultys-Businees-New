@@ -558,41 +558,60 @@ function injectSEOMetadataAndBody(html: string, urlPath: string): string {
     normPath.includes('zip-45g') ||
     normPath.includes('zip-43g') ||
     normPath.includes('z-23ge') ||
+    normPath.includes('z23g') ||
     normPath.includes('z-22g') ||
     normPath.includes('z-21i') ||
+    normPath.includes('mx-series') ||
     normPath.includes('mx-se');
 
   if (isSpecificHardware) {
     // Only actual hardware products receive Product schema
     let prodName = 'Zultys IP Phone';
-    if (normPath.includes('zip-49g')) prodName = 'Zultys ZIP 49G Smart Media Phone';
-    else if (normPath.includes('zip-47g')) prodName = 'Zultys ZIP 47G Business Gigabit Phone';
-    else if (normPath.includes('zip-45g')) prodName = 'Zultys ZIP 45G High-Performance Phone';
-    else if (normPath.includes('zip-43g')) prodName = 'Zultys ZIP 43G Entry Gigabit Phone';
-    else if (normPath.includes('z-23ge')) prodName = 'Zultys Z-23GE Enterprise IP Phone';
-    else if (normPath.includes('z-22g')) prodName = 'Zultys Z-22G Business IP Phone';
-    else if (normPath.includes('z-21i')) prodName = 'Zultys Z-21i Wall-Mountable IP Phone';
-    else if (normPath.includes('mx-se')) prodName = 'Zultys MX-SE IP-PBX Appliance';
+    let prodImage: string | undefined;
+    if (normPath.includes('zip-49g')) {
+      prodName = 'Zultys ZIP 49G Smart Media Phone';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-zip-49g-ip-phone.jpg';
+    } else if (normPath.includes('zip-47g')) {
+      prodName = 'Zultys ZIP 47G Business Gigabit Phone';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-zip-47g-ip-phone.jpg';
+    } else if (normPath.includes('zip-45g')) {
+      prodName = 'Zultys ZIP 45G High-Performance Phone';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-zip-45g-ip-phone.jpg';
+    } else if (normPath.includes('zip-43g')) {
+      prodName = 'Zultys ZIP 43G Entry Gigabit Phone';
+    } else if (normPath.includes('z-23ge') || normPath.includes('z23g')) {
+      prodName = 'Zultys Z 23GE IP Phone';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-Z-23GE-ip-phone.jpg';
+    } else if (normPath.includes('z-22g')) {
+      prodName = 'Zultys Z 22G IP Phone';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-Z-22G-ip-phone.jpg';
+    } else if (normPath.includes('z-21i')) {
+      prodName = 'Zultys Z 21i IP Phone';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-Z-21i-ip-phone.jpg';
+    } else if (normPath.includes('mx-series')) {
+      prodName = 'Zultys MX Series IP PBX';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-mx250-phone-system.jpg';
+    } else if (normPath.includes('mx-se')) {
+      prodName = 'Zultys MX-SE IP-PBX Appliance';
+      prodImage = 'https://images.dallasfortworthzultys.com/dallas-fort-worth-zultys-mx-se-phone-system.jpg';
+    }
 
-    graphNodes.push({
+    const productNode: Record<string, any> = {
       '@type': 'Product',
       '@id': `${canonicalUrl}#product`,
       name: prodName,
       description: description,
+      url: canonicalUrl,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'Offer',
-        priceCurrency: 'USD',
-        price: 'Contact for Quote',
-        availability: 'https://schema.org/InStock',
-        seller: {
-          '@id': `${siteUrl}/#organization`
-        }
       }
-    });
+    };
+    if (prodImage) {
+      productNode.image = prodImage;
+    }
+
+    graphNodes.push(productNode);
   } else if (normPath.startsWith('/blog') || normPath.includes('blog-') || normPath.includes('-blog')) {
     // Blog Posting Schema
     graphNodes.push({

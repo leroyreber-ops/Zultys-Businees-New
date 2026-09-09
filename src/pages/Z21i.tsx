@@ -50,32 +50,29 @@ export function Z21i() {
     metaKeywords.setAttribute('content', 'Zultys Z 21i, Z 21i phone, value IP phone, entry level business phone, Zultys dealer Dallas, Zultys support Fort Worth, business VoIP North Texas');
 
     // Canonical URL
+    const path = typeof window !== 'undefined' ? window.location.pathname : '/fort-worth-zultys-z-21i-phone';
+    const canonicalUrl = `https://dallasfortworthzultys.com${path.startsWith('/') ? path : `/${path}`}`;
+
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement('link');
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', 'https://dallasfortworthzultys.com/zultys-z-21i-ip-phone');
+    canonical.setAttribute('href', canonicalUrl);
 
-    // JSON-LD Schema
+    // JSON-LD Schema - Truthful Product schema without unverified offers
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Product',
+      '@id': `${canonicalUrl}#product`,
       name: 'Zultys Z 21i IP Phone',
       description: 'Cost-effective business IP phone with 2.3-inch display and 2 programmable keys.',
+      url: canonicalUrl,
+      image: ZULTYS_Z21I,
       brand: {
         '@type': 'Brand',
         name: 'Zultys'
-      },
-      offers: {
-        '@type': 'AggregateOffer',
-        availability: 'https://schema.org/InStock',
-        priceCurrency: 'USD',
-        seller: {
-          '@type': 'Organization',
-          name: 'DFW Business Communications'
-        }
       }
     };
 

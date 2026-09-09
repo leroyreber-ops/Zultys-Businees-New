@@ -1,6 +1,7 @@
 [[edge_functions]]
   path = "/*"
   function = "spa-404"
+  excludedPath = ["/assets/*", "/api/*", "/.netlify/*", "/robots.txt", "/sitemap.xml", "/sitemap.html", "/favicon*"]
 
 [[redirects]]
   from = "/sitemap.html"
