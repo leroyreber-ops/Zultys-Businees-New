@@ -1,7 +1,6 @@
 import { HashLink as Link } from './HashLink';
 import { Phone, Mail, MapPin, Facebook, Linkedin, Twitter, ExternalLink, Globe, Shield, Cpu, FileText } from 'lucide-react';
 import { ZultysLogo } from './ZultysLogo';
-import { getLocalBusinessSchema } from '../utils/localBusinessSchemaUtility';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -250,15 +249,6 @@ export function Footer() {
           </div>
         </div>
       </div>
-      {/* Dynamic LocalBusiness Schema for Dallas and Fort Worth */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(getLocalBusinessSchema('Dallas')) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(getLocalBusinessSchema('Fort Worth')) }}
-      />
     </footer>
   );
 }

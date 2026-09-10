@@ -17,9 +17,9 @@ export function AIBookingSchema() {
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "LocalBusiness",
-          "@id": "https://dallasfortworthzultys.com/#business",
-          "name": "Dallas Fort Worth Zultys Phone Systems",
+          "@type": "Organization",
+          "@id": "https://dallasfortworthzultys.com/#organization",
+          "name": "DFW Business Communications",
           "url": "https://dallasfortworthzultys.com",
           "telephone": "+1-817-231-2962",
           "email": "info@dallasfortworthzultys.com",

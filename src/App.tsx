@@ -239,7 +239,6 @@ import { QuotePopupWrapper } from './components/QuotePopupWrapper';
 import { FloatingTextCTA } from './components/FloatingTextCTA';
 import { LocalBusinessSchema } from './components/LocalBusinessSchema';
 import { ServiceSchema } from './components/ServiceSchema';
-import { WebSiteSchema } from './components/WebSiteSchema';
 import { FAQPageSchema } from './components/FAQPageSchema';
 import { AIBookingConcierge } from './components/AIBookingConcierge';
 import { AIBookingSchema } from './components/AIBookingSchema';
@@ -587,7 +586,6 @@ export default function App() {
     <QuoteProvider>
       <LocalBusinessSchema path={currentPath} />
       <ServiceSchema path={currentPath} />
-      <WebSiteSchema path={currentPath} />
       <FAQPageSchema path={currentPath} headless={true} />
       <AIBookingSchema />
       <Suspense fallback={getSuspenseFallback(currentPath)}>

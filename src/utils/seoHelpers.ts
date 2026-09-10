@@ -34,12 +34,6 @@ export interface SEOProps {
     question: string;
     answer: string;
   }[];
-  reviewSchema?: {
-    ratingValue: string;
-    reviewCount: string;
-    bestRating?: string;
-    worstRating?: string;
-  };
   howToSchema?: {
     name: string;
     description: string;

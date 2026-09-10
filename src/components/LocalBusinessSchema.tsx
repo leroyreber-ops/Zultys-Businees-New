@@ -633,8 +633,17 @@ export function LocalBusinessSchema({ path }: LocalBusinessSchemaProps) {
       if (!tag.hasAttribute('data-centralized')) {
         try {
           const content = JSON.parse(tag.textContent || '{}');
-          // Only remove duplicate business, organization, website, or service level schemas that we manage centrally
-          if (content['@type'] === 'LocalBusiness' || content['@type'] === 'Organization' || content['@type'] === 'WebSite' || content['@type'] === 'Service') {
+          // Only remove duplicate business, organization, website, or service level schemas that we manage centrally, plus any rogue rating/review schemas
+          if (
+            content['@type'] === 'LocalBusiness' || 
+            content['@type'] === 'Organization' || 
+            content['@type'] === 'WebSite' || 
+            content['@type'] === 'Service' ||
+            content['@type'] === 'AggregateRating' ||
+            content['@type'] === 'Review' ||
+            content.aggregateRating ||
+            content.review
+          ) {
             tag.remove();
           }
         } catch (e) {

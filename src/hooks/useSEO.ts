@@ -47,7 +47,6 @@ export function useSEO(props: UseSEOProps) {
     JSON.stringify(props.productSchema),
     JSON.stringify(props.serviceSchema),
     JSON.stringify(props.faqSchema),
-    JSON.stringify(props.reviewSchema),
     JSON.stringify(props.howToSchema),
     JSON.stringify(props.additionalSchema),
   ]);
